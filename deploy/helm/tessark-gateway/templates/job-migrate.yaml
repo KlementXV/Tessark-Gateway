@@ -1,0 +1,81 @@
+{{/*
+Deliberately `post-install,pre-upgrade`, not the literal `pre-install,pre-upgrade` a first
+reading of the plan suggests. Helm's hook model runs `pre-install` hooks strictly before *any*
+other resource in the release is created — on a fresh install with a chart-managed database
+(database.mode: embedded or cnpg, decision D1's default), that database doesn't exist yet at
+that point, so a pre-install migrate Job would have nothing to connect to no matter how long
+its own wait-for-postgres loop ran. `post-install` lets the database (StatefulSet/Cluster) and
+the Deployment come up first, then migrates — the plan's actual intent ("runs before the
+Deployment") is preserved for `pre-upgrade`, which *is* still correct: Helm applies
+pre-upgrade hooks before touching any other resource in the release, so an upgrade's new image
+never starts serving against a stale schema. The accepted tradeoff on a *fresh* install: the
+Deployment's pods can become Ready (their readinessProbe only needs `SELECT 1` to succeed, not
+a migrated schema) a few seconds before this Job finishes, and could 500 on a real query in
+that window — self-healing the moment migrate completes, and far less broken than racing a
+database that doesn't exist yet.
+*/}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "tessark-gateway.fullname" . }}-migrate
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrate
+  annotations:
+    helm.sh/hook: post-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "tessark-gateway.labels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "tessark-gateway.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          # Not the binary directly: `prisma` resolves `tsx`/other tool invocations via the
+          # PATH `npx` sets up, which a direct node_modules/.bin/prisma call does not have —
+          # found the hard way while testing the image in lot 9 (harmless for `migrate deploy`
+          # itself, but keeping both commands consistent avoids re-discovering it for `db seed`).
+          command: ["npx", "prisma", "migrate", "deploy"]
+          workingDir: /app
+          envFrom:
+            - configMapRef:
+                name: {{ include "tessark-gateway.fullname" . }}
+            - secretRef:
+                name: {{ include "tessark-gateway.secretName" . }}
+          {{- $extraEnv := include "tessark-gateway.databaseEnv" . }}
+          {{- if $extraEnv }}
+          env:
+            {{- $extraEnv | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

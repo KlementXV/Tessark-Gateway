@@ -1,0 +1,320 @@
+# Default values for tessark-gateway.
+# A `helm install` with this file untouched must come up in `database.mode: embedded`,
+# secrets aside (CLAUDE.md §0 rule 4).
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  # No registry exists yet (decision D4 in docs/plan-kubernetes-helm.md) — build locally with
+  # scripts/build-and-import.sh and import into every node that will run a pod.
+  repository: tessark-gateway
+  # Defaults to .Chart.AppVersion when empty. Never "latest": with pullPolicy IfNotPresent a
+  # reused tag never gets re-pulled/re-imported.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+replicaCount: 2
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# Required for the pull-request feature: without create/get/delete on jobs and secrets in this
+# namespace, mirroring images does not work at all. See templates/rbac.yaml and NOTES.txt.
+rbac:
+  create: true
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# Meaningless with replicaCount: 1.
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+# Generic on purpose (decision D6): no default ingress class or controller-specific
+# annotation. auth.url is derived from the first host below when left empty.
+ingress:
+  enabled: false
+  ingressClassName: ""
+  annotations: {}
+  hosts:
+    - host: gateway.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: tessark-gateway-tls
+  #   hosts:
+  #     - gateway.example.com
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+networkPolicy:
+  enabled: false
+
+# API_EXTERNAL_ENABLED and friends (docs/plan-api-mcp.md Lot 8). Off by default: a fresh
+# install exposes nothing beyond the session-cookie web UI, same as before this feature
+# existed. Turning it on means distributing Bearer tokens (Settings → API Tokens) — see
+# NOTES.txt.
+apiExternal:
+  enabled: false
+  tokenMaxTtlDays: 365
+  rateLimitPerMinute: 60
+
+# POST /api/mcp — a Streamable HTTP MCP server for LLM clients, Bearer-token only. Gated
+# independently of apiExternal.enabled in the app (src/lib/config.ts), but meaningless without
+# it: resolveApiToken never runs unless API_EXTERNAL_ENABLED is also true, so mcp.enabled alone
+# still leaves /api/mcp answering 401 to every caller.
+mcp:
+  enabled: false
+  writeToolsEnabled: false
+
+# Per-connection private certificate authorities on registries and upstream sources
+# (docs/plan-custom-ca-beta.md). Off by default. Turning it back off keeps the CA bundles
+# already stored and refuses any *new* transfer or mirror that depends on one — but a mirror's
+# CronJob is installed in the cluster and keeps ticking on its own, so suspend or delete the
+# affected mirrors before flipping this to false.
+customCa:
+  enabled: false
+
+# The in-app notification centre (header bell) is always on and needs nothing here. This
+# block only configures the optional outgoing copy of the same events.
+notifications:
+  # A Slack/Teams/generic endpoint. Empty leaves the webhook off — no request ever leaves the
+  # pod. Rendered into the chart's Secret, not the ConfigMap, because the URL is a credential;
+  # with existingSecret set, supply NOTIFICATIONS_WEBHOOK_URL there instead.
+  webhookUrl: ""
+  # json | slack | teams
+  webhookFormat: json
+  # The POST is awaited inside the handler that triggered it, so this bounds how long an
+  # unreachable endpoint can delay an approval.
+  webhookTimeoutMs: 5000
+  # Read notifications older than this are swept when their owner marks the list read.
+  retentionDays: 30
+
+# Set to reuse a Secret managed outside this chart (External Secrets, Vault, sealed-secrets,
+# ...) instead of the one templates/secret.yaml would create. Must carry the same keys
+# (see templates/secret.yaml's comment header) — chart-managed secret preservation on upgrade
+# (AUTH_SECRET, GATEWAY_SECRET_KEY) does not apply since the chart never touches this Secret.
+existingSecret: ""
+
+auth:
+  # Public URL behind the Ingress, drives NextAuth redirects. Derived from the first
+  # ingress.hosts[] entry (https:// if covered by ingress.tls) when left empty and
+  # ingress.enabled is true.
+  url: ""
+  trustHost: true
+  # Bootstrap SUPERADMIN, consumed once by the post-install seed Job — not required by the web
+  # server itself. Leave adminPassword empty (and provide it via existingSecret, or set it
+  # manually before the seed hook runs) rather than committing a default password.
+  adminUsername: "admin"
+  adminPassword: ""
+  # Extra users created once by the same post-install seed Job, alongside the superadmin
+  # above — list of { username, email, password, name?, role? }, role defaults to USER.
+  # JSON-encoded into GATEWAY_SEED_USERS. Manage further accounts from /settings/users after
+  # that; this list is never re-applied on upgrade.
+  seedUsers: []
+  # How stale a signed-in session's cached role may get before it is re-read from the
+  # database. Bounds how long a demoted or disabled user keeps their access; 0 re-reads on
+  # every request, at the cost of one query per request.
+  sessionRefreshSeconds: 300
+
+# Single sign-on through any OpenID Connect provider — Keycloak is the reference target, and
+# can itself broker LDAP/AD/SAML/Google. Off by default: an install that sets nothing here
+# behaves exactly as it did before this existed.
+#
+# On the provider side, the redirect URI to declare is:
+#   <auth.url>/api/auth/callback/oidc
+# It is printed in the post-install notes; getting it wrong is the most common failure.
+oidc:
+  enabled: false
+  # Everything but the issuer is discovered from <issuer>/.well-known/openid-configuration.
+  # Keycloak: https://keycloak.example.com/realms/<realm>
+  issuer: ""
+  clientId: ""
+  # Rendered into the chart's Secret, never the ConfigMap. With existingSecret set, supply
+  # OIDC_CLIENT_SECRET there instead and leave this empty.
+  clientSecret: ""
+  scopes: "openid profile email"
+  # Names the provider on the sign-in button and wherever the UI says who owns an account.
+  displayName: "Single sign-on"
+  # Keep the username/password form alongside SSO. Leave this on: it is the way back in when
+  # the provider is unreachable, and the bootstrapped superadmin is the account that uses it.
+  # Turning it off with the provider down means nobody can sign in — including you.
+  allowLocalLogin: true
+  # false = only users already in the database may sign in; an unknown subject is refused
+  # instead of being provisioned on first arrival.
+  allowSignup: true
+  # Whether a first-time subject may adopt a pre-existing *local* account with the same
+  # email. Off by default: an email is mutable and not always verified, so matching on one
+  # turns a compromised mailbox into account takeover. A verified email is required even when
+  # this is on. Meant to be switched on for a migration, then off again.
+  linkByEmail: false
+  # Dotted path to the claim carrying group membership — "groups" for a Keycloak group
+  # mapper, "realm_access.roles" for realm roles.
+  roleClaim: groups
+  # Claim value -> Role (SUPERADMIN | ADMIN | USER). Highest match wins; anything unmapped
+  # falls back to defaultRole. Re-applied at every sign-in, so the provider owns the role and
+  # /settings/users stops offering to change it. JSON-encoded into OIDC_ROLE_MAPPING.
+  #   roleMapping:
+  #     gateway-admins: ADMIN
+  #     gateway-owners: SUPERADMIN
+  roleMapping: {}
+  defaultRole: USER
+  # "local" clears the Gateway session only — the provider session survives, so signing in
+  # again needs no prompt. "idp" also ends the provider session, signing the user out of
+  # every application in the realm.
+  logoutMode: local
+
+# Upstream sources (mirror targets) created once by the same post-install seed Job as
+# auth.seedUsers — list of { name, host, authType?, username?, secret?, allowedRepos,
+# enabled?, description? }, same shape as the add-source form. JSON-encoded into
+# GATEWAY_SEED_SOURCES. See src/lib/sources/presets.ts for ready-made examples.
+seedSources: []
+
+# GATEWAY_SECRET_KEY — encrypts every stored registry/robot credential. Left empty, the chart
+# generates one at install and preserves it at every upgrade via `lookup` (templates/secret.yaml).
+# NEVER changes it once a Secret exists: losing/rotating this key makes every stored credential
+# permanently unreadable. Set explicitly only when migrating an existing key in.
+secretKey: ""
+
+config:
+  replicationWorkerEnabled: true
+  replicationPollSeconds: 60
+  replicationVerifySeconds: 300
+  replicationCatchupSeconds: 3600
+  k8sEnabled: true
+  # Leave empty: defaults to the pod's own namespace, which is also where rbac.yaml grants
+  # create/get/delete on jobs and secrets. Only set this if pulls must target a *different*
+  # namespace — RBAC then needs extending by hand, this chart doesn't do that for you.
+  k8sNamespace: ""
+  k8sHttpTimeoutMs: 10000
+  harborHttpTimeoutMs: 15000
+  registryCheckTimeoutMs: 8000
+  defaultBrandName: "Tessark"
+  defaultBrandTagline: "Gateway"
+  defaultPrimaryColor: ""
+  defaultLogoUrl: ""
+  logoMaxBytes: 524288
+  avatarMaxBytes: 262144
+  logLevel: info
+
+skopeo:
+  image: quay.io/skopeo/stable:latest
+  jobTtlSeconds: 3600
+  jobBackoffLimit: 1
+  jobActiveDeadlineSeconds: 1800
+  # JSON-encoded to match SKOPEO_NODE_SELECTOR/SKOPEO_TOLERATIONS in src/lib/config.ts.
+  nodeSelector: {}
+  tolerations: []
+  # Comma-joined into SKOPEO_IMAGE_PULL_SECRETS — only needed if `skopeo.image` lives in a
+  # private registry.
+  imagePullSecrets: []
+  serviceAccount: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+# Three modes (decision D1) behind a single switch. `embedded` needs nothing else installed —
+# the chart-managed default for a one-command install. `cnpg` requires the CloudNativePG
+# operator already present (a documented prerequisite, not a chart dependency). `external`
+# deploys nothing and points at a database you already run.
+database:
+  mode: embedded
+
+  embedded:
+    image: postgres:17-alpine
+    storageSize: 8Gi
+    storageClassName: ""
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+
+  cnpg:
+    instances: 3
+    storageSize: 10Gi
+    storageClassName: ""
+
+  external:
+    host: ""
+    port: 5432
+    database: tessark_gateway
+    username: tessark
+    # Ignored when existingSecret is set.
+    password: ""
+    existingSecret: ""
+    existingSecretPasswordKey: password
+    sslMode: prefer
+
+  # Applied to DATABASE_URL for every mode — dimension against replicaCount (2 web pods +
+  # short-lived migrate/seed Jobs) and the target database's own max_connections.
+  connectionLimit: 5
+
+# Build and publish deploy/build-runner before enabling; image must include @sha256:….
+builds:
+  # Opt in to Scheduled Builds beta (requires config.k8sEnabled: true).
+  enabled: false
+  # Required when enabled: registry.example/team/tessark-build-runner@sha256:<64 hex chars>
+  runnerImage: ""
+  # Empty uses the Helm release namespace, independently of config.k8sNamespace.
+  namespace: ""
+  # Defaults to <release fullname>-build-runner.
+  serviceAccount: ""
+  pollSeconds: 15
+  deadlineSeconds: 1800
+  jobTtlSeconds: 604800
+  retentionDays: 90
+  cpuRequest: 500m
+  cpuLimit: "2"
+  memoryRequest: 512Mi
+  memoryLimit: 2Gi
+  storageLimit: 10Gi
+  nodeSelector: {}
+  tolerations: []
+  imagePullSecrets: []
+  # Apply only to a dedicated build namespace. Counts non-terminal pods.
+  maxActivePods: 4
+  # Optional explicit egress rules; disabled leaves normal namespace networking in place.
+  networkPolicy:
+    enabled: false
+    egress: []

@@ -1,0 +1,48 @@
+{{/*
+Without this, the pull-request feature does not work at all: launchPullRequest() (src/lib/pulls/
+launch.ts) needs to create/get/delete Jobs and Secrets in this namespace for every mirror it
+starts, and the readiness/health surfacing (K8S_ENABLED-aware, lot 5) assumes those verbs are
+granted. get on pods/log is for retrieving a failed mirror's logs from the UI later — not used
+by any route yet, granted ahead of time so adding that feature doesn't also require an RBAC
+change.
+*/}}
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "tessark-gateway.fullname" . }}
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+  # Scheduled mirrors on the "skopeo" transport (src/lib/mirrors/skopeo-transport.ts) install
+  # a CronJob per mirror and patch it when the schedule changes. Without these verbs that
+  # transport fails at apply time with a clear message and the Harbor transport still works,
+  # so this is not fatal to the pull feature the way the jobs/secrets rules above are.
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["create", "get", "list", "watch", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "get", "list", "watch", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "tessark-gateway.fullname" . }}
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "tessark-gateway.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "tessark-gateway.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

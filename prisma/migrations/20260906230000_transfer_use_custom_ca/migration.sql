@@ -1,0 +1,1 @@
+ALTER TABLE "TransferRequest" ADD COLUMN "useCustomCa" BOOLEAN NOT NULL DEFAULT true;

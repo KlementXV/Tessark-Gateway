@@ -1,0 +1,61 @@
+# Local dev database only — not used in production (the Helm chart owns Postgres there,
+# see docs/plan-kubernetes-helm.md §7/§10). Start with: docker compose -f docker-compose.dev.yml up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tessark
+      POSTGRES_PASSWORD: tessark
+      POSTGRES_DB: tessark_gateway
+    ports:
+      - "5432:5432"
+    volumes:
+      - tessark-gateway-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tessark -d tessark_gateway"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Identity provider for developing against SSO. Not started by default — bring it up with:
+  #   docker compose -f docker-compose.dev.yml --profile sso up -d
+  # then point .env.local at it (see README, "Single sign-on"):
+  #   OIDC_ENABLED=true
+  #   OIDC_ISSUER=http://localhost:8080/realms/tessark
+  #   OIDC_CLIENT_ID=tessark-gateway
+  #   OIDC_CLIENT_SECRET=dev-client-secret
+  #   OIDC_ROLE_MAPPING={"gateway-admins":"ADMIN","gateway-owners":"SUPERADMIN"}
+  #
+  # The realm below is a toy: alice/alice (owner), bob/bob (admin), carol/carol (plain user),
+  # and a client secret committed in the open. None of it belongs anywhere but a laptop.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    profiles: ["sso"]
+    restart: unless-stopped
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8080"
+      # Serves /health/ready on the management port (9000), which the healthcheck below probes.
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./deploy/dev/keycloak-realm.json:/opt/keycloak/data/import/tessark-realm.json:ro
+    healthcheck:
+      # The 26.x images ship no curl or wget, so the probe goes through bash's /dev/tcp —
+      # invoked explicitly, since CMD-SHELL would use /bin/sh, which has no such feature.
+      test:
+        - CMD
+        - bash
+        - -c
+        - "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q UP <&3"
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  tessark-gateway-postgres:

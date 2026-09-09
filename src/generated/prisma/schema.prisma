@@ -1,0 +1,1031 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  USER
+}
+
+model User {
+  id                String                @id @default(cuid())
+  email             String                @unique
+  username          String                @unique
+  // Null for accounts mastered by an external directory (authProvider != "local"): there is
+  // no local password to verify. The Credentials provider refuses those accounts outright —
+  // see src/auth.ts — so a leftover hash can never become a way around the identity provider.
+  passwordHash      String?
+  name              String?
+  role              Role                  @default(USER)
+  disabled          Boolean               @default(false)
+  // Where this account's identity and credentials live. "local" means the row below is the
+  // source of truth, so the user may edit their own email/username/password from Settings.
+  // Any other value ("ldap", "oidc", …) marks an account mastered by an external directory:
+  // the Gateway then shows those fields read-only, since writing them here would silently
+  // diverge from — or be overwritten by — the directory. See src/lib/users/profile.ts.
+  authProvider      String                @default("local")
+  // Immutable subject identifier from the OIDC provider, namespaced by issuer so two
+  // providers cannot collide: "<issuer>|<sub>". This — never the email — is what links a
+  // returning user back to their row: an email is mutable, sometimes unverified, and
+  // matching on it would turn a compromised mailbox into account takeover. See
+  // src/lib/auth/oidc.ts.
+  externalId        String?               @unique
+  // Avatar uploaded by the user, stored inline for the same reason as the instance logo:
+  // no persistent volume in k8s, so the database is the only durable store. `avatarUpdatedAt`
+  // is the cache-buster stamped onto the URL that serves these bytes back.
+  avatarData        Bytes?
+  avatarMimeType    String?
+  avatarUpdatedAt   DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  // What this person is called on each cluster whose Harbors answer to their own directory.
+  clusterIdentities UserClusterIdentity[]
+}
+
+// A long-lived credential for the external REST API and the MCP server (see
+// src/lib/auth/api-token.ts) — an alternative to the NextAuth session cookie, never a
+// replacement for it. `userId` is a plain reference, not a relation: same convention as
+// RobotAccount.createdByUserId — the owning user is always re-fetched live at auth time
+// (see resolveApiToken), so a deleted/disabled user invalidates the token without needing
+// a cascade delete here. Effective permissions always track the current Role of that user;
+// this row never snapshots a role of its own. `tokenPrefix` is shown in the UI so a user can
+// recognize a token without ever seeing the secret again; `tokenHash` is the scrypt hash of
+// the secret half only (see generateApiToken in src/lib/api-tokens/generate.ts).
+model ApiToken {
+  id              String    @id @default(cuid())
+  name            String
+  tokenPrefix     String    @unique
+  tokenHash       String
+  userId          String
+  // JSON array of Project.id restricting the token to those projects; null = no restriction
+  // beyond what the owning user's Role already allows.
+  scopeProjectIds String?
+  expiresAt       DateTime?
+  lastUsedAt      DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+}
+
+enum NotificationKind {
+  PROJECT_REQUESTED
+  PROJECT_APPROVED
+  PROJECT_REJECTED
+  TRANSFER_REQUESTED
+  TRANSFER_APPROVED
+  TRANSFER_REJECTED
+  QUOTA_REQUESTED
+  QUOTA_APPROVED
+  QUOTA_REJECTED
+  PROJECT_DELETE_REQUESTED
+  PROJECT_DELETE_APPROVED
+  PROJECT_DELETE_REJECTED
+  MEMBER_ADDED
+}
+
+// One thing that happened, addressed to one person — the in-app notification centre behind
+// the header bell (see src/lib/notifications/service.ts). Written synchronously inside the
+// route handler that caused it, so only user-triggered events produce one: nothing runs in
+// this app without an inbound HTTP request, so a skopeo Job finishing has no moment at which
+// a row could be created. Adding those means adding a scheduler first.
+//
+// `payload` holds the *values* a message interpolates ({ project: "web-front" }), never a
+// rendered sentence: the recipient's locale is only known when they load the page, so the
+// text is assembled by next-intl at read time from `kind`. Storing a sentence would freeze
+// every notification into the language of whoever triggered it. JSON as text, same reason as
+// PendingOperation.payload.
+//
+// `userId` is a plain id column, not a relation — same convention as TransferRequest
+// .requestedByUserId. Rows for a deleted account are pruned by the retention sweep rather
+// than by a cascade.
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  kind      NotificationKind
+  payload   String           @default("{}")
+  // Where the bell sends the reader. Nullable because a future kind may have nowhere to go.
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  // Serves both the unread count and the reverse-chronological list, which are the only two
+  // queries this table ever answers.
+  @@index([userId, createdAt])
+}
+
+// Singleton row (id is always "default") holding the per-instance branding shown to this
+// client's users — name, tagline, logo, accent color. See src/lib/settings/service.ts.
+model InstanceSettings {
+  id                     String   @id @default("default")
+  brandName              String   @default("Tessark")
+  brandTagline           String   @default("Gateway")
+  // Where the logo lives: either an external https:// URL, or the internal path
+  // /api/settings/branding/logo?v=<ts> when a file was uploaded (see logoData below).
+  logoUrl                String?
+  primaryColor           String?
+  // Uploaded logo, stored inline rather than on disk: the app runs in k8s with no
+  // persistent volume, so the database is the only durable store available.
+  logoData               Bytes?
+  logoMimeType           String?
+  // Login page copy. NULL means "use the built-in, translated text", so an operator who
+  // only wants a different headline overrides that one field and keeps the rest localized;
+  // any value set here is a single string and therefore shown in every language.
+  loginDescription       String?
+  loginHeroTitle         String?
+  loginHeroSubtitle      String?
+  loginFootnote          String?
+  // JSON array of { title, description } for the showcase bullets. NULL keeps the built-in
+  // list; "[]" hides the bullets entirely. Stored as text rather than a Json column so the
+  // shape stays under our own zod validation and portable across Prisma providers.
+  loginFeatures          String?
+  // How many days of settled request history to keep. Requests are the only thing the Gateway
+  // accumulates without bound: a transfer that succeeded a year ago is read by nobody and its
+  // row still carries who asked for what. 0 disables the purge and keeps everything.
+  //
+  // Only *settled* rows are ever dropped — a PENDING request is a queue item, not history,
+  // whatever its age, and deleting one would silently answer it. See src/lib/history/retention.ts.
+  historyRetentionDays   Int      @default(30)
+  // The company's own certificate authority, as a PEM bundle. One per instance rather than one
+  // per connection: an internal CA signs the whole estate, and asking an admin to paste the
+  // same root onto every registry and every source is how one of them ends up out of date.
+  //
+  // Added to the trusted roots of every outgoing TLS connection — Harbor API calls, probes,
+  // skopeo Jobs and mirror CronJobs — never in place of them: a certificate signed by a public
+  // authority still validates. It is a *public* certificate, so unlike registry credentials it
+  // is stored as-is, with nothing to decrypt. NULL means the instance trusts the public roots
+  // alone, which is the default. Gated by CUSTOM_CA_BETA_ENABLED.
+  enterpriseCaPem        String?
+  // Whether the skopeo Jobs that copy images get the bundle above by default. The Gateway's own
+  // outgoing calls always do — they are how it reads Harbor, and an operator cannot pick per
+  // call — but a copy runs in a pod of its own against two registries, so it is worth being
+  // able to say "not by default" without removing the CA the rest of the instance relies on.
+  //
+  // The transfer dialog's switch starts here, and a caller that says nothing (REST, MCP) is
+  // read as asking for the default. Scheduled mirrors have no per-run switch and follow it at
+  // every tick: a mirror is a standing intention, so the instance's current answer is the one
+  // it should use.
+  enterpriseCaJobDefault Boolean  @default(true)
+  updatedAt              DateTime @updatedAt
+}
+
+// Which directory names the people this cluster's Harbors know.
+//
+// GATEWAY — the Gateway's own User.username *is* that name. One LDAP behind both sides, which
+//   is the historical assumption of this codebase (see src/lib/clusters/project-members.ts).
+// MAPPED  — this cluster answers to a directory of its own, so every membership has to name
+//   the account *that* directory knows: see UserClusterIdentity.
+//
+// There is deliberately no third mode "mapped, falling back to User.username": a homonym in
+// another directory would then silently receive somebody else's access, which is the whole
+// reason this enum exists. A missing mapping refuses the operation instead.
+enum ClusterIdentityMode {
+  GATEWAY
+  MAPPED
+}
+
+// A group of Harbors kept in lockstep: every Gateway action (project creation, robot
+// accounts, retention) is fanned out to all members, and their content is kept in sync by
+// Harbor's own replication. Since the cluster is the only unit a Project can target, a
+// lone Harbor is simply a cluster of one.
+//
+// replicationMode:
+//   "event_based" — each member pushes to every peer as artifacts land (near real-time).
+//     In a full mesh a replicated push re-triggers the destination's own policies; Harbor
+//     skips artifacts whose digest already matches, so this converges after one round, at
+//     the cost of some no-op executions in the replication log.
+//   "scheduled"   — the same mesh, driven by `replicationCron` instead of push events.
+//   "none"        — fan out Gateway actions only, leave image content alone.
+model Cluster {
+  id              String                @id @default(cuid())
+  name            String                @unique
+  description     String?
+  // The single hostname users pull from, in front of the members — registry.local sitting
+  // over registry-fr.local and registry-en.local. Purely the published address: the Gateway
+  // still drives each member through its own Registry.baseUrl, since fanning out and pushing
+  // a mirrored image both have to name one specific Harbor. Stored bare (host[:port], no
+  // scheme) because that is the form an image reference takes.
+  registryUrl     String?
+  replicationMode String                @default("event_based")
+  replicationCron String?
+  // Whose directory names this cluster's users. Defaults to GATEWAY, so a single-directory
+  // instance behaves exactly as it did before per-cluster identities existed.
+  identityMode    ClusterIdentityMode   @default(GATEWAY)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  registries      Registry[]
+  projects        Project[]
+  identities      UserClusterIdentity[]
+}
+
+// What one Gateway user is called on one cluster's Harbors.
+//
+// Unique in both directions on purpose: a person holds at most one account per cluster, and
+// an account belongs to at most one person. Without the second constraint two Gateway users
+// could point at the same Harbor account, and revoking one membership would strip the other
+// user's access.
+model UserClusterIdentity {
+  id             String   @id @default(cuid())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  cluster        Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  clusterId      String
+  // Spelled exactly as the cluster's Harbor spells it — taken from GET /api/v2.0/users/search
+  // (see searchHarborUsers), never typed from memory. Compared case-insensitively, as Harbor
+  // itself does when it matches a project member.
+  harborUsername String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, clusterId])
+  @@unique([clusterId, harborUsername])
+}
+
+// What the Gateway is allowed to do with a Harbor. The distinction exists because a client's
+// registries are not all theirs to administer: an international or partner Harbor has its own
+// projects, its own robots and its own team, and the Gateway is only ever a courier to it.
+enum RegistryRole {
+  // The Gateway owns this Harbor's projects, robots, retention and replication mesh. It is
+  // (or may become) a cluster member, and every fan-out operation applies to it.
+  MANAGED
+  // The Gateway reads this Harbor's project list and pushes images into it — nothing else.
+  // It never creates, modifies or deletes a project, a robot or a policy there. Such a
+  // registry is never a cluster member (see addClusterMember), because membership *is* the
+  // fan-out. Push credentials are the ones stored on the row itself: neither a project robot
+  // nor the system robot exists on a Harbor we do not administer.
+  DELIVERY
+}
+
+// Every registry is a Harbor — the gateway drives Harbor's v2.0 API for projects, robot
+// accounts and retention, none of which a plain Docker Registry v2 endpoint can serve.
+// `POST /api/registries/check` gates creation on a live Harbor probe, so there is no
+// registry "kind" to store or detect.
+// authType: "none" | "basic" | "token"
+//
+// A registry belongs to at most one cluster: membership is what makes it a fan-out target,
+// and letting the same Harbor sit in two meshes would give it conflicting peer sets.
+model Registry {
+  id                  String             @id @default(cuid())
+  name                String
+  baseUrl             String
+  role                RegistryRole       @default(MANAGED)
+  authType            String             @default("none")
+  username            String?
+  encryptedSecret     String?
+  insecureTLS         Boolean            @default(false)
+  description         String?
+  // Harbor system-level robot provisioned by Gateway on this Harbor (see
+  // src/lib/clusters/system-robot.ts). It carries push/pull on every project, and is what
+  // the skopeo Job authenticates with when the destination project has no robot of its own.
+  // `systemRobotName` is the full name Harbor generated ("robot$tessark-gateway"), never the
+  // short one we asked for: the prefix is a Harbor setting.
+  systemRobotName     String?
+  systemRobotId       Int?
+  systemRobotSecret   String?
+  systemRobotSyncedAt DateTime?
+  // Last Harbor version *observed* on this registry, and when. A cache for display and for the
+  // fleet-wide compatibility view — never the source of truth for a decision: an operation that
+  // depends on the version reads it live (src/lib/registries/version-cache.ts).
+  harborVersion       String?
+  harborVersionSeenAt DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  cluster             Cluster?           @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  clusterId           String?
+  placements          ProjectPlacement[]
+  robotPlacements     RobotPlacement[]
+  pendingOps          PendingOperation[]
+  outgoingLinks       ReplicationLink[]  @relation("ReplicationSource")
+  incomingLinks       ReplicationLink[]  @relation("ReplicationDest")
+  transferTargets     TransferTarget[]   @relation("TransferDestination")
+  transferSources     TransferRequest[]  @relation("TransferSource")
+  rulesAsSource       TransferRule[]     @relation("RuleSource")
+  rulesAsDestination  TransferRule[]     @relation("RuleDestination")
+  mirrorSources       ScheduledMirror[]  @relation("MirrorSource")
+  mirrorDestinations  ScheduledMirror[]  @relation("MirrorDestination")
+  mirrorPolicies      ScheduledMirror[]  @relation("MirrorPolicyHost")
+
+  @@unique([baseUrl])
+}
+
+enum ProjectStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
+enum ProjectMemberRole {
+  PROJECT_ADMIN
+  DEVELOPER
+  GUEST
+}
+
+// A Harbor project, requested by a USER and approved by an ADMIN/SUPERADMIN — see
+// src/lib/projects/service.ts. Approval creates it on every member of the cluster; the
+// per-Harbor result lives in ProjectPlacement, so `status` here is the desired state and
+// the placements are the observed one. ACTIVE means at least one member succeeded.
+model Project {
+  id              String                 @id @default(cuid())
+  name            String
+  description     String?
+  status          ProjectStatus          @default(PENDING)
+  // Mirrors Harbor's own project visibility: a public project is listed and readable by any
+  // signed-in user, membership or not. Pushed to each member Harbor at creation time.
+  isPublic        Boolean                @default(false)
+  // Storage the project may use on *each* member Harbor, in MiB — null means unlimited,
+  // which is Harbor's own default. Stored in MiB rather than bytes because Prisma's Int is
+  // a 32-bit JS number (a byte count would overflow past 2 GiB) and BigInt doesn't survive
+  // JSON.stringify in an API response. Harbor is handed MiB × 1024².
+  //
+  // It is a per-Harbor limit, not a cluster-wide budget: replication means every member ends
+  // up holding the same artifacts, so the same number applies to each of them.
+  storageQuotaMib Int?
+  // Harbor project metadata `auto_scan` / `auto_sbom_generation`: scan every image as it is
+  // pushed, and generate its SBOM. Per-Harbor settings like isPublic and the quota, so they
+  // are desired state fanned out to every member rather than written once.
+  //
+  // `auto_sbom_generation` only exists from Harbor 2.12. A member older than that is skipped
+  // rather than failed — see clusters/scan-policy.ts.
+  autoScan        Boolean                @default(false)
+  autoSbom        Boolean                @default(false)
+  cluster         Cluster                @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  clusterId       String
+  // Null for a project the Gateway adopted rather than created — it already existed on the
+  // Harbors when the cluster was reconciled, so nobody here ever requested it.
+  ownerUserId     String?
+  rejectionReason String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  members         ProjectMember[]
+  groups          ProjectGroupMember[]
+  robotAccounts   RobotAccount[]
+  quotaRequests   QuotaRequest[]
+  deleteRequests  ProjectDeleteRequest[]
+  retentionPolicy RetentionPolicy?
+  transferTargets TransferTarget[]
+  placements      ProjectPlacement[]
+  builds          ScheduledBuild[]
+  mirrors         ScheduledMirror[]
+
+  @@unique([clusterId, name])
+}
+
+// How far a single Harbor has been brought in line with the desired state.
+// FAILED rows are what the reconciler retries once the member answers its health probe again.
+enum PlacementStatus {
+  PENDING
+  ACTIVE
+  FAILED
+}
+
+// One project as it exists on one member Harbor. Harbor allocates its own numeric IDs per
+// instance, so the same project is id 12 on one member and id 7 on another — which is
+// precisely why these can't live on Project itself.
+model ProjectPlacement {
+  id                String          @id @default(cuid())
+  project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId         String
+  registry          Registry        @relation(fields: [registryId], references: [id], onDelete: Cascade)
+  registryId        String
+  harborProjectId   Int?
+  harborRetentionId Int?
+  // Harbor creates a quota object alongside the project and never lets it be deleted, so
+  // this is a cache of the ID that lookup by reference would return anyway — see
+  // src/lib/clusters/quota.ts, which falls back to that lookup when it is still null.
+  harborQuotaId     Int?
+  status            PlacementStatus @default(PENDING)
+  lastError         String?
+  syncedAt          DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([projectId, registryId])
+}
+
+model ProjectMember {
+  id        String            @id @default(cuid())
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  userId    String
+  role      ProjectMemberRole @default(DEVELOPER)
+  createdAt DateTime          @default(now())
+
+  @@unique([projectId, userId])
+}
+
+// A directory group granted a role on the project, alongside the individual members above.
+//
+// This is a *complement* to ProjectMember, never a replacement: the Gateway has no binding to
+// the cluster's directory, so it cannot expand a group into people. A group grant therefore
+// gives access on the Harbors without making anybody a member here — the project does not
+// appear in their Gateway list, and loadProjectForAccess() does not see them. That asymmetry
+// is the price of not having to map every person one by one, and the UI says so.
+//
+// The name is the group as the cluster's Harbor knows it (see searchHarborUserGroups); it is
+// meaningless outside this project's cluster, which is why the row hangs off the project
+// rather than off the user.
+model ProjectGroupMember {
+  id        String            @id @default(cuid())
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  groupName String
+  role      ProjectMemberRole @default(DEVELOPER)
+  createdAt DateTime          @default(now())
+
+  @@unique([projectId, groupName])
+}
+
+enum QuotaRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// A project manager asking an admin to move the project's storage quota. Quotas are an
+// allocation of shared storage, so only a global ADMIN may set one (see
+// PUT /api/projects/[id]/quota) — this model is the channel that lets the people who
+// actually run the project ask for the change instead of doing it out of band.
+//
+// Approving one applies the exact `requestedQuotaMib` recorded here, through the same
+// applyProjectQuota() the admin's own edit goes through. `currentQuotaMib` snapshots what the
+// limit was when the request was raised: it is what makes the reviewer's before/after
+// meaningful, and it keeps its meaning in history once the quota has moved on.
+//
+// At most one PENDING row per project — a second ask supersedes the first rather than
+// stacking, so the queue never shows two contradictory numbers for the same project.
+model QuotaRequest {
+  id                String             @id @default(cuid())
+  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId         String
+  // Same unit and semantics as Project.storageQuotaMib: MiB per member Harbor, null =
+  // unlimited. Null is a legitimate request ("lift the limit"), not an absent value.
+  requestedQuotaMib Int?
+  currentQuotaMib   Int?
+  // Why the change is needed — free text for the reviewer, optional like every other
+  // justification in this app.
+  reason            String?
+  status            QuotaRequestStatus @default(PENDING)
+  // Plain id columns, no relation: same convention as TransferRequest.requestedByUserId — a
+  // deleted account must not take the request's history with it.
+  requestedByUserId String
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
+  rejectionReason   String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([projectId, status])
+}
+
+enum ProjectDeleteRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Somebody asking for a project to be taken down.
+//
+// Deleting a project is already possible for whoever manages it (DELETE /api/projects/[id]),
+// and that path is untouched. This is the channel for everyone else: a member who no longer
+// needs the project can say so, with a reason, instead of a message in a chat window that
+// nobody can later find. It is also the record of the decision — who asked, who agreed, when —
+// which the direct delete, being instantaneous, leaves nowhere.
+//
+// Approving runs the identical deletion the direct path runs (see src/lib/projects/delete.ts),
+// refusals included: a project that still holds repositories is refused to the reviewer exactly
+// as it is to a manager, because Harbor will not remove a project that is not empty. The
+// approval is not a way around that check — it only decides *whether*, never *how*.
+//
+// At most one PENDING row per project: a second ask while the first is open is the same ask.
+model ProjectDeleteRequest {
+  id                String                     @id @default(cuid())
+  // SetNull, not Cascade — and this is the one rule of this model worth reading twice. An
+  // approved request *is* the deletion of its own project, so a cascade would erase the record
+  // of the decision at the exact moment it was carried out: who asked, who agreed, and why
+  // would all disappear with the thing they were about. The row outlives the project, and
+  // `projectName` is what it is still able to name afterwards.
+  project           Project?                   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId         String?
+  // The name as it was when the request was raised, frozen. Same reason TransferRequest keeps
+  // `sourceImage`: history has to stay readable once the row it pointed at is gone.
+  projectName       String
+  // Why it should go — free text for the reviewer, and the part that makes this row worth
+  // keeping once the project itself no longer exists to explain it.
+  reason            String?
+  status            ProjectDeleteRequestStatus @default(PENDING)
+  // Plain id columns, no relation: same convention as TransferRequest.requestedByUserId — a
+  // deleted account must not take the request's history with it.
+  requestedByUserId String
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
+  rejectionReason   String?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+
+  @@index([projectId, status])
+}
+
+// The secret is shown once at creation time and encrypted at rest immediately afterward —
+// same handling as Registry.encryptedSecret (see src/lib/crypto.ts).
+//
+// Harbor mints a different secret on every member, which would leave the user juggling one
+// credential per Harbor for a single logical robot. So the Gateway generates the secret
+// itself and pushes it onto each member's robot (see src/lib/clusters/robots.ts); the one
+// stored here then authenticates against the whole cluster. `unifiedSecret` records whether
+// that succeeded everywhere — when false, read the per-member secret off RobotPlacement.
+model RobotAccount {
+  id              String           @id @default(cuid())
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId       String
+  name            String
+  encryptedSecret String
+  unifiedSecret   Boolean          @default(true)
+  expiresAt       DateTime?
+  createdByUserId String
+  createdAt       DateTime         @default(now())
+  placements      RobotPlacement[]
+
+  @@unique([projectId, name])
+}
+
+// One robot as it exists on one member Harbor. `encryptedSecret` is only populated as a
+// fallback, when that member rejected the secret alignment PATCH.
+model RobotPlacement {
+  id              String          @id @default(cuid())
+  robotAccount    RobotAccount    @relation(fields: [robotAccountId], references: [id], onDelete: Cascade)
+  robotAccountId  String
+  registry        Registry        @relation(fields: [registryId], references: [id], onDelete: Cascade)
+  registryId      String
+  harborRobotId   Int?
+  encryptedSecret String?
+  status          PlacementStatus @default(PENDING)
+  lastError       String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([robotAccountId, registryId])
+}
+
+// Desired retention for the project. The Harbor-side policy IDs are per member and live on
+// ProjectPlacement.harborRetentionId.
+model RetentionPolicy {
+  id         String   @id @default(cuid())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId  String   @unique
+  keepLastN  Int      @default(10)
+  tagPattern String   @default("**")
+  updatedAt  DateTime @updatedAt
+}
+
+// An upstream registry users are allowed to mirror *from* — Docker Hub, Quay, a partner's
+// GitLab. Deliberately not a Registry: that model is Harbor-only (it carries projects, robots
+// and retention), while a source is just a host to pull bytes out of. Keeping them apart is
+// also what makes "limit where images come from" expressible at all — the set of sources is
+// the allowlist.
+//
+// `allowedRepos` narrows it further, down to repository paths within the host: a JSON array
+// of globs (`*` matches one path segment, `**` matches any number), stored as text because
+// SQLite has no JSON column — same reason as PendingOperation.payload. `["**"]` allows the
+// whole host. See src/lib/sources/match.ts.
+model UpstreamSource {
+  id               String            @id @default(cuid())
+  name             String            @unique
+  // Bare registry host, no scheme — "docker.io", "quay.io", "registry.gitlab.example.com".
+  // That is the form an image reference takes, and what skopeo is handed.
+  host             String            @unique
+  authType         String            @default("none")
+  username         String?
+  encryptedSecret  String?
+  allowedRepos     String            @default("[\"**\"]")
+  // Disabling retires a source without deleting it: existing pull history keeps pointing at
+  // a row that still resolves, but no new request can name it.
+  enabled          Boolean           @default(true)
+  description      String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  transferRequests TransferRequest[]
+  transferRules    TransferRule[]    @relation("RuleSource")
+  mirrors          ScheduledMirror[] @relation("MirrorSource")
+}
+
+enum TransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+// A user's request to move an image, approved by an admin and executed as Kubernetes Jobs
+// running skopeo — see src/lib/k8s/client.ts.
+//
+// The request holds the intention (what to move, who asked, whether it was approved); where
+// it lands is one TransferTarget per destination. Same split as Project/ProjectPlacement: one
+// approval can fan out to several destinations, and each succeeds or fails on its own without
+// dragging the others down. Since the pod reaches every Harbor, those destinations are always
+// parallel — never a chain of hops.
+//
+// `status` here is the aggregate of the targets — denormalised so the admin queue can filter
+// and count on it without loading them. It is recomputed by src/lib/transfers/status.ts.
+model TransferRequest {
+  id                String           @id @default(cuid())
+  // Where the image comes from, in one of two forms — exactly one is set, the same way a
+  // destination works (see TransferTarget):
+  //
+  //   * `sourceId` — an UpstreamSource: a host outside the estate that an admin allowed,
+  //     narrowed by that source's own repository allowlist.
+  //   * `sourceRegistryId` + `sourceProjectName` — a Harbor the Gateway knows, managed or
+  //     delivery. This is what makes "take what the DMZ already holds and put it on the
+  //     cluster" expressible.
+  //
+  // Null only for a request whose source was deleted afterwards; `sourceImage` still records
+  // what was actually moved, so history survives.
+  source            UpstreamSource?  @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  sourceId          String?
+  sourceRegistry    Registry?        @relation("TransferSource", fields: [sourceRegistryId], references: [id], onDelete: SetNull)
+  sourceRegistryId  String?
+  sourceProjectName String?
+  // Repository path within the source host ("library/nginx"), and the tag, kept apart because
+  // that is how they are picked in the form and how the allowlist is matched.
+  sourceRepo        String
+  sourceTag         String           @default("latest")
+  // The full reference the job was handed — host/repo:tag, resolved at creation time and
+  // frozen. Renaming or deleting the source later must not rewrite what a past transfer did.
+  sourceImage       String
+  // The digest that tag pointed at when the request was raised, when the source could be
+  // asked (a Harbor can, an arbitrary upstream host generally cannot). The Job copies by
+  // digest whenever this is set: a tag can move between the moment a reviewer approves a
+  // transfer and the moment it runs, and what was approved is what has to travel. Null falls
+  // back to copying the tag, which is the best that source can offer.
+  sourceDigest      String?
+  // Whether the private CAs stored on the two ends (source and destinations) are handed to
+  // this transfer's Jobs. True keeps the connection's configuration, which is what an admin
+  // set it for; false runs the copy against the public root authorities alone — useful when
+  // the CA is the thing under suspicion, and the only way to say so without editing the
+  // registry row for everyone. It never turns verification off: a server whose chain no
+  // longer resolves simply fails, it is not trusted blindly.
+  //
+  // Stored rather than decided at launch so that a retry, or an approval days later, replays
+  // the choice the requester actually made.
+  useCustomCa       Boolean          @default(true)
+  // The paste this row came out of, when it came out of one. Several images submitted together
+  // are several requests — each with its own approval, status and retry — and that does not
+  // change here. This only records that they were asked for in one gesture, so the review queue
+  // can show them together and a reviewer can approve some of them without approving the rest.
+  // Null for a request raised on its own, which is most of them.
+  batchId           String?
+  requestedByUserId String
+  status            TransferStatus   @default(PENDING)
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
+  rejectionReason   String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  targets           TransferTarget[]
+
+  @@index([sourceRegistryId])
+  @@index([batchId])
+}
+
+// One destination of a transfer: where it lands, the repository path under it, and the state
+// of that specific mirror job. `targetRepo` null means "same short name as the source".
+//
+// A destination is a *coordinate* — one Harbor, one project name — not a foreign key. Two
+// forms express it, and exactly one is set (enforced in validateTransfer, since Prisma has no
+// check constraint):
+//
+//   * `projectId` — a Gateway-managed project. The coordinate is computed at launch:
+//     pickWriteMember() chooses a healthy member of its cluster, Project.name is the project.
+//     Replication then carries the image to that member's peers.
+//   * `destRegistryId` + `destProjectName` — a DELIVERY registry. The requester states the
+//     coordinate outright, because the Gateway does not own that Harbor's project list and
+//     must never guess a name there: two Harbors may share a project name, or not.
+//
+// Both `onDelete: SetNull`, unlike the Cascade a single owner would justify: a transfer that
+// already ran is history, and deleting the project or registry it aimed at must not erase the
+// record that an image once went there.
+model TransferTarget {
+  id                String          @id @default(cuid())
+  transferRequest   TransferRequest @relation(fields: [transferRequestId], references: [id], onDelete: Cascade)
+  transferRequestId String
+  project           Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId         String?
+  destRegistry      Registry?       @relation("TransferDestination", fields: [destRegistryId], references: [id], onDelete: SetNull)
+  destRegistryId    String?
+  destProjectName   String?
+  targetRepo        String?
+  // Phase 4 anchor: the image profile (corporate CA, internal package repos) to bake in on
+  // top of the mirrored image. Null means a plain copy, which is every target for now.
+  profileId         String?
+  status            TransferStatus  @default(PENDING)
+  k8sJobName        String?
+  errorMessage      String?
+  syncedAt          DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // Naming the same destination twice in one request means the same thing as naming it once,
+  // but the rule can no longer be a database constraint: a coordinate spans three nullable
+  // columns, and Postgres treats NULLs as distinct in a unique index. validateTransfer()
+  // dedupes on the resolved coordinate instead; these indexes only serve the lookups.
+  @@index([transferRequestId])
+  @@index([projectId])
+  @@index([destRegistryId])
+}
+
+// Work owed to one member Harbor that was unreachable when the action ran. Fan-out is
+// best-effort — the action succeeds on whichever members answer and parks the rest here —
+// and the reconciler drains a member's queue in `createdAt` order as soon as its health
+// probe comes back green (src/lib/clusters/queue.ts).
+//
+// Ordering matters: a ROBOT_CREATE queued behind a PROJECT_CREATE has nothing to attach to
+// until the project exists, so a member's queue is always replayed oldest-first and stops
+// at the first entry that still fails.
+//
+// kind: "PROJECT_CREATE" | "PROJECT_DELETE" | "ROBOT_CREATE" | "ROBOT_DELETE"
+//     | "MEMBER_ADD" | "MEMBER_REMOVE" | "GROUP_ADD" | "GROUP_REMOVE"
+//     | "RETENTION_UPSERT" | "QUOTA_UPDATE" | "ARTIFACT_DELETE" | "REPLICATION_SYNC"
+//       — see OperationKind in src/lib/clusters/fanout.ts
+model PendingOperation {
+  id             String    @id @default(cuid())
+  registry       Registry  @relation(fields: [registryId], references: [id], onDelete: Cascade)
+  registryId     String
+  kind           String
+  // JSON blob of whatever the replay needs beyond the FKs below — SQLite has no JSON column.
+  payload        String    @default("{}")
+  projectId      String?
+  robotAccountId String?
+  attempts       Int       @default(0)
+  lastError      String?
+  lastAttemptAt  DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([registryId, createdAt])
+}
+
+// One directed edge of the replication mesh: the policy living on `source` that pushes to
+// `dest`. A cluster of N members has N×(N-1) of these. Both Harbor-side objects are created
+// on the source — the registry endpoint describing the peer, and the policy referencing it.
+model ReplicationLink {
+  id                 String          @id @default(cuid())
+  source             Registry        @relation("ReplicationSource", fields: [sourceRegistryId], references: [id], onDelete: Cascade)
+  sourceRegistryId   String
+  dest               Registry        @relation("ReplicationDest", fields: [destRegistryId], references: [id], onDelete: Cascade)
+  destRegistryId     String
+  harborEndpointId   Int?
+  harborPolicyId     Int?
+  status             PlacementStatus @default(PENDING)
+  lastError          String?
+  // What was *actually* written to the source Harbor, so a re-sync that changes nothing costs
+  // no network at all. SHA-256 over the peer's URL, login, secret and TLS posture plus the
+  // trigger: the secret has to be covered — a rotated password is precisely the drift this
+  // exists to catch — and hashing is the only way to cover it without storing it twice.
+  appliedFingerprint String?
+  // The same peer URL in the clear. Redundant with the fingerprint and kept only because
+  // "which address does this endpoint hold?" is the first question asked of a broken link.
+  appliedBaseUrl     String?
+  // Last time the source Harbor confirmed it can reach the peer (POST /registries/ping). Null
+  // means never probed, which is not the same as unreachable — see replication.ts.
+  lastPingAt         DateTime?
+  catchUpRequested   Boolean         @default(true)
+  executionId        Int?
+  lastExecutionId    Int?
+  executionStatus    String?
+  executionError     String?
+  lastCatchUpAt      DateTime?
+  nextAttemptAt      DateTime        @default(now())
+  attempts           Int             @default(0)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@unique([sourceRegistryId, destRegistryId])
+}
+
+// Who may move what, from where, to where.
+//
+// Since the pod reaches every Harbor it knows, an edge here is a *policy*, never a statement
+// about reachability: without a matching enabled rule a transfer is refused even though the
+// network would have allowed it. That inversion is the whole point — it is what lets one
+// installation say "only prod/** leaves for the international Harbor" and another say
+// nothing leaves at all, from the same image.
+//
+// Both sides are nullable, and null means "any": null on the source side opens every source,
+// null on the destination side opens every destination. An operator opening a whole direction
+// at once is the common case, and spelling out N×M rules for it would be unusable.
+//
+// Same glob grammar and the same matcher as UpstreamSource.allowedRepos (src/lib/sources/
+// repo.ts): `*` stays within a path segment, `**` crosses separators. Stored as JSON in text
+// columns for the same reason.
+model TransferRule {
+  id               String          @id @default(cuid())
+  name             String          @unique
+  description      String?
+  // Source side. A rule naming an upstream source and a registry at once is meaningless — a
+  // transfer has one source — so at most one is set; both null means "from anywhere".
+  sourceUpstream   UpstreamSource? @relation("RuleSource", fields: [sourceUpstreamId], references: [id], onDelete: Cascade)
+  sourceUpstreamId String?
+  sourceRegistry   Registry?       @relation("RuleSource", fields: [sourceRegistryId], references: [id], onDelete: Cascade)
+  sourceRegistryId String?
+  // Destination side. Null means any destination, managed or delivery.
+  destRegistry     Registry?       @relation("RuleDestination", fields: [destRegistryId], references: [id], onDelete: Cascade)
+  destRegistryId   String?
+  // Which projects on the destination this rule opens, and which repository paths on the
+  // source it covers. `["**"]` for both is "everything this direction can carry".
+  projectFilter    String          @default("[\"**\"]")
+  repoFilter       String          @default("[\"**\"]")
+  // How the bytes travel. Only "skopeo" exists today; the column is here so the Harbor-native
+  // and archive transports land as new values rather than as a migration.
+  transport        String          @default("skopeo")
+  // Whether a transfer matching this rule waits for an admin. Carried by the rule rather than
+  // derived from the requester's role, so an installation can review everything that leaves
+  // the estate — including an admin's own transfers — while leaving internal ones free.
+  requiresApproval Boolean         @default(true)
+  enabled          Boolean         @default(true)
+  // Per-rule skopeo overrides on top of the SKOPEO_* defaults (see src/lib/config.ts). JSON
+  // in a text column; "{}" means "use the instance defaults unchanged".
+  skopeoOverrides  String          @default("{}")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([sourceUpstreamId])
+  @@index([sourceRegistryId])
+  @@index([destRegistryId])
+}
+
+// A transfer that repeats: "nginx:latest, into apps, every morning".
+//
+// A TransferRequest is a decision about one image at one moment — it is approved, it runs, it
+// becomes history. A mirror is a standing intention, so it is a different row with a different
+// life: it has no status, it is never "done", and what it produces are runs. Nothing here
+// bypasses the policy — a mirror is matched against TransferRule exactly like the transfer it
+// repeats, at creation and again on every re-apply.
+//
+// `transport` says who holds the clock, and the two are genuinely different deployments:
+//
+//   "harbor" — a pull-mode replication policy on the destination Harbor, with a scheduled
+//     trigger. Harbor pulls, retries and keeps the execution log; the Gateway only writes the
+//     policy. Requires a destination Harbor the Gateway administers (a MANAGED member behind
+//     a Gateway project) which itself reaches the source host.
+//   "skopeo" — a Kubernetes CronJob running the same skopeo copy a one-shot transfer runs.
+//     Kubernetes holds the clock, the Gateway's pod is the one that needs egress, and it is
+//     the only form that can deliver to a Harbor the Gateway does not administer.
+//
+// Deliberately one destination per mirror, unlike a transfer's fan-out: each transport
+// installs one object per destination anyway, and "the same image, three places, daily" reads
+// better as three lines an operator can disable one at a time than as one row with a hidden
+// list inside it.
+model ScheduledMirror {
+  id                String          @id @default(cuid())
+  name              String          @unique
+  description       String?
+  // Source, in the two forms of TransferRequest — an allowed upstream host, or a project on a
+  // Harbor the Gateway knows.
+  //
+  // Restrict on all four ends (source, sourceRegistry, project, destRegistry), and this is
+  // the one rule of this model worth reading twice. A mirror owns an object on the outside —
+  // a Harbor replication policy, or a Kubernetes CronJob — that only deleteMirror() takes
+  // down. A cascade deletes the row without ever calling it, so the schedule keeps firing
+  // with nothing left in the Gateway to show it or stop it. Refusing the parent delete forces
+  // the caller to remove the mirror properly first, which is the only order that leaves
+  // nothing running behind. See mirrorsBlockingDelete() for the readable half of this rule.
+  //
+  // Transfer history keeps SetNull instead, because it records something that already
+  // happened and owns nothing outside.
+  source            UpstreamSource? @relation("MirrorSource", fields: [sourceId], references: [id], onDelete: Restrict)
+  sourceId          String?
+  sourceRegistry    Registry?       @relation("MirrorSource", fields: [sourceRegistryId], references: [id], onDelete: Restrict)
+  sourceRegistryId  String?
+  sourceProjectName String?
+  sourceRepo        String
+  // One fixed tag. No glob: a pattern makes a run's volume unbounded and its history
+  // unreadable, and "keep nginx:latest fresh" is the whole of what this exists for.
+  sourceTag         String          @default("latest")
+  // Destination, in the two coordinate forms of TransferTarget.
+  project           Project?        @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  projectId         String?
+  destRegistry      Registry?       @relation("MirrorDestination", fields: [destRegistryId], references: [id], onDelete: Restrict)
+  destRegistryId    String?
+  destProjectName   String?
+  // Null keeps the source's short name ("library/nginx" → "<project>/nginx"). Always null on
+  // the harbor transport: a replication policy cannot rename a repository, and silently
+  // ignoring the field would be worse than refusing it.
+  targetRepo        String?
+  // Standard 5-field crontab, in UTC — "0 3 * * *". Five fields rather than the 6-field form
+  // Cluster.replicationCron takes, because this one may be handed to Kubernetes verbatim and
+  // a CronJob accepts nothing else; the harbor transport prefixes the seconds field itself.
+  schedule          String
+  // "harbor" | "skopeo" — see the comment above the model.
+  transport         String          @default("harbor")
+  // Disabling stops the schedule without losing the definition: the Harbor policy is written
+  // with enabled:false, the CronJob with suspend:true. Deleting is what removes them.
+  enabled           Boolean         @default(true)
+  // Where the harbor transport put the policy. A cluster has several members and only one of
+  // them holds it — the mesh carries what lands there to the others — so which one has to be
+  // recorded, or a later delete would have nowhere to look. SetNull: losing the Harbor loses
+  // the policy with it, and the mirror needs re-applying rather than deleting.
+  harborRegistry    Registry?       @relation("MirrorPolicyHost", fields: [harborRegistryId], references: [id], onDelete: SetNull)
+  harborRegistryId  String?
+  harborEndpointId  Int?
+  harborPolicyId    Int?
+  // Where the skopeo transport put the CronJob, in the Gateway's own namespace.
+  k8sCronJobName    String?
+  // Whether the schedule is actually installed on its transport right now, and why not.
+  // Distinct from a *run* failing: a mirror can be perfectly installed and still have its
+  // last run fail on an upstream 401.
+  applied           Boolean         @default(false)
+  lastAppliedAt     DateTime?
+  lastError         String?
+  createdByUserId   String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([sourceId])
+  @@index([sourceRegistryId])
+  @@index([projectId])
+  @@index([destRegistryId])
+}
+
+// No registry FK: teardown must survive deletion of either registry. Credentials are
+// encrypted and removed with this row as soon as both Harbor objects are gone.
+model ReplicationCleanup {
+  id                  String   @id
+  sourceRegistryId    String
+  destRegistryId      String
+  encryptedConnection String
+  harborPolicyId      Int?
+  harborEndpointId    Int?
+  attempts            Int      @default(0)
+  nextAttemptAt       DateTime @default(now())
+  lastError           String?
+  createdAt           DateTime @default(now())
+}
+
+// Persistent build definitions; transport resources must be removed before the project.
+model ScheduledBuild {
+  id                String          @id @default(cuid())
+  name              String          @unique
+  projectId         String
+  project           Project         @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  targetRepo        String
+  tag               String
+  config            String
+  schedule          String
+  enabled           Boolean         @default(true)
+  applied           Boolean         @default(false)
+  appliedRevisionId String?
+  lastAppliedAt     DateTime?
+  lastError         String?
+  deleting          Boolean         @default(false)
+  createdByUserId   String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  revisions         BuildRevision[]
+  runs              BuildRun[]
+
+  @@unique([projectId, targetRepo, tag])
+}
+
+model BuildRevision {
+  id          String         @id @default(cuid())
+  buildId     String
+  build       ScheduledBuild @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  config      String
+  destination String
+  registryId  String
+  robotId     String
+  fingerprint String
+  createdAt   DateTime       @default(now())
+  runs        BuildRun[]
+
+  @@index([buildId])
+}
+
+model BuildRun {
+  id          String         @id @default(cuid())
+  buildId     String
+  build       ScheduledBuild @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  revisionId  String
+  revision    BuildRevision  @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+  jobName     String         @unique
+  jobUid      String?        @unique
+  origin      String
+  status      String         @default("pending")
+  startedAt   DateTime?
+  completedAt DateTime?
+  commit      String?
+  digest      String?
+  stage       String?
+  error       String?
+  createdAt   DateTime       @default(now())
+
+  @@index([buildId, createdAt])
+  @@index([status])
+}

@@ -1,0 +1,68 @@
+{{/*
+post-install only, no pre-upgrade — the seed is a one-time bootstrap
+(prisma/seed.ts exits as a no-op the moment any user row exists), never useful on an upgrade.
+Weight -3, after job-migrate's -5: Helm runs same-type hooks in ascending weight order and
+waits for each to complete before starting the next, so the schema is guaranteed to exist
+before this Job tries to write to it.
+*/}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "tessark-gateway.fullname" . }}-seed
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: seed
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "-3"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "tessark-gateway.labels" . | nindent 8 }}
+        app.kubernetes.io/component: seed
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "tessark-gateway.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: seed
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          command: ["npx", "prisma", "db", "seed"]
+          workingDir: /app
+          envFrom:
+            - configMapRef:
+                name: {{ include "tessark-gateway.fullname" . }}
+            - secretRef:
+                name: {{ include "tessark-gateway.secretName" . }}
+          {{- $extraEnv := include "tessark-gateway.databaseEnv" . }}
+          {{- if $extraEnv }}
+          env:
+            {{- $extraEnv | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

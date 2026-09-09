@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "tessark-gateway.fullname" . }}-test-connection
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: wget
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      # Liveness only, deliberately — `helm test` runs whenever an operator wants to poke the
+      # release, including right after a fresh install before the migrate/seed hooks have
+      # necessarily settled; /api/ready failing at that exact moment is not a reason to report
+      # a broken chart.
+      command:
+        - node
+        - -e
+        - |
+          fetch('http://{{ include "tessark-gateway.fullname" . }}:{{ .Values.service.port }}/api/health')
+            .then((res) => { if (!res.ok) throw new Error('status ' + res.status); console.log('ok'); })
+            .catch((err) => { console.error(err); process.exit(1); })

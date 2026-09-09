@@ -1,0 +1,106 @@
+{{/*
+Every non-sensitive variable from the zod schema in src/lib/config.ts (§3 ConfigMap table in
+CLAUDE.md) — kept in exact correspondence, one values.yaml field per env var. All have a safe
+default there, so this ConfigMap alone (no values.yaml overrides) is enough for a working
+install.
+
+Deliberately NOT here: KUBERNETES_SERVICE_HOST/PORT (injected by Kubernetes itself, never
+declared by us) and AUTH_URL, which is emitted here too but derived (see
+tessark-gateway.authUrl) rather than hardcoded from values.
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  REPLICATION_WORKER_ENABLED: {{ .Values.config.replicationWorkerEnabled | quote }}
+  REPLICATION_POLL_SECONDS: {{ .Values.config.replicationPollSeconds | quote }}
+  REPLICATION_VERIFY_SECONDS: {{ .Values.config.replicationVerifySeconds | quote }}
+  REPLICATION_CATCHUP_SECONDS: {{ .Values.config.replicationCatchupSeconds | quote }}
+  name: {{ include "tessark-gateway.fullname" . }}
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+data:
+  REPLICATION_WORKER_ENABLED: {{ .Values.config.replicationWorkerEnabled | quote }}
+  REPLICATION_POLL_SECONDS: {{ .Values.config.replicationPollSeconds | quote }}
+  REPLICATION_VERIFY_SECONDS: {{ .Values.config.replicationVerifySeconds | quote }}
+  REPLICATION_CATCHUP_SECONDS: {{ .Values.config.replicationCatchupSeconds | quote }}
+  AUTH_TRUST_HOST: {{ .Values.auth.trustHost | quote }}
+  {{- with (include "tessark-gateway.authUrl" .) }}
+  AUTH_URL: {{ . | quote }}
+  {{- end }}
+  K8S_ENABLED: {{ .Values.config.k8sEnabled | quote }}
+  {{- if .Values.config.k8sNamespace }}
+  K8S_NAMESPACE: {{ .Values.config.k8sNamespace | quote }}
+  {{- end }}
+  K8S_HTTP_TIMEOUT_MS: {{ .Values.config.k8sHttpTimeoutMs | quote }}
+  SKOPEO_IMAGE: {{ .Values.skopeo.image | quote }}
+  SKOPEO_JOB_TTL_SECONDS: {{ .Values.skopeo.jobTtlSeconds | quote }}
+  SKOPEO_JOB_BACKOFF_LIMIT: {{ .Values.skopeo.jobBackoffLimit | quote }}
+  SKOPEO_JOB_ACTIVE_DEADLINE_SECONDS: {{ .Values.skopeo.jobActiveDeadlineSeconds | quote }}
+  SKOPEO_CPU_REQUEST: {{ .Values.skopeo.resources.requests.cpu | quote }}
+  SKOPEO_CPU_LIMIT: {{ .Values.skopeo.resources.limits.cpu | quote }}
+  SKOPEO_MEMORY_REQUEST: {{ .Values.skopeo.resources.requests.memory | quote }}
+  SKOPEO_MEMORY_LIMIT: {{ .Values.skopeo.resources.limits.memory | quote }}
+  SKOPEO_NODE_SELECTOR: {{ .Values.skopeo.nodeSelector | toJson | quote }}
+  SKOPEO_TOLERATIONS: {{ .Values.skopeo.tolerations | toJson | quote }}
+  SKOPEO_IMAGE_PULL_SECRETS: {{ .Values.skopeo.imagePullSecrets | join "," | quote }}
+  {{- if .Values.skopeo.serviceAccount }}
+  SKOPEO_SERVICE_ACCOUNT: {{ .Values.skopeo.serviceAccount | quote }}
+  {{- end }}
+  HARBOR_HTTP_TIMEOUT_MS: {{ .Values.config.harborHttpTimeoutMs | quote }}
+  REGISTRY_CHECK_TIMEOUT_MS: {{ .Values.config.registryCheckTimeoutMs | quote }}
+  DEFAULT_BRAND_NAME: {{ .Values.config.defaultBrandName | quote }}
+  DEFAULT_BRAND_TAGLINE: {{ .Values.config.defaultBrandTagline | quote }}
+  {{- if .Values.config.defaultPrimaryColor }}
+  DEFAULT_PRIMARY_COLOR: {{ .Values.config.defaultPrimaryColor | quote }}
+  {{- end }}
+  {{- if .Values.config.defaultLogoUrl }}
+  DEFAULT_LOGO_URL: {{ .Values.config.defaultLogoUrl | quote }}
+  {{- end }}
+  LOGO_MAX_BYTES: {{ .Values.config.logoMaxBytes | quote }}
+  AVATAR_MAX_BYTES: {{ .Values.config.avatarMaxBytes | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  OIDC_ENABLED: {{ .Values.oidc.enabled | quote }}
+  {{- if .Values.oidc.enabled }}
+  OIDC_ISSUER: {{ .Values.oidc.issuer | quote }}
+  OIDC_CLIENT_ID: {{ .Values.oidc.clientId | quote }}
+  OIDC_SCOPES: {{ .Values.oidc.scopes | quote }}
+  OIDC_DISPLAY_NAME: {{ .Values.oidc.displayName | quote }}
+  OIDC_ALLOW_SIGNUP: {{ .Values.oidc.allowSignup | quote }}
+  OIDC_LINK_BY_EMAIL: {{ .Values.oidc.linkByEmail | quote }}
+  OIDC_ROLE_CLAIM: {{ .Values.oidc.roleClaim | quote }}
+  OIDC_ROLE_MAPPING: {{ .Values.oidc.roleMapping | toJson | quote }}
+  OIDC_DEFAULT_ROLE: {{ .Values.oidc.defaultRole | quote }}
+  OIDC_LOGOUT_MODE: {{ .Values.oidc.logoutMode | quote }}
+  {{- end }}
+  {{/*
+  Rendered unconditionally: the application refuses to start with local login off *and* OIDC
+  off, and emitting this key only under `oidc.enabled` would let an upgrade that turns SSO
+  back off leave a stale `false` behind in the ConfigMap.
+  */}}
+  OIDC_ALLOW_LOCAL_LOGIN: {{ if .Values.oidc.enabled }}{{ .Values.oidc.allowLocalLogin | quote }}{{ else }}"true"{{ end }}
+  AUTH_SESSION_REFRESH_SECONDS: {{ .Values.auth.sessionRefreshSeconds | quote }}
+  API_EXTERNAL_ENABLED: {{ .Values.apiExternal.enabled | quote }}
+  API_TOKEN_MAX_TTL_DAYS: {{ .Values.apiExternal.tokenMaxTtlDays | quote }}
+  API_RATE_LIMIT_PER_MINUTE: {{ .Values.apiExternal.rateLimitPerMinute | quote }}
+  MCP_ENABLED: {{ .Values.mcp.enabled | quote }}
+  MCP_WRITE_TOOLS_ENABLED: {{ .Values.mcp.writeToolsEnabled | quote }}
+  CUSTOM_CA_BETA_ENABLED: {{ .Values.customCa.enabled | quote }}
+  NOTIFICATIONS_WEBHOOK_FORMAT: {{ .Values.notifications.webhookFormat | quote }}
+  NOTIFICATIONS_WEBHOOK_TIMEOUT_MS: {{ .Values.notifications.webhookTimeoutMs | quote }}
+  NOTIFICATION_RETENTION_DAYS: {{ .Values.notifications.retentionDays | quote }}
+  BUILDS_BETA_ENABLED: {{ .Values.builds.enabled | quote }}
+  BUILDS_RUNNER_IMAGE: {{ .Values.builds.runnerImage | quote }}
+  BUILDS_NAMESPACE: {{ default .Release.Namespace .Values.builds.namespace | quote }}
+  BUILDS_SERVICE_ACCOUNT: {{ default (printf "%s-build-runner" (include "tessark-gateway.fullname" .)) .Values.builds.serviceAccount | quote }}
+  BUILDS_POLL_SECONDS: {{ .Values.builds.pollSeconds | quote }}
+  BUILDS_DEADLINE_SECONDS: {{ .Values.builds.deadlineSeconds | quote }}
+  BUILDS_JOB_TTL_SECONDS: {{ .Values.builds.jobTtlSeconds | quote }}
+  BUILDS_RETENTION_DAYS: {{ .Values.builds.retentionDays | quote }}
+  BUILDS_CPU_REQUEST: {{ .Values.builds.cpuRequest | quote }}
+  BUILDS_CPU_LIMIT: {{ .Values.builds.cpuLimit | quote }}
+  BUILDS_MEMORY_REQUEST: {{ .Values.builds.memoryRequest | quote }}
+  BUILDS_MEMORY_LIMIT: {{ .Values.builds.memoryLimit | quote }}
+  BUILDS_STORAGE_LIMIT: {{ .Values.builds.storageLimit | quote }}
+  BUILDS_NODE_SELECTOR: {{ .Values.builds.nodeSelector | toJson | quote }}
+  BUILDS_TOLERATIONS: {{ .Values.builds.tolerations | toJson | quote }}
+  BUILDS_IMAGE_PULL_SECRETS: {{ .Values.builds.imagePullSecrets | toJson | quote }}

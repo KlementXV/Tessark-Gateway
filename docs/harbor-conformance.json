@@ -1,0 +1,2022 @@
+{
+  "_note": "Written by the conformance reporter, never by hand (docs/plan-harbor-compatibility.md §2). Empty until the first campaign of lot 2 runs.",
+  "runs": [
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "skipped",
+          "symptom": "no directory account to grant to"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "fail",
+          "symptom": "the admin account must be findable in the directory"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "skipped"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "skipped"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "skipped"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "skipped"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "53ad6bd78a53",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "skipped"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-36-43-063Z",
+      "finishedAt": "2026-09-08T21:36:43.063Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "skipped"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "skipped"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "skipped"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "skipped"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "2d43695666de",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "skipped"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "skipped"
+        }
+      ],
+      "runId": "run-2026-09-08T21-37-50-823Z",
+      "finishedAt": "2026-09-08T21:37:50.823Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "skipped",
+          "symptom": "the scanner did not finish within 180s"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "fail",
+          "symptom": "the artifact should be readable"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "pass"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "pass"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "0f7a91ac8ddf",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "pass"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "fail",
+          "symptom": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- true\n"
+        }
+      ],
+      "runId": "run-2026-09-08T21-59-33-989Z",
+      "finishedAt": "2026-09-08T21:59:33.989Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "skipped",
+          "symptom": "the scanner did not finish within 180s (the artifact at tessark-conf-f0c57c61/conformance@sha256:d1a8d0a4eeb6… was not readable)"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "fail",
+          "symptom": "tessark-conf-f0c57c61/conformance@sha256:d1a8d0a4eeb6… was not readable; the repository holds 0 artifact(s): "
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "pass"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "pass"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "db6f89a907a6",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "pass"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "fail",
+          "symptom": "the policy should be switched off before it is removed\n+ actual - expected\n\n+ undefined\n- false\n"
+        }
+      ],
+      "runId": "run-2026-09-08T22-06-32-357Z",
+      "finishedAt": "2026-09-08T22:06:32.357Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "pass"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "pass"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "bed54f1de29f",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "pass"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "fail",
+          "symptom": "the policy should be switched off before it is removed\n+ actual - expected\n\n+ undefined\n- false\n"
+        }
+      ],
+      "runId": "run-2026-09-08T22-13-44-496Z",
+      "finishedAt": "2026-09-08T22:13:44.497Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "0479774031a06668",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "pass"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "pass"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "49eb37e87495462b",
+      "suiteRevision": "7080e4083513",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "pass"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-08T22-14-30-863Z",
+      "finishedAt": "2026-09-08T22:14:30.863Z",
+      "context": {
+        "target": "http://localhost:1998",
+        "authMode": "basic"
+      }
+    }
+  ]
+}

@@ -1,0 +1,699 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "tessark-gateway",
+  "type": "object",
+  "required": [
+    "image",
+    "database"
+  ],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": [
+        "repository",
+        "pullPolicy"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tag": {
+          "type": "string"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ]
+        }
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "rbac": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean"
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ClusterIP",
+            "NodePort",
+            "LoadBalancer"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "ingressClassName": {
+          "type": "string"
+        },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "host",
+              "paths"
+            ],
+            "properties": {
+              "host": {
+                "type": "string",
+                "minLength": 1
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "path",
+                    "pathType"
+                  ],
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "enum": [
+                        "Prefix",
+                        "Exact",
+                        "ImplementationSpecific"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "existingSecret": {
+      "type": "string"
+    },
+    "secretKey": {
+      "type": "string"
+    },
+    "auth": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "trustHost": {
+          "type": "boolean"
+        },
+        "adminUsername": {
+          "type": "string"
+        },
+        "adminPassword": {
+          "type": "string"
+        },
+        "seedUsers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "username",
+              "email",
+              "password"
+            ],
+            "properties": {
+              "username": {
+                "type": "string",
+                "minLength": 3
+              },
+              "email": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string",
+                "minLength": 8
+              },
+              "name": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "SUPERADMIN",
+                  "ADMIN",
+                  "USER"
+                ]
+              }
+            }
+          }
+        },
+        "sessionRefreshSeconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "oidc": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "clientSecret": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowLocalLogin": {
+          "type": "boolean"
+        },
+        "allowSignup": {
+          "type": "boolean"
+        },
+        "linkByEmail": {
+          "type": "boolean"
+        },
+        "roleClaim": {
+          "type": "string",
+          "minLength": 1
+        },
+        "roleMapping": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "SUPERADMIN",
+              "ADMIN",
+              "USER"
+            ]
+          }
+        },
+        "defaultRole": {
+          "type": "string",
+          "enum": [
+            "SUPERADMIN",
+            "ADMIN",
+            "USER"
+          ]
+        },
+        "logoutMode": {
+          "type": "string",
+          "enum": [
+            "local",
+            "idp"
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "enabled": {
+            "const": true
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "then": {
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "clientId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "issuer",
+          "clientId"
+        ]
+      }
+    },
+    "seedSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "host"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "host": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authType": {
+            "type": "string",
+            "enum": [
+              "none",
+              "basic",
+              "token"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "allowedRepos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "k8sEnabled": {
+          "type": "boolean"
+        },
+        "k8sNamespace": {
+          "type": "string"
+        },
+        "k8sHttpTimeoutMs": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "harborHttpTimeoutMs": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "registryCheckTimeoutMs": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "defaultBrandName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defaultBrandTagline": {
+          "type": "string"
+        },
+        "defaultPrimaryColor": {
+          "type": "string",
+          "pattern": "^(#[0-9a-fA-F]{6})?$"
+        },
+        "defaultLogoUrl": {
+          "type": "string"
+        },
+        "logoMaxBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "avatarMaxBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "logLevel": {
+          "type": "string",
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "replicationWorkerEnabled": {
+          "type": "boolean"
+        },
+        "replicationPollSeconds": {
+          "type": "integer",
+          "minimum": 10
+        },
+        "replicationVerifySeconds": {
+          "type": "integer",
+          "minimum": 30
+        },
+        "replicationCatchupSeconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "skopeo": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jobTtlSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "jobBackoffLimit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "jobActiveDeadlineSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "serviceAccount": {
+          "type": "string"
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "embedded",
+            "cnpg",
+            "external"
+          ]
+        },
+        "connectionLimit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "embedded": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string",
+              "minLength": 1
+            },
+            "storageSize": {
+              "type": "string",
+              "pattern": "^[0-9]+[EPTGMK]i?$"
+            },
+            "storageClassName": {
+              "type": "string"
+            }
+          }
+        },
+        "cnpg": {
+          "type": "object",
+          "properties": {
+            "instances": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "storageSize": {
+              "type": "string",
+              "pattern": "^[0-9]+[EPTGMK]i?$"
+            },
+            "storageClassName": {
+              "type": "string"
+            }
+          }
+        },
+        "external": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string"
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            },
+            "database": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            },
+            "existingSecret": {
+              "type": "string"
+            },
+            "existingSecretPasswordKey": {
+              "type": "string"
+            },
+            "sslMode": {
+              "type": "string",
+              "enum": [
+                "disable",
+                "prefer",
+                "require",
+                "verify-ca",
+                "verify-full"
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "external"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "external": {
+                "properties": {
+                  "host": {
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "host"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "networkPolicy": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "apiExternal": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "tokenMaxTtlDays": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rateLimitPerMinute": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "writeToolsEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "customCa": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "builds": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable Scheduled Builds beta."
+        },
+        "runnerImage": {
+          "type": "string",
+          "pattern": "^$|^.+@sha256:[a-f0-9]{64}$",
+          "description": "Published deploy/build-runner image pinned by SHA-256 digest; required when enabled."
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "serviceAccount": {
+          "type": "string"
+        },
+        "pollSeconds": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "deadlineSeconds": {
+          "type": "integer",
+          "minimum": 30
+        },
+        "jobTtlSeconds": {
+          "type": "integer",
+          "minimum": 300
+        },
+        "retentionDays": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxActivePods": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cpuRequest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cpuLimit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "memoryRequest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "memoryLimit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "storageLimit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nodeSelector": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "networkPolicy": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "egress": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "enabled": {
+            "const": true
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "then": {
+        "required": [
+          "runnerImage"
+        ],
+        "properties": {
+          "runnerImage": {
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

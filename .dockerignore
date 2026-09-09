@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+docs
+scripts
+*.md
+.env
+.env.*
+!.env.example
+prisma/dev.db*
+docker-compose*.yml
+deploy
+.dockerignore
+Dockerfile

@@ -1,0 +1,99 @@
+{{/*
+database.mode: embedded (default) — a single-instance Postgres good enough for a one-command
+install or small production, written directly in this chart rather than pulled in as a
+subchart dependency (no Bitnami: their free images moved to `bitnamilegacy` in August 2025 —
+decision D1). Not a substitute for `cnpg` when HA/backups matter.
+*/}}
+{{- if eq .Values.database.mode "embedded" }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "tessark-gateway.embeddedDbName" . }}
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  serviceName: {{ include "tessark-gateway.embeddedDbName" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "tessark-gateway.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: database
+  template:
+    metadata:
+      labels:
+        {{- include "tessark-gateway.labels" . | nindent 8 }}
+        app.kubernetes.io/component: database
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: {{ .Values.database.embedded.image }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tessark-gateway.embeddedDbSecretName" . }}
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tessark-gateway.embeddedDbSecretName" . }}
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tessark-gateway.embeddedDbSecretName" . }}
+                  key: database
+            # A subPath (not the volume root) so the PVC being pre-populated with a
+            # lost+found directory by some CSI provisioners doesn't make initdb think the
+            # data directory is non-empty-but-uninitialized.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "tessark", "-d", "tessark_gateway"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "tessark", "-d", "tessark_gateway"]
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.database.embedded.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "tessark-gateway.labels" . | nindent 10 }}
+        annotations:
+          # Survives `helm uninstall` (decision D8) — see NOTES.txt for the deliberate-deletion
+          # procedure. Also true of PVCs from volumeClaimTemplates by default (the StatefulSet
+          # controller never deletes them on its own); this annotation protects it in addition
+          # against a release-level cleanup that goes looking for it.
+          helm.sh/resource-policy: keep
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.database.embedded.storageClassName }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.database.embedded.storageSize }}
+{{- end }}

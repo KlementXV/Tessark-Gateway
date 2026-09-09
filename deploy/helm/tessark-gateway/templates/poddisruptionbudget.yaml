@@ -1,0 +1,13 @@
+{{- if and .Values.podDisruptionBudget.enabled (gt (.Values.replicaCount | int) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "tessark-gateway.fullname" . }}
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "tessark-gateway.selectorLabels" . | nindent 6 }}
+{{- end }}

@@ -1,0 +1,127 @@
+Tessark Gateway ({{ .Chart.AppVersion }}) is deploying to namespace "{{ .Release.Namespace }}".
+
+{{- if .Values.ingress.enabled }}
+
+Once the pods are Ready, reach it at:
+{{- range .Values.ingress.hosts }}
+  {{ if $.Values.ingress.tls }}https{{ else }}http{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+
+No Ingress is enabled (ingress.enabled: false). Reach it from inside the cluster at:
+  http://{{ include "tessark-gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+or with:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "tessark-gateway.fullname" . }} 8080:{{ .Values.service.port }}
+{{- end }}
+
+{{- if not .Values.rbac.create }}
+
+  ⚠ rbac.create is false: no Role/RoleBinding was created. Without create/get/delete on jobs
+    and secrets in this namespace, the image-pull feature will fail on every attempt with an
+    explicit error in the UI — it will not silently do nothing.
+{{- end }}
+
+{{- if and .Values.auth.adminPassword (not .Values.existingSecret) }}
+
+First login (bootstrap SUPERADMIN, consumed once by the seed Job):
+  username: {{ .Values.auth.adminUsername | default "admin" }}
+  password: (the value you set in auth.adminPassword)
+{{- end }}
+
+{{- if .Values.oidc.enabled }}
+
+Single sign-on is enabled; the button on /login reads "{{ .Values.oidc.displayName }}". Declare
+this exact redirect URI on the provider side — a mismatch is the most common reason the first
+sign-in fails:
+{{- $authUrl := include "tessark-gateway.authUrl" . }}
+{{- if $authUrl }}
+  {{ $authUrl }}/api/auth/callback/oidc
+{{- else }}
+  <the URL users reach the Gateway on>/api/auth/callback/oidc
+  ⚠ Neither auth.url nor an Ingress host is set, so AUTH_URL is unset and NextAuth will build
+    redirects from the internal request host — which the browser cannot reach. Set auth.url.
+{{- end }}
+{{- if not .Values.oidc.roleMapping }}
+
+  Note: oidc.roleMapping is empty, so every user signing in through the provider gets
+  {{ .Values.oidc.defaultRole }}. Roles stay editable in /settings/users. Set a mapping to let
+  the provider own them instead.
+{{- end }}
+{{- if not .Values.oidc.allowLocalLogin }}
+
+  ⚠ oidc.allowLocalLogin is false: the username/password form is gone. If the provider becomes
+    unreachable, nobody can sign in — including you. Recovering means setting
+    oidc.allowLocalLogin=true and waiting for the rollout.
+{{- end }}
+{{- if .Values.oidc.linkByEmail }}
+
+  ⚠ oidc.linkByEmail is true: a first-time subject whose *verified* email matches an existing
+    local account takes that account over, password removed. Intended for a one-off migration
+    — turn it back off once your accounts are linked.
+{{- end }}
+{{- end }}
+{{- if .Values.apiExternal.enabled }}
+
+⚠ apiExternal.enabled is true: every /api/* route now also accepts a Bearer API token in
+  addition to the session cookie. Nothing is reachable with one until a user creates a token
+  from Settings → API Tokens — this flag does not hand out any credential on its own. The
+  chart's own RBAC (create/get/delete on jobs and secrets, see rbac.create above) does not
+  change: a token only ever gets what its owner's Role already allows.
+{{- end }}
+
+{{- if .Values.mcp.enabled }}
+
+⚠ mcp.enabled is true: POST /api/mcp serves an MCP tool server to any caller with a valid
+  Bearer token — same requirement as above (apiExternal.enabled + a token from Settings).
+  {{- if .Values.mcp.writeToolsEnabled }} Write tools are also enabled (mcp.writeToolsEnabled):
+  a connected LLM client can create/approve pull requests and create projects, gated by the
+  calling token's own Role — nothing an equivalent REST call couldn't already do.
+  {{- else }} Only read-only tools are enabled (mcp.writeToolsEnabled: false).
+  {{- end }}
+{{- end }}
+{{- if .Values.customCa.enabled }}
+
+⚠ customCa.enabled is true (beta): an ADMIN can attach a private certificate authority to a
+  registry or an upstream source. TLS stays verified — a CA can never be combined with
+  insecure TLS or an http:// URL, and the Gateway refuses the pair. Turning this back to
+  false keeps the stored bundles but refuses any new transfer or mirror that needs one; a
+  mirror's CronJob already installed in the cluster keeps running on its own schedule, so
+  suspend or delete those mirrors *before* the upgrade:
+    kubectl -n {{ .Release.Namespace }} get cronjob -l tessark.io/mirror-id
+{{- end }}
+{{- if not (or .Values.apiExternal.enabled .Values.mcp.enabled) }}
+
+/api/mcp and the Swagger UI at /api/docs are routed by this Ingress like every other path —
+there is only one backend Service — but the application itself answers /api/mcp with 404
+while mcp.enabled is false (apiExternal.enabled gates every other /api/* route the same way).
+/api/docs stays reachable either way: it only describes the API, it never returns instance
+data.
+{{- end }}
+
+⚠ Back up GATEWAY_SECRET_KEY, and back it up *together with* the database.
+  It decrypts every stored registry/robot credential — losing it, or restoring the database
+  from a backup taken with a different key, makes every credential permanently unreadable.
+  Retrieve it with:
+    kubectl -n {{ .Release.Namespace }} get secret {{ include "tessark-gateway.secretName" . }} -o jsonpath='{.data.GATEWAY_SECRET_KEY}' | base64 -d
+
+Objects that survive `helm uninstall` (decision D8 — see docs/plan-kubernetes-helm.md):
+  - Secret {{ include "tessark-gateway.secretName" . }} (AUTH_SECRET, GATEWAY_SECRET_KEY, ...)
+{{- if eq .Values.database.mode "embedded" }}
+  - Secret {{ include "tessark-gateway.embeddedDbSecretName" . }} (embedded Postgres credentials)
+  - PersistentVolumeClaim data-{{ include "tessark-gateway.embeddedDbName" . }}-0 (embedded Postgres data)
+{{- end }}
+A re-install into the same namespace picks these back up: existing users, registries and
+credentials all come back. This is intentional — "start clean" does not mean "reinstall". To
+actually start clean, delete them explicitly:
+  kubectl -n {{ .Release.Namespace }} delete secret {{ include "tessark-gateway.secretName" . }}{{ if eq .Values.database.mode "embedded" }} {{ include "tessark-gateway.embeddedDbSecretName" . }}{{ end }}
+{{- if eq .Values.database.mode "embedded" }}
+  kubectl -n {{ .Release.Namespace }} delete pvc data-{{ include "tessark-gateway.embeddedDbName" . }}-0
+{{- end }}
+
+Scheduled builds beta:
+  Build and publish deploy/build-runner, set builds.runnerImage to its digest, then enable
+  builds.enabled. Use a dedicated namespace/node pool for administrator-approved Dockerfiles.
+  The tested runner profile uses UID 1000, VFS/chroot and seccomp/AppArmor Unconfined, without
+  privileged mode, SYS_ADMIN or host mounts. A restricted Pod Security namespace will reject this profile.
+  Pause and verify existing schedules before disabling the beta or changing its namespace.
+  Keep K8S_ENABLED and manager RBAC available until build cleanup completes.

@@ -1,0 +1,30 @@
+{{/*
+database.mode: cnpg — HA via CloudNativePG. The operator is a documented prerequisite, not a
+dependency this chart packages (CRDs and controllers are cluster-scoped and shouldn't be
+owned by an application release). Fails at render time with a clear message when the operator
+isn't installed, rather than producing a Cluster resource that never reconciles and a
+Deployment that starts against a database URL nothing will ever answer on.
+*/}}
+{{- if eq .Values.database.mode "cnpg" }}
+{{- if not (.Capabilities.APIVersions.Has "postgresql.cnpg.io/v1/Cluster") }}
+{{- fail "database.mode=cnpg requires the CloudNativePG operator (CRD postgresql.cnpg.io/v1/Cluster not found in this cluster) — install it first: https://cloudnative-pg.io/documentation/current/installation_upgrade/" }}
+{{- end }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "tessark-gateway.fullname" . }}
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  instances: {{ .Values.database.cnpg.instances }}
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+  storage:
+    size: {{ .Values.database.cnpg.storageSize }}
+    {{- with .Values.database.cnpg.storageClassName }}
+    storageClass: {{ . }}
+    {{- end }}
+{{- end }}

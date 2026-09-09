@@ -1,0 +1,41 @@
+/node_modules
+/.next/
+/out/
+/build
+.env
+.env.*
+!.env.example
+
+# Local AI assistant configuration, skills, and working notes.
+.agents/
+.claude/
+.codex/
+.cursor/
+.github/copilot-instructions.md
+AGENTS.md
+AGENTS.*.md
+CLAUDE.md
+CLAUDE.*.md
+CODEX.md
+GEMINI.md
+SKILL.md
+skills-lock.json
+/docs/plan-*.md
+/docs/code-audit-*.md
+
+# Local databases and logs.
+/prisma/*.db*
+*.log
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+next-env.d.ts
+
+# Regenerated from swagger-ui-dist by "postinstall" (scripts/copy-swagger-ui.mjs) — not
+# source, don't commit the vendored bundle.
+/public/swagger-ui/
+
+# Publish only human-facing README documentation.
+*.[mM][dD]
+*.[mM][dD][xX]
+!README.md

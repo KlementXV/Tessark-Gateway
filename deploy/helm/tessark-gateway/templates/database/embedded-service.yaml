@@ -1,0 +1,21 @@
+{{- if eq .Values.database.mode "embedded" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tessark-gateway.embeddedDbName" . }}
+  labels:
+    {{- include "tessark-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  # Headless: a StatefulSet's single replica is addressed directly by pod DNS, no load
+  # balancing needed for a single-instance database.
+  clusterIP: None
+  ports:
+    - port: 5432
+      targetPort: postgres
+      protocol: TCP
+      name: postgres
+  selector:
+    {{- include "tessark-gateway.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+{{- end }}

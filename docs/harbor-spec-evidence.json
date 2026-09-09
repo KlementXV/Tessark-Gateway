@@ -1,0 +1,508 @@
+{
+  "_note": "Written by tools/harbor-spec-diff.ts, never by hand. A comparison with complete:false proves nothing and can never yield `expected`.",
+  "comparisons": [
+    {
+      "capabilityId": "artifact-delete",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /projects/{}/repositories/{}/artifacts · parameters.with_sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.start_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.end_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.scan_status · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.sbom_digest · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.report_id · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.duration · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.scanner · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.scanner.name · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.scanner.vendor · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].sbom_overview.scanner.version · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · parameters.with_sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.start_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.end_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scan_status · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.sbom_digest · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.report_id · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.duration · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.name · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.vendor · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.version · new optional field",
+        "GET /search · response.200.project[].metadata.auto_sbom_generation · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /projects/{}/repositories/{}/artifacts/{} · parameters.with_sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.start_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.end_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scan_status · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.sbom_digest · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.report_id · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.duration · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.name · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.vendor · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.version · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "directory-identity",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /projects · response.200[].metadata.auto_sbom_generation · new optional field",
+        "POST /projects · body.metadata.auto_sbom_generation · new optional field",
+        "GET /projects/{} · response.200.metadata.auto_sbom_generation · new optional field",
+        "PUT /projects/{} · body.metadata.auto_sbom_generation · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "project-members",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "project-quota",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "replication-policy",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "retention-policy",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "PUT /projects/{} · body.metadata.auto_sbom_generation · new optional field",
+        "POST /projects/{}/repositories/{}/artifacts/{}/scan · parameters.scanType · new optional field",
+        "POST /projects/{}/repositories/{}/artifacts/{}/scan · body.scan_type · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · parameters.with_sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.start_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.end_time · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scan_status · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.sbom_digest · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.report_id · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.duration · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.name · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.vendor · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.sbom_overview.scanner.version · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "system-robot",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "fromVersion": "2.10.0",
+      "toVersion": "2.11.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "POST /projects/{}/repositories/{}/artifacts/{}/scan · parameters.scanType · new optional field",
+        "POST /projects/{}/repositories/{}/artifacts/{}/scan · body.scan_type · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.10.0.yaml does not parse: Missing closing 'quote at line 7170, column 148:",
+        "2.10.0.yaml does not parse: Implicit keys need to be on a single line at line 7171, column 9:",
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [
+        "GET /projects/{}/repositories/{}/artifacts · parameters.with_signature · request field removed"
+      ],
+      "additions": [
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].artifact_type · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts · response.200[].repository_name · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.artifact_type · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.repository_name · new optional field",
+        "GET /search · response.200.project[].metadata.proxy_speed_kb · new optional field",
+        "GET /search · response.200.project[].metadata.max_upstream_conn · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.artifact_type · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.repository_name · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "directory-identity",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /projects · response.200[].metadata.proxy_speed_kb · new optional field",
+        "GET /projects · response.200[].metadata.max_upstream_conn · new optional field",
+        "POST /projects · body.metadata.proxy_speed_kb · new optional field",
+        "POST /projects · body.metadata.max_upstream_conn · new optional field",
+        "GET /projects/{} · response.200.metadata.proxy_speed_kb · new optional field",
+        "GET /projects/{} · response.200.metadata.max_upstream_conn · new optional field",
+        "PUT /projects/{} · body.metadata.proxy_speed_kb · new optional field",
+        "PUT /projects/{} · body.metadata.max_upstream_conn · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "project-members",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "project-quota",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /registries · response.200[].ca_certificate · new optional field",
+        "POST /registries · body.ca_certificate · new optional field",
+        "GET /registries/{} · response.200.ca_certificate · new optional field",
+        "PUT /registries/{} · body.ca_certificate · new optional field",
+        "POST /registries/ping · body.ca_certificate · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "replication-policy",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /replication/policies · response.200[].src_registry.ca_certificate · new optional field",
+        "GET /replication/policies · response.200[].dest_registry.ca_certificate · new optional field",
+        "GET /replication/policies · response.200[].single_active_replication · new optional field",
+        "POST /replication/policies · body.src_registry.ca_certificate · new optional field",
+        "POST /replication/policies · body.dest_registry.ca_certificate · new optional field",
+        "POST /replication/policies · body.single_active_replication · new optional field",
+        "GET /replication/policies/{} · response.200.src_registry.ca_certificate · new optional field",
+        "GET /replication/policies/{} · response.200.dest_registry.ca_certificate · new optional field",
+        "GET /replication/policies/{} · response.200.single_active_replication · new optional field",
+        "PUT /replication/policies/{} · body.src_registry.ca_certificate · new optional field",
+        "PUT /replication/policies/{} · body.dest_registry.ca_certificate · new optional field",
+        "PUT /replication/policies/{} · body.single_active_replication · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "retention-policy",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "PUT /projects/{} · body.metadata.proxy_speed_kb · new optional field",
+        "PUT /projects/{} · body.metadata.max_upstream_conn · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.artifact_type · new optional field",
+        "GET /projects/{}/repositories/{}/artifacts/{} · response.200.repository_name · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "system-robot",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [
+        "GET /robots · response.200[].creator_type · new optional field",
+        "GET /robots · response.200[].creator_ref · new optional field"
+      ],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "fromVersion": "2.11.0",
+      "toVersion": "2.15.0",
+      "complete": false,
+      "breakingChanges": [],
+      "additions": [],
+      "info": [],
+      "incompleteReasons": [
+        "2.11.0.yaml does not parse: Missing closing 'quote at line 7248, column 148:",
+        "2.11.0.yaml does not parse: Implicit keys need to be on a single line at line 7249, column 9:"
+      ]
+    }
+  ]
+}
