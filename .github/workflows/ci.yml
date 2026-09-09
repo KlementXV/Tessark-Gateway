@@ -1,0 +1,219 @@
+name: Test, build and publish
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gateway-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  checks:
+    name: Code and configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run prisma:generate
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run check:messages
+      - run: npm run check:env-example
+      - run: npm run check:harbor-surface
+      - run: npm run check:harbor-matrix
+      - run: npm audit --omit=dev --audit-level=high
+
+  tests:
+    name: Tests (Node ${{ matrix.node }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run prisma:generate
+      - name: Unit and TLS integration tests
+        run: npm test
+      - name: Build runner tests
+        run: python3 scripts/test-build-runner.py
+
+  postgres:
+    name: PostgreSQL migrations and locking
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: tessark
+          POSTGRES_PASSWORD: ci-database-password
+          POSTGRES_DB: tessark_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tessark -d tessark_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      DATABASE_URL: postgresql://tessark:ci-database-password@127.0.0.1:5432/tessark_ci?schema=public&connection_limit=5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run prisma:generate
+      - run: node scripts/test-replication-postgres.mjs
+
+  chart:
+    name: Helm chart
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.20.1
+      - run: bash scripts/check-chart.sh
+
+  image:
+    name: Build and test application image
+    needs: [checks, tests, postgres, chart]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+      image-id: ${{ steps.build.outputs.imageid }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Container repository
+        id: repository
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "image=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - name: Image tags and OCI labels
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ steps.repository.outputs.image }}
+          flavor: latest=auto
+          tags: |
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,format=long
+            type=semver,pattern={{version}}
+          labels: |
+            org.opencontainers.image.title=Tessark Gateway
+            org.opencontainers.image.description=Harbor fleet management portal
+      - name: Require a semantic version for release tags
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          IMAGE_VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          if [[ ! "$IMAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo 'Use a semantic version tag such as v1.2.3 or v1.2.3-rc.1.' >&2
+            exit 1
+          fi
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - name: Build image without application secrets
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          push: false
+          provenance: false
+          tags: tessark-gateway:ci
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIT_REVISION=${{ github.sha }}
+            IMAGE_VERSION=${{ steps.meta.outputs.version }}
+            IMAGE_SOURCE=${{ github.server_url }}/${{ github.repository }}
+          cache-from: type=gha,scope=gateway-amd64
+          cache-to: type=gha,mode=max,scope=gateway-amd64
+      - name: Migrations, seed and HTTP smoke test
+        run: bash scripts/test-image.sh tessark-gateway:ci
+      - name: Export the tested image
+        if: github.event_name == 'push'
+        run: docker save tessark-gateway:ci | gzip -1 > "$RUNNER_TEMP/gateway-image.tar.gz"
+      - name: Upload the tested image
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gateway-image-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/gateway-image.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    name: Publish tested image to GHCR
+    needs: [checks, tests, postgres, chart, image]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # No repository checkout or application code execution in the publishing job.
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: gateway-image-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tested-image
+      - name: Load and verify the tested image
+        env:
+          EXPECTED_IMAGE_ID: ${{ needs.image.outputs.image-id }}
+        run: |
+          docker load --input "$RUNNER_TEMP/tested-image/gateway-image.tar.gz"
+          actual="$(docker image inspect tessark-gateway:ci --format '{{.Id}}')"
+          test "$actual" = "$EXPECTED_IMAGE_ID"
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push the tested image and report digests
+        env:
+          IMAGE_TAGS: ${{ needs.image.outputs.tags }}
+        run: |
+          test -n "$IMAGE_TAGS"
+          while IFS= read -r tag; do
+            [ -n "$tag" ] || continue
+            docker tag tessark-gateway:ci "$tag"
+            docker push "$tag"
+            printf -- '- `%s`\n' "$tag" >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$IMAGE_TAGS"
+          docker image inspect tessark-gateway:ci --format '{{json .RepoDigests}}' >> "$GITHUB_STEP_SUMMARY"

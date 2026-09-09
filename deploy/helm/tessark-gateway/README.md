@@ -14,6 +14,8 @@
 
 Run the commands in this guide from the repository root. Examples consistently use release and namespace `tessark-gateway`. Supply your own image repository, tag, host and secrets.
 
+Published application images are available through [the GHCR pipeline](../../../docs/ci/README.md#english). Set `image.repository: ghcr.io/klementxv/tessark-gateway` and a published version/commit tag. The following instructions are for building your own image.
+
 ### Build the application image
 
 The [Dockerfile](../../../Dockerfile) builds with Node 22 and includes the standalone web server plus Prisma migration/seed tooling. Application configuration is supplied at runtime, not as image build arguments.
@@ -206,6 +208,8 @@ Transfer Job defaults are a 30-minute deadline and one-hour TTL after completion
 - Pour `database.mode=cnpg`, un opérateur CloudNativePG déjà installé. Le chart ne l’installe pas.
 
 Exécuter les commandes depuis la racine du dépôt. Les exemples utilisent la release et le namespace `tessark-gateway`. Fournir son propre dépôt d’images, tag, domaine et secrets.
+
+Les images applicatives sont publiées par [le pipeline GHCR](../../../docs/ci/README.md#français). Définir `image.repository: ghcr.io/klementxv/tessark-gateway` et un tag de version/commit publié. Les instructions suivantes servent à construire sa propre image.
 
 ### Construire l’image applicative
 

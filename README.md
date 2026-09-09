@@ -29,12 +29,17 @@ Harbor support is recorded per capability and version in the [compatibility matr
 
 | Guide | Contents |
 | --- | --- |
+| [CI and container packages](docs/ci/README.md#english) | Automated tests, GHCR publication and image tags |
 | [Kubernetes and Helm](deploy/helm/tessark-gateway/README.md#english) | Images, installation, values, database modes, upgrades and operations |
 | [Authentication and directories](docs/authentication/README.md#english) | Local accounts, SSO, role mapping and Harbor identities |
 | [REST API and MCP](docs/api/README.md#english) | Tokens, endpoints, rate limits and tools |
 | [Replication and recovery](docs/replication/README.md#english) | Worker configuration, retries, consistency and troubleshooting |
 | [Build runner](deploy/build-runner/README.md#english) | Runner image, execution profile, credentials and lifecycle |
 | [Harbor compatibility](docs/harbor/README.md#english) | Version matrix, evidence and required tests |
+
+### Container images
+
+The [CI workflow](docs/ci/README.md#english) publishes tested application images to `ghcr.io/klementxv/tessark-gateway`. Use `main` for development or a published version/commit tag for deployment. The current image platform is `linux/amd64`. Private packages require authentication.
 
 ### Local development
 
@@ -172,12 +177,17 @@ La [matrice de compatibilité](docs/harbor/README.md#français) décrit le suppo
 
 | Guide | Contenu |
 | --- | --- |
+| [CI et packages conteneurs](docs/ci/README.md#français) | Tests automatisés, publication GHCR et tags des images |
 | [Kubernetes et Helm](deploy/helm/tessark-gateway/README.md#français) | Images, installation, valeurs, bases de données, mises à jour et exploitation |
 | [Authentification et annuaires](docs/authentication/README.md#français) | Comptes locaux, SSO, attribution des rôles et identités Harbor |
 | [API REST et MCP](docs/api/README.md#français) | Tokens, points d’accès, limites de débit et outils |
 | [Réplication et reprise](docs/replication/README.md#français) | Configuration du worker, tentatives, cohérence et diagnostic |
 | [Runner de builds](deploy/build-runner/README.md#français) | Image du runner, profil d’exécution, identifiants et cycle de vie |
 | [Compatibilité Harbor](docs/harbor/README.md#français) | Matrice des versions, preuves et tests requis |
+
+### Images conteneurs
+
+Le [workflow CI](docs/ci/README.md#français) publie les images applicatives testées dans `ghcr.io/klementxv/tessark-gateway`. Utiliser `main` pour le développement ou un tag de version/commit publié pour un déploiement. La plateforme actuelle est `linux/amd64`. Un package privé exige une authentification.
 
 ### Développement local
 
