@@ -271,9 +271,30 @@ database:
         memory: 1Gi
 
   cnpg:
+    # Requires an operator already installed in the Kubernetes cluster.
     instances: 3
+    # Empty preserves the operator/existing cluster image choice. Set a CNPG-compatible
+    # image explicitly to control PostgreSQL releases; do not use the vanilla postgres image.
+    imageName: ""
     storageSize: 10Gi
     storageClassName: ""
+    # Retain the Cluster (and its operator-owned resources) on Helm uninstall.
+    keepCluster: true
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+    affinity:
+      enablePodAntiAffinity: true
+      podAntiAffinityType: preferred
+      topologyKey: kubernetes.io/hostname
+      nodeSelector: {}
+      tolerations: []
+    # PostgreSQL parameter values must be strings, e.g. max_connections: "100".
+    parameters: {}
 
   external:
     host: ""
@@ -289,6 +310,9 @@ database:
   # Applied to DATABASE_URL for every mode — dimension against replicaCount (2 web pods +
   # short-lived migrate/seed Jobs) and the target database's own max_connections.
   connectionLimit: 5
+  # Bound the migration init container's wait for a usable database. Set Helm's
+  # --timeout higher to also allow image downloads, storage provisioning and migrations.
+  waitForReadySeconds: 600
 
 # Build and publish deploy/build-runner before enabling; image must include @sha256:….
 builds:

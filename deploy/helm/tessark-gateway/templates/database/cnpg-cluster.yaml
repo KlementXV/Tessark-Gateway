@@ -13,18 +13,39 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: {{ include "tessark-gateway.fullname" . }}
+  {{- if (dig "keepCluster" true .Values.database.cnpg) }}
+  annotations:
+    helm.sh/resource-policy: keep
+  {{- end }}
   labels:
     {{- include "tessark-gateway.labels" . | nindent 4 }}
     app.kubernetes.io/component: database
 spec:
   instances: {{ .Values.database.cnpg.instances }}
+  {{- with .Values.database.cnpg.imageName }}
+  imageName: {{ . | quote }}
+  {{- end }}
+  enableSuperuserAccess: false
+  {{- with .Values.database.cnpg.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.database.cnpg.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.database.cnpg.parameters }}
+  postgresql:
+    parameters:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
   bootstrap:
     initdb:
       database: app
       owner: app
   storage:
-    size: {{ .Values.database.cnpg.storageSize }}
+    size: {{ .Values.database.cnpg.storageSize | quote }}
     {{- with .Values.database.cnpg.storageClassName }}
-    storageClass: {{ . }}
+    storageClass: {{ . | quote }}
     {{- end }}
 {{- end }}

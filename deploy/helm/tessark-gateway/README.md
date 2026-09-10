@@ -108,6 +108,65 @@ All modes use `database.connectionLimit: 5`. Size the database connection budget
 
 For an external database, set `database.mode: external` plus `database.external.host`, `port`, `database`, `username` and either `password` or `existingSecret` with `existingSecretPasswordKey` (default `password`). Host/user/database remain necessary when using the password Secret. `sslMode` defaults to `prefer`; choose the mode required by your database deployment. CNPG and external password Secrets provide credentials through pod environment references; `DATABASE_URL` may therefore not be present in the application Secret. See [the environment helpers](templates/_helpers.tpl).
 
+### Optional CloudNativePG cluster
+
+Set `database.mode: cnpg` to have this chart create a `postgresql.cnpg.io/v1` **Cluster**. The CloudNativePG operator must already be installed and running; it remains managed separately from the Gateway release. The chart checks for its Cluster CRD and fails clearly if it is absent.
+
+Merge this into your deployment values file, alongside the application image, URL and bootstrap credentials:
+
+```yaml
+database:
+  mode: cnpg
+  connectionLimit: 5
+  waitForReadySeconds: 600
+  cnpg:
+    instances: 3
+    storageSize: 20Gi
+    storageClassName: "" # Use the cluster default, or your database storage class.
+    keepCluster: true
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+    affinity:
+      enablePodAntiAffinity: true
+      podAntiAffinityType: preferred
+      topologyKey: kubernetes.io/hostname
+      nodeSelector: {}
+      tolerations: []
+    parameters:
+      max_connections: "100"
+```
+
+Three instances provide one primary and two replicas. The operator manages replication and failover; Gateway connects through the primary service `<release-fullname>-rw` and uses the generated `<release-fullname>-app` Secret. Database and owner remain `app` for compatibility with existing installations. Superuser access is disabled.
+
+`preferred` anti-affinity permits a small cluster to schedule all instances, but multiple replicas on one node do not provide protection against that node failing. For three separate eligible nodes, set `podAntiAffinityType: required`; instances will remain Pending if insufficient nodes/storage are available. Database placement is configured under `database.cnpg.affinity`, separately from Gateway pod placement. See [CNPG scheduling](https://cloudnative-pg.io/docs/devel/scheduling/).
+
+| Setting | Behavior |
+| --- | --- |
+| `database.cnpg.imageName` | Optional CNPG-compatible PostgreSQL image. Empty preserves the operator/existing cluster image choice; set it explicitly to control releases. Do not use the vanilla `postgres` image. |
+| `database.cnpg.resources` | CPU/memory requests and limits per database instance |
+| `database.cnpg.storageSize`, `storageClassName` | Storage per instance; expansion also depends on the StorageClass |
+| `database.cnpg.parameters` | PostgreSQL parameters, with string values; CNPG validates supported settings |
+| `database.cnpg.keepCluster` | `true` by default: Helm retains the Cluster on uninstall. Explicit deletion of the Cluster can still delete operator-owned resources. |
+| `database.waitForReadySeconds` | Migration init container waits for a successful `SELECT 1`, default 600 seconds, for all database modes |
+
+```bash
+kubectl get crd clusters.postgresql.cnpg.io
+helm upgrade --install tessark-gateway ./deploy/helm/tessark-gateway \
+  --namespace tessark-gateway --create-namespace \
+  -f /secure/tessark-values.yaml --timeout 20m
+kubectl -n tessark-gateway wait --for=condition=Ready cluster/tessark-gateway --timeout=10m
+kubectl -n tessark-gateway get cluster,pods,pvc
+```
+
+Adjust resource names if `nameOverride` or `fullnameOverride` is set. The readiness wait avoids exhausting migration retries while CNPG provisions PostgreSQL. Helm’s timeout also includes scheduling, image downloads and migrations, so leave additional headroom. The wait does not prove that every replica is healthy; inspect the Cluster status separately.
+
+**Changing `database.mode` does not migrate existing data.** For an existing embedded/external database, arrange a separate database migration and retain the matching `GATEWAY_SECRET_KEY`. Use a fresh release/database for a new installation. Retention and replication are not backups: configure and test CNPG backups separately; this chart does not automatically configure a backup destination or schedule. Before reinstalling a retained cluster, confirm that the original operator-managed credentials and Gateway encryption key are still available.
+
 ### Secrets and backups
 
 Without `existingSecret`, the chart creates and preserves `AUTH_SECRET` and `GATEWAY_SECRET_KEY` using the existing Secret on upgrades. A conflicting explicit `secretKey` is rejected. Keep the same encryption key with its database; replacing it makes stored registry and robot credentials unreadable.
@@ -167,7 +226,7 @@ Before disabling custom CA support, suspend or remove scheduled mirrors that dep
 helm uninstall tessark-gateway --namespace tessark-gateway
 ```
 
-Uninstall retains the application Secret, embedded PostgreSQL credential Secret and persistent database volume. A separate build namespace is retained as well. Reinstallation can reuse existing data; uninstall is not a database reset. Review [NOTES.txt](templates/NOTES.txt) and actual remaining objects before deliberately deleting retained resources.
+Uninstall retains the application Secret, embedded PostgreSQL credential Secret and persistent database volume. In CNPG mode it also retains the Cluster when `database.cnpg.keepCluster=true` (default). A separate build namespace is retained as well. Reinstallation can reuse existing data; uninstall is not a database reset. Review [NOTES.txt](templates/NOTES.txt) and actual remaining objects before deliberately deleting retained resources.
 
 ### Operations and troubleshooting
 
@@ -303,6 +362,65 @@ Tous les modes utilisent `database.connectionLimit: 5`. Dimensionner les connexi
 
 Pour une base externe, définir `database.mode: external`, puis `database.external.host`, `port`, `database`, `username` et soit `password`, soit `existingSecret` avec `existingSecretPasswordKey` (défaut `password`). Hôte/utilisateur/base restent nécessaires avec un Secret de mot de passe. `sslMode` vaut `prefer` par défaut ; choisir le mode adapté à la base. Les modes CNPG et externe avec Secret de mot de passe fournissent les identifiants par références d’environnement dans les pods ; `DATABASE_URL` peut donc être absent du Secret applicatif. Voir [les helpers d’environnement](templates/_helpers.tpl).
 
+### Cluster CloudNativePG optionnel
+
+Définir `database.mode: cnpg` pour que ce chart crée un **Cluster** `postgresql.cnpg.io/v1`. L’opérateur CloudNativePG doit être déjà installé et actif ; sa gestion reste séparée de la release Gateway. Le chart vérifie la présence de sa CRD Cluster et échoue explicitement si elle manque.
+
+Intégrer ce bloc au fichier de valeurs du déploiement, avec l’image applicative, l’URL et les identifiants initiaux :
+
+```yaml
+database:
+  mode: cnpg
+  connectionLimit: 5
+  waitForReadySeconds: 600
+  cnpg:
+    instances: 3
+    storageSize: 20Gi
+    storageClassName: "" # Classe par défaut du cluster, ou classe dédiée aux bases.
+    keepCluster: true
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+    affinity:
+      enablePodAntiAffinity: true
+      podAntiAffinityType: preferred
+      topologyKey: kubernetes.io/hostname
+      nodeSelector: {}
+      tolerations: []
+    parameters:
+      max_connections: "100"
+```
+
+Trois instances correspondent à un primaire et deux réplicas. L’opérateur gère la réplication et la bascule ; Gateway se connecte au service primaire `<release-fullname>-rw` et utilise le Secret généré `<release-fullname>-app`. La base et son propriétaire restent `app` pour préserver la compatibilité des installations existantes. L’accès superutilisateur est désactivé.
+
+L’anti-affinité `preferred` permet de placer toutes les instances sur un petit cluster, mais plusieurs réplicas sur un même nœud ne protègent pas contre sa panne. Avec trois nœuds distincts éligibles, utiliser `podAntiAffinityType: required` ; les instances restent Pending si les nœuds ou le stockage sont insuffisants. Le placement de la base se configure sous `database.cnpg.affinity`, séparément des pods Gateway. Voir [le placement CNPG](https://cloudnative-pg.io/docs/devel/scheduling/).
+
+| Réglage | Comportement |
+| --- | --- |
+| `database.cnpg.imageName` | Image PostgreSQL compatible CNPG optionnelle. Vide, elle conserve le choix de l’opérateur/du cluster existant ; la définir explicitement pour contrôler les versions. Ne pas utiliser l’image `postgres` standard. |
+| `database.cnpg.resources` | Demandes et limites CPU/mémoire par instance de base |
+| `database.cnpg.storageSize`, `storageClassName` | Stockage par instance ; son extension dépend aussi de la StorageClass |
+| `database.cnpg.parameters` | Paramètres PostgreSQL sous forme de chaînes ; CNPG valide les réglages acceptés |
+| `database.cnpg.keepCluster` | `true` par défaut : Helm conserve le Cluster à la désinstallation. Sa suppression explicite peut toujours supprimer les ressources appartenant à l’opérateur. |
+| `database.waitForReadySeconds` | L’init container de migration attend un `SELECT 1` réussi, 600 secondes par défaut, pour tous les modes de base |
+
+```bash
+kubectl get crd clusters.postgresql.cnpg.io
+helm upgrade --install tessark-gateway ./deploy/helm/tessark-gateway \
+  --namespace tessark-gateway --create-namespace \
+  -f /secure/tessark-values.yaml --timeout 20m
+kubectl -n tessark-gateway wait --for=condition=Ready cluster/tessark-gateway --timeout=10m
+kubectl -n tessark-gateway get cluster,pods,pvc
+```
+
+Adapter les noms avec `nameOverride` ou `fullnameOverride`. L’attente évite d’épuiser les tentatives de migration pendant le provisionnement PostgreSQL par CNPG. Le délai Helm inclut aussi placement, téléchargement des images et migrations ; prévoir une marge. Cette attente ne prouve pas que chaque réplica est sain ; vérifier séparément l’état du Cluster.
+
+**Changer `database.mode` ne migre pas les données existantes.** Pour une base embedded/external déjà utilisée, organiser une migration de base distincte et conserver la même `GATEWAY_SECRET_KEY`. Pour une nouvelle installation, utiliser une nouvelle release/base. Conservation et réplication ne remplacent pas les sauvegardes : configurer et tester celles de CNPG séparément ; ce chart ne configure automatiquement ni destination ni planification de sauvegarde. Avant de réinstaller un cluster conservé, vérifier que ses identifiants gérés par l’opérateur et la clé de chiffrement Gateway restent disponibles.
+
 ### Secrets et sauvegardes
 
 Sans `existingSecret`, le chart crée et préserve `AUTH_SECRET` et `GATEWAY_SECRET_KEY` en consultant le Secret existant lors des mises à jour. Une `secretKey` explicite différente est refusée. Conserver la même clé de chiffrement avec sa base ; la remplacer rend les identifiants de registres et de robots illisibles.
@@ -362,7 +480,7 @@ Avant de désactiver les CA personnalisées, suspendre ou supprimer les miroirs 
 helm uninstall tessark-gateway --namespace tessark-gateway
 ```
 
-La désinstallation conserve le Secret applicatif, le Secret d’identifiants PostgreSQL embarqué et le volume persistant de la base. Un namespace de builds distinct est aussi conservé. Une réinstallation peut retrouver les données ; désinstaller ne réinitialise pas la base. Examiner [NOTES.txt](templates/NOTES.txt) et les objets réellement restants avant une suppression volontaire des ressources conservées.
+La désinstallation conserve le Secret applicatif, le Secret d’identifiants PostgreSQL embarqué et le volume persistant de la base. En mode CNPG, elle conserve aussi le Cluster si `database.cnpg.keepCluster=true` (défaut). Un namespace de builds distinct est aussi conservé. Une réinstallation peut retrouver les données ; désinstaller ne réinitialise pas la base. Examiner [NOTES.txt](templates/NOTES.txt) et les objets réellement restants avant une suppression volontaire des ressources conservées.
 
 ### Exploitation et diagnostic
 

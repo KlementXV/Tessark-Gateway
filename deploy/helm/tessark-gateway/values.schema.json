@@ -463,6 +463,74 @@
             },
             "storageClassName": {
               "type": "string"
+            },
+            "imageName": {
+              "type": "string"
+            },
+            "keepCluster": {
+              "type": "boolean"
+            },
+            "resources": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            },
+            "affinity": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enablePodAntiAffinity": {
+                  "type": "boolean"
+                },
+                "podAntiAffinityType": {
+                  "type": "string",
+                  "enum": [
+                    "preferred",
+                    "required"
+                  ]
+                },
+                "topologyKey": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "nodeSelector": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "tolerations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "parameters": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         },
@@ -503,6 +571,11 @@
               ]
             }
           }
+        },
+        "waitForReadySeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
         }
       },
       "allOf": [

@@ -104,19 +104,29 @@ data.
   Retrieve it with:
     kubectl -n {{ .Release.Namespace }} get secret {{ include "tessark-gateway.secretName" . }} -o jsonpath='{.data.GATEWAY_SECRET_KEY}' | base64 -d
 
-Objects that survive `helm uninstall` (decision D8 — see docs/plan-kubernetes-helm.md):
+{{- if eq .Values.database.mode "cnpg" }}
+
+CloudNativePG manages Cluster {{ include "tessark-gateway.fullname" . }}:
+  primary service: {{ include "tessark-gateway.fullname" . }}-rw
+  application credentials: Secret {{ include "tessark-gateway.cnpgSecretName" . }}
+  kubectl -n {{ .Release.Namespace }} get cluster {{ include "tessark-gateway.fullname" . }}
+  Migrations wait for database connectivity before starting (up to {{ .Values.database.waitForReadySeconds | default 600 }} seconds).
+  Changing database.mode does not migrate existing data. Configure backups separately.
+{{- end }}
+
+Objects that survive `helm uninstall`:
   - Secret {{ include "tessark-gateway.secretName" . }} (AUTH_SECRET, GATEWAY_SECRET_KEY, ...)
 {{- if eq .Values.database.mode "embedded" }}
   - Secret {{ include "tessark-gateway.embeddedDbSecretName" . }} (embedded Postgres credentials)
   - PersistentVolumeClaim data-{{ include "tessark-gateway.embeddedDbName" . }}-0 (embedded Postgres data)
 {{- end }}
-A re-install into the same namespace picks these back up: existing users, registries and
-credentials all come back. This is intentional — "start clean" does not mean "reinstall". To
-actually start clean, delete them explicitly:
-  kubectl -n {{ .Release.Namespace }} delete secret {{ include "tessark-gateway.secretName" . }}{{ if eq .Values.database.mode "embedded" }} {{ include "tessark-gateway.embeddedDbSecretName" . }}{{ end }}
-{{- if eq .Values.database.mode "embedded" }}
-  kubectl -n {{ .Release.Namespace }} delete pvc data-{{ include "tessark-gateway.embeddedDbName" . }}-0
+{{- if and (eq .Values.database.mode "cnpg") (dig "keepCluster" true .Values.database.cnpg) }}
+  - CloudNativePG Cluster {{ include "tessark-gateway.fullname" . }} and its operator-owned resources
 {{- end }}
+A re-install into the same namespace picks these back up: existing users, registries and
+credentials remain usable when the corresponding database is preserved. Do not delete the
+application encryption key while retaining its database. Review the database, retained
+resources and backups together before any deliberate reset.
 
 Scheduled builds beta:
   Build and publish deploy/build-runner, set builds.runnerImage to its digest, then enable

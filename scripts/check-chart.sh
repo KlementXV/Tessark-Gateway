@@ -38,3 +38,4 @@ if helm template tessark-ci "$chart" --set builds.enabled=true \
 fi
 
 echo 'Helm passed: embedded, CNPG, external, builds and invalid activation guards.'
+node scripts/test-chart.mjs

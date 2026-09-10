@@ -90,6 +90,8 @@ To build and run the production web server locally, use `npm run build` followed
 
 Moving an empty project to another cluster changes its placement and configuration; it does not copy images. Use transfers for content delivery.
 
+For an operator-managed PostgreSQL cluster, enable `database.mode: cnpg` in Helm. The chart creates the cluster when CloudNativePG is already installed; see [CNPG configuration](deploy/helm/tessark-gateway/README.md#optional-cloudnativepg-cluster).
+
 ### Runtime configuration
 
 [`.env.example`](.env.example) documents the configuration variables and [the configuration schema](src/lib/config.ts) defines defaults and validation. Local Next.js and Prisma commands read `.env.local`. Containers receive settings at runtime through environment variables and Kubernetes Secrets/ConfigMaps. Configuration read through the application schema also supports `<NAME>_FILE`; a configured file takes precedence over the direct variable.
@@ -237,6 +239,8 @@ Pour construire et lancer le serveur web de production localement, utiliser `npm
 5. Créer un transfert, obtenir l’approbation si nécessaire, puis consulter le résultat de chaque destination. Chacune utilise son propre Job `skopeo`, indépendant des autres. Pour une source issue d’un projet Harbor connu, le digest est figé à la demande.
 
 Déplacer un projet vide vers un autre cluster modifie son emplacement et sa configuration ; cela ne copie pas les images. Utiliser les transferts pour livrer du contenu.
+
+Pour un cluster PostgreSQL géré par un opérateur, activer `database.mode: cnpg` dans Helm. Le chart crée le cluster si CloudNativePG est déjà installé ; voir [la configuration CNPG](deploy/helm/tessark-gateway/README.md#cluster-cloudnativepg-optionnel).
 
 ### Configuration d’exécution
 

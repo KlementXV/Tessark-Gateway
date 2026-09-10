@@ -2,7 +2,7 @@ apiVersion: v2
 name: tessark-gateway
 description: Portail Next.js pilotant un ou plusieurs Harbor (clusters, projets, robots, rétention, réplication, mirroring d'images upstream via skopeo).
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "0.1.0"
 kubeVersion: ">=1.27.0-0"
 maintainers:

@@ -13,7 +13,7 @@
 | Code and configuration | Prisma generation, ESLint, TypeScript, translations, environment example, Harbor surface/matrix, production dependency audit (high/critical) |
 | Tests, Node 22 and 24 | Application unit tests, real local TLS handshakes, Python build-runner tests |
 | PostgreSQL | PostgreSQL 17 service, all migrations in a temporary schema, cross-connection locks and durable cleanup |
-| Helm | Lint, embedded/CNPG/external rendering, build configuration and rejection of invalid activation |
+| Helm | Lint, embedded/CNPG/external rendering, CNPG configuration/credentials, migration wait/retry behavior, build configuration and rejection of invalid activation |
 | Image | Linux AMD64 Docker build, migrations, idempotent seed, password preservation, readiness, login page, API authentication boundary and Swagger |
 | Publish | Download the tested image, verify its image ID, then push it to GHCR |
 
@@ -106,7 +106,7 @@ Real Harbor conformance and installation into a live Kubernetes cluster are sepa
 | Code et configuration | Génération Prisma, ESLint, TypeScript, traductions, exemple d’environnement, surface/matrice Harbor, audit des dépendances de production (sévérité haute/critique) |
 | Tests, Node 22 et 24 | Tests applicatifs, véritables connexions TLS locales, tests Python du runner |
 | PostgreSQL | Service PostgreSQL 17, toutes les migrations dans un schéma temporaire, verrous entre connexions et nettoyage durable |
-| Helm | Lint, rendu embedded/CNPG/external, configuration des builds et refus des activations invalides |
+| Helm | Lint, rendu embedded/CNPG/external, configuration/identifiants CNPG, attente des migrations, configuration des builds et refus des activations invalides |
 | Image | Build Docker Linux AMD64, migrations, seed idempotent, conservation du mot de passe, readiness, page de connexion, protection API et Swagger |
 | Publication | Téléchargement de l’image testée, vérification de son identifiant, puis push vers GHCR |
 
