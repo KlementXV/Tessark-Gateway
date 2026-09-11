@@ -10,12 +10,28 @@ import {
   setClusterIdentity,
 } from "@/lib/clusters/identity"
 import { saveMemberAcrossCluster } from "@/lib/clusters/project-members"
+import type { HarborUnknownUserReason } from "@/lib/registries/harbor"
 import { loadProjectForAccess, requireManager } from "@/lib/projects/access"
 import { prisma } from "@/lib/prisma"
 import { memberAddInputSchema } from "@/lib/projects/schema"
 import { notify } from "@/lib/notifications/service"
 
 type Params = { params: Promise<{ id: string }> }
+
+// "Unknown account" used to cover three situations with three different fixes. Each Harbor
+// now says which one it is (src/lib/clusters/directory.ts, recoverUnknownUser).
+function unknownAccountMessage(harborUsername: string, reason: HarborUnknownUserReason | null): string {
+  switch (reason) {
+    case "absent-from-directory":
+      return `The cluster's LDAP directory has no account "${harborUsername}" — check the identifier: it must match the attribute Harbor searches on (ldap_uid).`
+    case "not-yet-signed-in":
+      return `No Harbor in the cluster knows "${harborUsername}" yet: they sign in to Harbor through OIDC, and Harbor only creates the account at that first sign-in. Ask them to sign in to Harbor once, then grant access again.`
+    case "no-local-account":
+      return `No Harbor in the cluster has a local account "${harborUsername}" — create it on Harbor before granting access.`
+    default:
+      return `No Harbor in the cluster knows the account "${harborUsername}" — it has to exist there (or in the directory) before it can be granted access.`
+  }
+}
 
 export async function POST(request: Request, { params }: Params) {
   const { id } = await params
@@ -99,7 +115,7 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json(
       {
         error: summary.unknownUserEverywhere
-          ? `No Harbor in the cluster knows the account "${harborUsername}" — it has to exist there (or in the directory) before it can be granted access.`
+          ? unknownAccountMessage(harborUsername, summary.unknownUserReason ?? null)
           : `No Harbor in the cluster accepted the membership — ${detail}`,
       },
       { status: 502 }

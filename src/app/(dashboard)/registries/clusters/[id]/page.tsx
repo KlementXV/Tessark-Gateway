@@ -1,19 +1,25 @@
 import type { CSSProperties } from "react"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { Boxes, IdCard, Network, Pencil, Server } from "lucide-react"
+import { BookUser, Boxes, IdCard, Network, Pencil, Server } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 
+import { auth } from "@/auth"
+import { Role } from "@/generated/prisma/client"
+import { hasRole } from "@/lib/auth/guard"
+import { ClusterDirectoryConfigDialog } from "@/components/clusters/cluster-directory-config-dialog"
 import { PageBreadcrumb } from "@/components/layout/breadcrumb-context"
 import { PageHeader, SubHeader } from "@/components/layout/page-header"
 import { ClusterFormDialog } from "@/components/clusters/cluster-form-dialog"
 import { ClusterIdentitiesDialog } from "@/components/clusters/cluster-identities-dialog"
+import { ClusterDirectoryPanel } from "@/components/clusters/cluster-directory-panel"
 import { ClusterMeshPanel } from "@/components/clusters/cluster-mesh-panel"
 import { RegistryCard } from "@/components/registries/registry-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MetricGrid } from "@/components/ui/metric-grid"
 import { getClusterDetail } from "@/lib/clusters/detail"
+import { getClusterDirectoryView } from "@/lib/clusters/directory-view"
 import { getClusterReplication } from "@/lib/clusters/replication-view"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -44,7 +50,11 @@ export default async function ClusterDetailPage({ params }: { params: Promise<{ 
   const { cluster, members, projectCount, unmappedMembers } = detail
   // Read after the cluster exists, not alongside: an unreachable member costs a Harbor
   // timeout, and paying it to render a 404 would be the slowest way to say "no such cluster".
-  const mesh = await getClusterReplication(id)
+  const [mesh, directory, session] = await Promise.all([
+    getClusterReplication(id),
+    getClusterDirectoryView(id),
+    auth(),
+  ])
 
   return (
     <>
@@ -145,6 +155,28 @@ export default async function ClusterDetailPage({ params }: { params: Promise<{ 
       </section>
 
       {mesh && <ClusterMeshPanel cluster={mesh} />}
+
+      {directory && (
+        <ClusterDirectoryPanel
+          view={directory}
+          action={
+            // Writing a directory configuration decides who can sign in to every Harbor of the
+            // cluster: SUPERADMIN, on top of the ADMIN the section already requires.
+            hasRole(session, Role.SUPERADMIN) ? (
+              <ClusterDirectoryConfigDialog
+                clusterId={cluster.id}
+                clusterName={cluster.name}
+                trigger={
+                  <Button variant="outline" size="sm">
+                    <BookUser />
+                    {t("directoryConfig.trigger")}
+                  </Button>
+                }
+              />
+            ) : undefined
+          }
+        />
+      )}
     </>
   )
 }

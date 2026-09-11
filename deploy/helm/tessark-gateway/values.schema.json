@@ -28,6 +28,14 @@
             "IfNotPresent",
             "Never"
           ]
+        },
+        "registry": {
+          "type": "string",
+          "pattern": "^([a-zA-Z0-9.-]+(:[0-9]+)?)?$"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^(sha256:[a-f0-9]{64})?$"
         }
       }
     },
@@ -69,8 +77,56 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 65535
+        },
+        "targetPort": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "nodePort": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "clusterIP": {
+          "type": "string"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "externalTrafficPolicy": {
+          "type": "string",
+          "enum": [
+            "",
+            "Cluster",
+            "Local"
+          ]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ClusterIP"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "nodePort": {
+                "const": 0
+              },
+              "externalTrafficPolicy": {
+                "const": ""
+              }
+            }
+          }
+        }
+      ]
     },
     "ingress": {
       "type": "object",
@@ -118,12 +174,37 @@
                       ]
                     }
                   }
-                }
+                },
+                "minItems": 1
+              }
+            }
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "hosts": {
+                "minItems": 1
               }
             }
           }
         }
-      }
+      ]
     },
     "existingSecret": {
       "type": "string"
@@ -184,6 +265,132 @@
         "sessionRefreshSeconds": {
           "type": "integer",
           "minimum": 0
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "embedded",
+            "external"
+          ]
+        },
+        "dex": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string",
+              "minLength": 1
+            },
+            "imagePullPolicy": {
+              "type": "string",
+              "enum": [
+                "Always",
+                "IfNotPresent",
+                "Never"
+              ]
+            },
+            "imagePullSecrets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "replicaCount": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "issuer": {
+              "type": "string"
+            },
+            "ingressTls": {
+              "type": "array"
+            },
+            "clientId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "clientSecret": {
+              "type": "string"
+            },
+            "connectors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "config": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "env": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "existingSecret": {
+              "type": "string"
+            },
+            "caConfigMap": {
+              "type": "string"
+            },
+            "extraConfig": {
+              "type": "object"
+            },
+            "createCrdRbac": {
+              "type": "boolean"
+            },
+            "service": {
+              "type": "object",
+              "properties": {
+                "port": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 65535
+                }
+              }
+            },
+            "resources": {
+              "type": "object"
+            },
+            "podSecurityContext": {
+              "type": "object"
+            },
+            "securityContext": {
+              "type": "object"
+            },
+            "nodeSelector": {
+              "type": "object"
+            },
+            "tolerations": {
+              "type": "array"
+            },
+            "affinity": {
+              "type": "object"
+            }
+          }
         }
       }
     },
@@ -249,32 +456,6 @@
             "idp"
           ]
         }
-      },
-      "if": {
-        "properties": {
-          "enabled": {
-            "const": true
-          }
-        },
-        "required": [
-          "enabled"
-        ]
-      },
-      "then": {
-        "properties": {
-          "issuer": {
-            "type": "string",
-            "minLength": 1
-          },
-          "clientId": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "required": [
-          "issuer",
-          "clientId"
-        ]
       }
     },
     "seedSources": {
@@ -413,6 +594,13 @@
         },
         "serviceAccount": {
           "type": "string"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
@@ -447,6 +635,21 @@
             },
             "storageClassName": {
               "type": "string"
+            },
+            "imagePullSecrets": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "imagePullPolicy": {
+              "type": "string",
+              "enum": [
+                "Always",
+                "IfNotPresent",
+                "Never"
+              ]
             }
           }
         },
@@ -530,6 +733,13 @@
               "type": "object",
               "additionalProperties": {
                 "type": "string"
+              }
+            },
+            "imagePullSecrets": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
               }
             }
           }
@@ -767,6 +977,117 @@
           }
         }
       }
+    },
+    "global": {
+      "type": "object",
+      "properties": {
+        "imageRegistry": {
+          "type": "string",
+          "pattern": "^([a-zA-Z0-9.-]+(:[0-9]+)?)?$"
+        },
+        "imageRepositoryPrefix": {
+          "type": "string",
+          "pattern": "^([a-z0-9]+(?:[._/-][a-z0-9]+)*)?$"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "imageRepositoryPrefix": {
+                "minLength": 1
+              }
+            },
+            "required": [
+              "imageRepositoryPrefix"
+            ]
+          },
+          "then": {
+            "properties": {
+              "imageRegistry": {
+                "minLength": 1
+              }
+            },
+            "required": [
+              "imageRegistry"
+            ]
+          }
+        }
+      ]
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "oidc": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          },
+          "identity": {
+            "properties": {
+              "mode": {
+                "const": "external"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        "required": [
+          "oidc",
+          "identity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "oidc": {
+            "properties": {
+              "issuer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "clientId": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "issuer",
+              "clientId"
+            ]
+          }
+        }
+      }
+    }
+  ]
 }

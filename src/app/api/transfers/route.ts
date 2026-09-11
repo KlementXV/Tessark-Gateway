@@ -13,6 +13,8 @@ import {
   type TransferRequestBatchInput,
 } from "@/lib/transfers/schema"
 import { TransferValidationError, validateTransferRequest } from "@/lib/transfers/validate"
+import { expandAllTags } from "@/lib/transfers/all-tags"
+import { MAX_TRANSFER_TAGS } from "@/lib/transfers/repository-tags"
 import { notify } from "@/lib/notifications/service"
 
 // Creation lives here rather than under a project: a request can land in several destinations
@@ -39,6 +41,10 @@ export async function POST(request: Request) {
   const parsed = transferRequestCreateInputSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  }
+
+  if (parsed.data.allTags) {
+    return createBatch({ ...parsed.data, images: [{ repo: parsed.data.repo, tag: parsed.data.tag }] }, session)
   }
 
   let validated
@@ -126,15 +132,42 @@ async function createBatch(body: unknown, session: Session) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
   const input: TransferRequestBatchInput = parsed.data
-  const jobDefault = (await getEnterpriseCa()).jobDefault
-  // A single image posted through this shape is not a batch: grouping one row under a heading
-  // would only add a disclosure triangle to click.
-  const batchId = input.images.length > 1 ? crypto.randomUUID() : null
-
   const started: { image: string; id: string; pending: boolean }[] = []
   const failed: { image: string; error: string }[] = []
+  let images: (TransferRequestBatchInput["images"][number] & { pinnedDigest?: string })[] = input.images
+  if (input.allTags) {
+    images = []
+    const seen = new Set<string>()
+    for (const image of input.images) {
+      const source = resolveImageSource(input, image)!
+      const key = JSON.stringify([source, image.repo, image.tag])
+      if (seen.has(key)) continue
+      seen.add(key)
+      try {
+        const expanded = await expandAllTags({ ...source, repo: image.repo, tag: image.tag,
+          allTags: true, targets: input.targets, useCustomCa: input.useCustomCa }, session)
+        for (const entry of expanded) {
+          const duplicate = images.find(existing => existing.repo === entry.repo && existing.tag === entry.tag &&
+            existing.sourceId === entry.sourceId && existing.sourceRegistryId === entry.sourceRegistryId &&
+            existing.sourceProjectName === entry.sourceProjectName)
+          if (duplicate && duplicate.pinnedDigest !== entry.pinnedDigest) {
+            return NextResponse.json({ error: "A source tag changed between artifact selections; no transfers were created. Retry the request." }, { status: 409 })
+          }
+          if (!duplicate) images.push(entry)
+        }
+      } catch (error) {
+        if (!(error instanceof TransferValidationError)) throw error
+        failed.push({ image: `${image.repo}:${image.tag}`, error: error.message })
+      }
+      if (images.length > MAX_TRANSFER_TAGS) {
+        return NextResponse.json({ error: `All-tags batches are limited to ${MAX_TRANSFER_TAGS} tags; no transfers were created.` }, { status: 400 })
+      }
+    }
+  }
+  const jobDefault = (await getEnterpriseCa()).jobDefault
+  const batchId = images.length > 1 ? crypto.randomUUID() : null
 
-  for (const image of input.images) {
+  for (const image of images) {
     const source = resolveImageSource(input, image)
     const label = `${image.repo}:${image.tag}`
     if (!source) {
@@ -156,6 +189,7 @@ async function createBatch(body: unknown, session: Session) {
           targets: input.targets,
         },
         session,
+        { pinnedDigest: image.pinnedDigest },
       )
 
       const created = await prisma.transferRequest.create({

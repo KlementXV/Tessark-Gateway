@@ -142,3 +142,34 @@ test("a port in a host is not read as a tag", () => {
     [["etcd", "latest"]],
   )
 })
+
+test("OCI Helm chart references retain version case and normalize build metadata", () => {
+  const parsed = parseImageList("oci://harbor-dmz.local:8443/apps/mychart:1.2.3-rc.1+Build.7", onHub)
+  assert.deepEqual(parsed.invalid, [])
+  assert.equal(parsed.images[0].sourceKey, DMZ.key)
+  assert.equal(parsed.images[0].sourceProject, "apps")
+  assert.equal(parsed.images[0].repo, "mychart")
+  assert.equal(parsed.images[0].tag, "1.2.3-rc.1_Build.7")
+})
+
+test("OCI charts need a version and still enforce approved hosts and projects", () => {
+  const parsed = parseImageList([
+    "oci://harbor-dmz.local:8443/apps/mychart",
+    "oci://harbor-dmz.local:8443/apps/mychart:latest",
+    "oci://evil.example/charts/mychart:1.0.0",
+    "oci://harbor-dmz.local:8443/private/mychart:1.0.0",
+  ].join("\n"), onHub)
+  assert.deepEqual(parsed.images, [])
+  assert.deepEqual(parsed.invalid.map(item => item.reason), ["syntax", "syntax", "unknownHost", "unknownProject"])
+})
+
+test("mixed image and chart lists deduplicate equivalent OCI tags and preserve image tag case", () => {
+  const parsed = parseImageList([
+    "nginx:ReleaseA",
+    "oci://harbor-dmz.local:8443/apps/chart:1.0.0+Build",
+    "harbor-dmz.local:8443/apps/chart:1.0.0_Build",
+  ].join("\n"), onHub)
+  assert.equal(parsed.images[0].tag, "ReleaseA")
+  assert.equal(parsed.images.length, 2)
+  assert.equal(parsed.duplicates.length, 1)
+})

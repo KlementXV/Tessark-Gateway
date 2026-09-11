@@ -11,6 +11,7 @@ import { SectionTabs } from "@/components/layout/section-tabs"
 import { settingsTabsFor } from "@/components/settings/settings-tabs"
 import { getConfig } from "@/lib/config"
 import { getUserProfile } from "@/lib/users/profile"
+import { APP_VERSION } from "@/lib/version"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("nav")
@@ -79,6 +80,7 @@ export default async function SettingsPage() {
           </section>
         </div>
       </div>
+      <p className="px-4 pt-6 text-xs text-muted-foreground lg:px-6">Tessark Gateway · v{APP_VERSION}</p>
     </>
   )
 }

@@ -113,6 +113,7 @@ export function RequestTransferDialog({
   // One line, one image — "library/nginx:1.27", tag optional. A single line behaves exactly as
   // the two fields it replaces did; a pasted list is the same request repeated.
   const [imageList, setImageList] = React.useState("")
+  const [allTags, setAllTags] = React.useState(false)
   // Every source the requester may name, flattened to the one shape the parser needs. A line
   // carrying a host is matched against this list, which is what keeps the host on the line from
   // being a registry nobody approved: an unknown one refuses the line.
@@ -195,6 +196,7 @@ export function RequestTransferDialog({
 
   function reset() {
     setImageList("")
+    setAllTags(false)
     setSourceProject("")
     setSelected(initialSelection)
     setUseCustomCa(enterpriseCaJobDefault)
@@ -256,6 +258,7 @@ export function RequestTransferDialog({
                 }),
           })),
           useCustomCa,
+          allTags,
           targets: selectedIds.map((id) => {
             const destination = byId.get(id)!
             const targetRepo = selected[id]?.trim() || null
@@ -403,7 +406,11 @@ export function RequestTransferDialog({
                 placeholder={t("imagesPlaceholder")}
                 className="font-mono text-sm"
               />
-              <p className="text-xs text-muted-foreground">{t("imagesHint")}</p>
+              <p className="text-xs text-muted-foreground">{t(allTags ? "allTagsHint" : "imagesHint")}</p>
+              <div className="flex items-center gap-2">
+                <Switch id="transfer-all-tags" checked={allTags} onCheckedChange={setAllTags} disabled={submitting} />
+                <Label htmlFor="transfer-all-tags">{t("allTags")}</Label>
+              </div>
 
               {parsed.duplicates.length > 0 && (
                 <p className="text-xs text-destructive">

@@ -12,6 +12,8 @@ import { z } from "zod"
 
 import { apiTokenCreateInputSchema } from "@/lib/api-tokens/schema"
 import {
+  clusterDirectoryApplyInputSchema,
+  clusterDirectoryConfigInputSchema,
   clusterIdentityInputSchema,
   clusterInputSchema,
   clusterMemberInputSchema,
@@ -136,8 +138,39 @@ export const ROUTES: RouteSpec[] = [
     method: "GET",
     path: "/clusters/{id}/directory",
     tags: ["clusters"],
-    summary: "Search the cluster's own user directory through one of its Harbors",
+    summary:
+      "Search the cluster's user directory through one of its Harbors — its LDAP directory when configured (exact identifier), otherwise the accounts Harbor already knows; `source` says which",
     minRole: "admin",
+  },
+  {
+    method: "GET",
+    path: "/clusters/{id}/directory-config",
+    tags: ["clusters"],
+    summary: "Read the LDAP settings the Gateway may write onto the cluster's Harbors, and where each Harbor stands — never the bind password",
+    minRole: "superadmin",
+  },
+  {
+    method: "PUT",
+    path: "/clusters/{id}/directory-config",
+    tags: ["clusters"],
+    summary: "Store the cluster's LDAP settings (opt-in via `enabled`); writes nothing to any Harbor",
+    minRole: "superadmin",
+    requestSchema: clusterDirectoryConfigInputSchema,
+  },
+  {
+    method: "DELETE",
+    path: "/clusters/{id}/directory-config",
+    tags: ["clusters"],
+    summary: "Forget the stored LDAP settings; the Harbors keep what they carry",
+    minRole: "superadmin",
+  },
+  {
+    method: "POST",
+    path: "/clusters/{id}/directory-config/apply",
+    tags: ["clusters"],
+    summary: "Write the stored LDAP settings to each Harbor after its own ping succeeds; never queued or replayed (requires confirm: true)",
+    minRole: "superadmin",
+    requestSchema: clusterDirectoryApplyInputSchema,
   },
   {
     method: "POST",
@@ -250,7 +283,8 @@ export const ROUTES: RouteSpec[] = [
     method: "GET",
     path: "/projects/{id}/groups/search",
     tags: ["projects"],
-    summary: "List the directory groups the project's cluster knows (owner, project admin, or ADMIN+)",
+    summary:
+      "List the directory groups the project's cluster knows; with ?q=, also look that exact name up in its LDAP directory (owner, project admin, or ADMIN+)",
     minRole: "user",
   },
   {
@@ -355,7 +389,10 @@ export const ROUTES: RouteSpec[] = [
       "that form answers { started, failed } with an entry per image, since one can be refused " +
       "without the others being. Each entry of `images` may carry its own source " +
       "(`sourceId`, or `sourceRegistryId` + `sourceProjectName`); one that carries none uses the " +
-      "source named at the top level, so a single call can pull from several registries.",
+      "source named at the top level, so a single call can pull from several registries. " +
+      "Set allTags=true to include tags sharing the exact digest of the requested artifact (tag selects the artifact). " +
+      "This also returns { started, failed } for a single repository, with one request per tag. " +
+      "All alias copies are pinned to the selected digest. At most 500 expanded tags per batch; no silent truncation.",
     minRole: "user",
     // A union rather than a second entry on the same method+path, which OpenAPI cannot express
     // and which this document would silently collapse into whichever came last.

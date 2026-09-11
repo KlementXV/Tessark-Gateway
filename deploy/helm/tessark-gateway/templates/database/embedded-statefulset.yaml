@@ -25,6 +25,7 @@ spec:
         {{- include "tessark-gateway.labels" . | nindent 8 }}
         app.kubernetes.io/component: database
     spec:
+      {{- include "tessark-gateway.pullSecrets" (dict "root" . "local" .Values.database.embedded.imagePullSecrets) | nindent 6 }}
       securityContext:
         runAsNonRoot: true
         fsGroup: 999
@@ -32,7 +33,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: {{ .Values.database.embedded.image }}
+          image: {{ include "tessark-gateway.imageRef" (dict "root" . "image" .Values.database.embedded.image) | quote }}
+          imagePullPolicy: {{ .Values.database.embedded.imagePullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

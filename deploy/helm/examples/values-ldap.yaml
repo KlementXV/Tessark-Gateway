@@ -1,0 +1,84 @@
+# Sign-in against an LDAP/AD directory through the Dex this chart deploys
+# (identity.mode=embedded — docs/authentication/README.md). Combine with the values of your
+# installation:  helm upgrade --install gateway deploy/helm/tessark-gateway -f values.yaml -f values-ldap.yaml
+#
+# Harbor's own LDAP settings are configured separately — on each Harbor, or from a cluster's page
+# (Directory → Configure directory, SUPERADMIN, opt-in).
+
+auth:
+  url: https://gateway.client.example
+
+ingress:
+  enabled: true
+  hosts:
+    - host: gateway.client.example
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: gateway-tls
+      hosts:
+        - gateway.client.example
+
+oidc:
+  enabled: true
+  displayName: Company directory
+  # "groups" is required as soon as roleMapping is set: without it Dex emits no groups claim and
+  # the chart refuses to render.
+  scopes: "openid profile email groups"
+  roleClaim: groups
+  roleMapping:
+    tessark-admins: ADMIN
+    tessark-owners: SUPERADMIN
+  # The way back in when Dex or the directory is down. Keep a local SUPERADMIN.
+  allowLocalLogin: true
+
+identity:
+  mode: embedded
+  dex:
+    # Empty issuer: https://gateway.client.example/dex, routed by the Gateway's own Ingress.
+    issuer: ""
+    # Rendered into Dex's Secret; or set existingSecret to a Secret carrying LDAP_BIND_PW and
+    # GATEWAY_CLIENT_SECRET.
+    env:
+      LDAP_BIND_PW: change-me
+    # A ConfigMap in the release namespace with the directory's CA, mounted at /etc/dex/ca.
+    caConfigMap: directory-ca
+    connectors:
+      - type: ldap
+        id: ad
+        name: Company directory
+        config:
+          host: dc01.client.local:636
+          rootCA: /etc/dex/ca/ca.crt
+          bindDN: CN=svc-tessark,OU=Services,DC=client,DC=local
+          bindPW: $LDAP_BIND_PW
+          usernamePrompt: Username
+          userSearch:
+            baseDN: OU=Users,DC=client,DC=local
+            filter: "(objectClass=person)"
+            username: sAMAccountName
+            idAttr: objectGUID
+            emailAttr: mail
+            nameAttr: displayName
+            # Must be the attribute Harbor's ldap_uid uses: it becomes the Gateway username.
+            preferredUsernameAttr: sAMAccountName
+          groupSearch:
+            baseDN: OU=Groups,DC=client,DC=local
+            filter: "(objectClass=group)"
+            userMatchers:
+              - userAttr: DN
+                groupAttr: member
+            nameAttr: cn
+      # Mixed: an upstream OIDC provider next to the directory, under the same issuer. Dex shows
+      # one button per connector. Provide PARTNER_CLIENT_ID / PARTNER_CLIENT_SECRET through env.
+      # - type: oidc
+      #   id: partners
+      #   name: Partners
+      #   config:
+      #     issuer: https://login.partner.example
+      #     clientID: $PARTNER_CLIENT_ID
+      #     clientSecret: $PARTNER_CLIENT_SECRET
+      #     redirectURI: https://gateway.client.example/dex/callback
+      #     scopes: [openid, profile, email, groups]
+      #     insecureEnableGroups: true

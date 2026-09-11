@@ -1,0 +1,31 @@
+{{- if include "tessark-gateway.dexEnabled" . }}
+{{/*
+Dex's configuration. A ConfigMap, not a Secret: nothing sensitive is written here — connectors
+reference their secrets as $VARIABLE, expanded by Dex from the environment its Secret provides
+(verified on Dex v2.44.0), and the Gateway's client secret is read through `secretEnv`.
+*/}}
+{{- $authUrl := include "tessark-gateway.authUrl" . }}
+{{- $config := dict
+  "issuer" (include "tessark-gateway.dexIssuer" .)
+  "storage" (dict "type" "kubernetes" "config" (dict "inCluster" true))
+  "web" (dict "http" "0.0.0.0:5556")
+  "telemetry" (dict "http" "0.0.0.0:5558")
+  "enablePasswordDB" false
+  "staticClients" (list (dict
+    "id" .Values.identity.dex.clientId
+    "name" "Tessark Gateway"
+    "secretEnv" "GATEWAY_CLIENT_SECRET"
+    "redirectURIs" (list (printf "%s/api/auth/callback/oidc" (trimSuffix "/" $authUrl)))))
+  "connectors" .Values.identity.dex.connectors
+}}
+{{- $config = merge $config (deepCopy .Values.identity.dex.extraConfig) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tessark-gateway.dexName" . }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+data:
+  config.yaml: |
+    {{- toYaml $config | nindent 4 }}
+{{- end }}

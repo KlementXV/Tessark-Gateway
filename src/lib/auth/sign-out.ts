@@ -3,12 +3,30 @@
 import { signOut } from "next-auth/react"
 
 /**
- * The single sign-out entry point for the UI. Everything routes through /api/auth/
- * federated-logout rather than straight to /login: NextAuth clears the session cookie first,
- * then that route decides — from OIDC_LOGOUT_MODE, which only the server knows — whether the
- * identity provider session ends too. Keeping the decision server-side means no sign-out
- * button has to be told how this instance is configured.
+ * Resolve the destination while the session still carries the provider's ID token, clear
+ * the Gateway session, then navigate. The server decides whether provider logout is enabled.
+ * A failed target lookup must still allow local sign-out.
  */
-export function signOutTo(): Promise<void> {
-  return signOut({ callbackUrl: "/api/auth/federated-logout" })
+export async function signOutTo(): Promise<void> {
+  let destination = "/login"
+  try {
+    const response = await fetch("/api/auth/logout-target", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (response.ok) {
+      const body = await response.json() as { url?: unknown } | null
+      if (typeof body?.url === "string" && body.url) {
+        const url = new URL(body.url, window.location.href)
+        if (url.protocol === "https:" || url.protocol === "http:") destination = url.toString()
+      }
+    }
+  } catch {
+    // Discovery or the target route may be unavailable; the local session still has to end.
+  }
+
+  // Auth.js restricts callback redirects to this origin. The provider URL is resolved by our
+  // server above and must be visited separately, once its session cookie has been cleared.
+  await signOut({ redirect: false, redirectTo: "/login" })
+  window.location.assign(destination)
 }

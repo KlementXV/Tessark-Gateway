@@ -6,6 +6,8 @@ output=$(mktemp -d)
 trap 'rm -rf "$output"' EXIT
 
 helm lint "$chart" --strict
+# Embedded Dex: default install without it, LDAP/OIDC/mixed renders, air-gap rewrite, refusals.
+node --test scripts/test-chart-identity.mjs
 for mode in embedded cnpg external; do
   helm template tessark-ci "$chart" --namespace tessark-ci \
     --api-versions postgresql.cnpg.io/v1/Cluster \

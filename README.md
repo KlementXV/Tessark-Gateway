@@ -1,5 +1,9 @@
 # Tessark Gateway
 
+On-premise / air-gap, private image registries and OCI Helm chart transfers: [deployment guide](docs/on-premise-airgap.md).
+
+[Changelog](CHANGELOG.md) · [Versions et releases](docs/releases.md)
+
 A web portal for managing Harbor registries, projects and image delivery.
 
 Un portail web pour administrer les registres Harbor, les projets et la livraison d’images.
@@ -115,6 +119,7 @@ A notification webhook is optional (`NOTIFICATIONS_WEBHOOK_URL`, format `json`, 
 After installing dependencies and generating Prisma:
 
 ```bash
+npm run version:check
 npm run lint
 npx tsc --noEmit
 npm test
@@ -265,6 +270,7 @@ Un webhook de notification est optionnel (`NOTIFICATIONS_WEBHOOK_URL`, format `j
 Après l’installation des dépendances et la génération de Prisma :
 
 ```bash
+npm run version:check
 npm run lint
 npx tsc --noEmit
 npm test

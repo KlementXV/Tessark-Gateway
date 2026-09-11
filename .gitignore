@@ -39,3 +39,6 @@ next-env.d.ts
 *.[mM][dD]
 *.[mM][dD][xX]
 !README.md
+!CHANGELOG.md
+!/docs/releases.md
+!/docs/on-premise-airgap.md

@@ -44,6 +44,8 @@ export const transferRequestCreateObject = z.object({
   sourceProjectName: harborProjectName.optional(),
   repo: repoField,
   tag: tagField,
+  // Include tags pointing to the exact same digest as the requested artifact.
+  allTags: z.boolean().optional(),
   // Whether the enterprise CA travels with this transfer (see TransferRequest.useCustomCa).
   // Deliberately without a zod default: omitted means "whatever the instance says" — resolved
   // against InstanceSettings.enterpriseCaJobDefault — which is not the same statement as an

@@ -152,7 +152,15 @@ export function parseImageList(
     const reject = (reason: InvalidReason, detail?: string) =>
       invalid.push({ line, text, reason, detail })
 
-    const lowered = text.toLowerCase().replace(/^\/+|\/+$/g, "")
+    // Helm OCI references use an explicit version. Build metadata is stored as `_`
+    // in registry tags; preserve its case (tags, unlike repositories, are case-sensitive).
+    const isChart = text.startsWith("oci://")
+    const reference = isChart ? text.slice(6) : text
+    if (isChart && !/:[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:[+_][0-9A-Za-z.-]+)?$/.test(reference)) {
+      return reject("syntax")
+    }
+    const ref = splitRef(reference)
+    const lowered = `${ref.repo.toLowerCase().replace(/^\/+|\/+$/g, "")}:${isChart ? ref.tag.replace("+", "_") : ref.tag}`
     // A reference may name its own registry. Everything before the first "/" is inspected
     // first, because whether it is a host decides what the rest of the line even means.
     const slash = lowered.indexOf("/")

@@ -48,8 +48,51 @@ import {
   requestHarborScan,
   updateHarborRegistryEndpoint,
 } from "../../src/lib/registries/harbor"
+import {
+  countHarborUsers,
+  getHarborAuthConfig,
+  importLdapUsers,
+  pingHarborLdap,
+  putHarborLdapConfig,
+  searchLdapGroups,
+  searchLdapUsers,
+  type HarborLdapCandidate,
+} from "../../src/lib/registries/harbor"
 import { registryFetch } from "../../src/lib/registries/http"
 import type { RegistryConnection } from "../../src/lib/registries/types"
+import { resolveLdapFixture, type LdapFixture } from "./target"
+
+/** The LDAP fixture, or a skip naming what is missing. */
+function requireLdap(what: string): LdapFixture {
+  const fixture = resolveLdapFixture()
+  if (!fixture) throw new ScenarioUnavailable(`${what} needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID`)
+  return fixture
+}
+
+function fixtureCandidate(fixture: LdapFixture, password = fixture.password): HarborLdapCandidate {
+  return {
+    url: fixture.url,
+    searchDn: fixture.searchDn,
+    searchPassword: password,
+    baseDn: fixture.baseDn,
+    filter: "",
+    uid: fixture.uid,
+    scope: 2,
+    verifyCert: false,
+    groupBaseDn: fixture.groupBaseDn,
+    groupSearchFilter: "",
+    groupAttributeName: "cn",
+    groupMembershipAttribute: "memberof",
+    groupSearchScope: 2,
+  }
+}
+
+/** The Harbor's own directory settings, or a skip when it has none. */
+async function requireConfiguredDirectory(conn: RegistryConnection) {
+  const config = await getHarborAuthConfig(conn)
+  if (!config.ldap.url) throw new ScenarioUnavailable("this Harbor has no LDAP directory configured")
+  return config
+}
 
 export interface ScenarioContext {
   conn: RegistryConnection
@@ -326,6 +369,92 @@ export const SCENARIOS: readonly Scenario[] = [
     },
   },
   {
+    id: "directory/ldap-config-read",
+    capabilityId: "ldap-directory",
+    run: async ({ conn }) => {
+      const config = await getHarborAuthConfig(conn)
+      assert.ok(["db_auth", "ldap_auth", "oidc_auth", "http_auth", "uaa_auth"].includes(config.authMode), `unexpected auth_mode "${config.authMode}"`)
+      // The bind password is write-only in Harbor's API; the whole diagnostic design relies on it.
+      const raw = await (await registryFetch(conn, "/api/v2.0/configurations")).json() as Record<string, unknown>
+      assert.equal("ldap_search_password" in raw, false, "Harbor started returning the LDAP bind password")
+    },
+  },
+  {
+    id: "directory/ldap-user-search-exact",
+    capabilityId: "ldap-directory",
+    run: async ({ conn }) => {
+      const fixture = requireLdap("the exact-match search")
+      await requireConfiguredDirectory(conn)
+      const found = await searchLdapUsers(conn, fixture.knownUid)
+      assert.ok(found.some((user) => user.username === fixture.knownUid), `${fixture.knownUid} is in the directory but was not found`)
+      // Measured on 2.15.0: the match is exact. The pickers tell users so; if Harbor turned it
+      // into a substring search, that sentence would become false.
+      const partial = await searchLdapUsers(conn, fixture.knownUid.slice(0, -1))
+      assert.equal(partial.some((user) => user.username === fixture.knownUid), false, "the directory search became a partial match")
+    },
+  },
+  {
+    id: "directory/ldap-group-search",
+    capabilityId: "ldap-directory",
+    run: async ({ conn }) => {
+      const fixture = requireLdap("the group search")
+      if (!fixture.groupName) throw new ScenarioUnavailable("needs HARBOR_CONFORMANCE_LDAP_GROUP")
+      await requireConfiguredDirectory(conn)
+      const [group] = await searchLdapGroups(conn, { name: fixture.groupName })
+      assert.ok(group, `${fixture.groupName} is in the directory but was not found`)
+      const byDn = await searchLdapGroups(conn, { dn: group.dn })
+      assert.equal(byDn[0]?.name, fixture.groupName)
+      // Measured: an unknown group is a 404 on Harbor, which the client turns into an empty list.
+      assert.deepEqual(await searchLdapGroups(conn, { name: `tessark-conf-nogroup-${Date.now()}` }), [])
+    },
+  },
+  {
+    id: "directory/ldap-import-idempotent",
+    capabilityId: "ldap-directory",
+    run: async ({ conn }) => {
+      const fixture = requireLdap("the import")
+      const config = await requireConfiguredDirectory(conn)
+      if (config.authMode !== "ldap_auth") {
+        throw new ScenarioUnavailable(`import only works on ldap_auth (this Harbor is ${config.authMode})`)
+      }
+      // Leaves the known account imported on this Harbor: an import has no undo short of deleting
+      // the user, and the account is the fixture's, not the campaign's.
+      assert.deepEqual((await importLdapUsers(conn, [fixture.knownUid])).failed, [])
+      assert.deepEqual((await importLdapUsers(conn, [fixture.knownUid])).failed, [], "importing twice must be harmless")
+      const nobody = `tessark-conf-nobody-${Date.now()}`
+      const mixed = await importLdapUsers(conn, [fixture.knownUid, nobody])
+      assert.deepEqual(mixed.imported, [fixture.knownUid], "a refused uid must not take its neighbours down")
+      assert.deepEqual(mixed.failed.map((entry) => entry.uid), [nobody])
+    },
+  },
+  {
+    id: "directory/ldap-ping-candidate",
+    capabilityId: "ldap-config-write",
+    run: async ({ conn }) => {
+      const fixture = requireLdap("the directory ping")
+      assert.equal((await pingHarborLdap(conn, fixtureCandidate(fixture))).success, true, "the fixture directory should bind")
+      const wrong = await pingHarborLdap(conn, fixtureCandidate(fixture, `${fixture.password}-wrong`))
+      assert.equal(wrong.success, false, "a wrong bind password must fail the ping — the write gate relies on it")
+    },
+  },
+  {
+    id: "directory/ldap-config-write",
+    capabilityId: "ldap-config-write",
+    run: async ({ conn }) => {
+      const fixture = requireLdap("the configuration write")
+      if (!fixture.allowWrite) throw new ScenarioUnavailable("writing the target's configuration needs HARBOR_CONFORMANCE_LDAP_WRITE=true")
+      assert.ok((await countHarborUsers(conn)) >= 0)
+      await putHarborLdapConfig(conn, fixtureCandidate(fixture))
+      const config = await getHarborAuthConfig(conn)
+      assert.equal(config.ldap.url, fixture.url)
+      assert.equal(config.ldap.baseDn, fixture.baseDn)
+      assert.equal(config.ldap.uid, fixture.uid)
+      // The password cannot be read back; a search that binds with it is the only proof it landed.
+      const found = await searchLdapUsers(conn, fixture.knownUid)
+      assert.ok(found.some((user) => user.username === fixture.knownUid), "the written bind password does not work")
+    },
+  },
+  {
     id: "members/grant-revoke",
     capabilityId: "project-members",
     run: async ({ conn, scratchProjectId, scratchProjectName }) => {
@@ -391,10 +520,15 @@ export const SCENARIOS: readonly Scenario[] = [
     capabilityId: "project-quota",
     run: async ({ conn, scratchProjectId }) => {
       const oneGigabyte = 1024 * 1024 * 1024
-      await setHarborProjectQuota(conn, scratchProjectId, oneGigabyte)
+      // A quota has an ID of its own. It happens to equal the project's on a fresh Harbor, which
+      // is how passing the project ID here went unnoticed until an instance where they differ
+      // (2026-09-10: project 27, quota 23) answered 404.
+      const before = await getHarborProjectQuota(conn, scratchProjectId)
+      assert.ok(before, "Harbor creates one quota per project")
+      await setHarborProjectQuota(conn, before.id, oneGigabyte)
       const quota = await getHarborProjectQuota(conn, scratchProjectId)
       assert.equal(quota?.hardBytes, oneGigabyte)
-      await setHarborProjectQuota(conn, scratchProjectId, -1)
+      await setHarborProjectQuota(conn, before.id, -1)
     },
   },
   {

@@ -3,8 +3,8 @@
 //   - `credentials`  — username/password checked against the User table. This is the
 //     break-glass path: it stays available even when SSO is on, so an unreachable identity
 //     provider never locks the bootstrapped SUPERADMIN out of their own instance.
-//   - `oidc`         — any OpenID Connect provider, discovered from its issuer (Keycloak is
-//     the reference target). All of its logic lives in src/lib/auth/oidc.ts.
+//   - `oidc`         — Dex, discovered from its issuer (LDAP/AD and/or upstream OIDC
+//     authentication). All of its logic lives in src/lib/auth/oidc.ts.
 //
 // The configuration is built **lazily**. Reading getConfig() at module load would make
 // `next build` require a full environment, which CLAUDE.md §0.1 forbids; NextAuth accepts a

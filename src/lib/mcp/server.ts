@@ -7,9 +7,10 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { getConfig } from "@/lib/config"
 import { registerReadOnlyTools, registerWriteTools } from "@/lib/mcp/tools"
 import type { ToolContext } from "@/lib/mcp/tool-runner"
+import { APP_VERSION } from "@/lib/version"
 
 export function buildMcpServer(ctx: ToolContext): McpServer {
-  const server = new McpServer({ name: "tessark-gateway", version: "1.0.0" })
+  const server = new McpServer({ name: "tessark-gateway", version: APP_VERSION })
   registerReadOnlyTools(server, ctx)
   if (getConfig().mcpWriteToolsEnabled) registerWriteTools(server, ctx)
   return server

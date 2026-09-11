@@ -12,5 +12,6 @@ export const ROLE_RANK: Record<Role, number> = {
 
 /** The most privileged of the given roles, or `fallback` when the list is empty. */
 export function highestRole(roles: Role[], fallback: Role): Role {
-  return roles.reduce((best, role) => (ROLE_RANK[role] > ROLE_RANK[best] ? role : best), fallback)
+  if (roles.length === 0) return fallback
+  return roles.reduce((best, role) => (ROLE_RANK[role] > ROLE_RANK[best] ? role : best))
 }

@@ -9,7 +9,9 @@ import {
   HARBOR_ROLE_PROJECT_ADMIN,
   HarborUnknownUserError,
   removeHarborProjectMember,
+  type HarborUnknownUserReason,
 } from "@/lib/registries/harbor"
+import { recoverUnknownUser } from "./directory"
 import { enqueue, fanOut, parsePayload, type MemberOutcome } from "./fanout"
 import {
   MissingClusterIdentityError,
@@ -79,20 +81,34 @@ export async function applyMemberToMember(
     throw new Error(`Project "${desired.projectName}" does not exist on ${member.registryName} yet`)
   }
 
+  const grant = () =>
+    applyHarborProjectMember(member.conn, harborProjectId, desired.harborUsername, harborRoleId(desired.role))
+
   try {
-    await applyHarborProjectMember(
-      member.conn,
-      harborProjectId,
-      desired.harborUsername,
-      harborRoleId(desired.role)
-    )
+    await grant()
   } catch (err) {
+    if (!(err instanceof HarborUnknownUserError)) throw err
+
+    // Asked of this member, since every Harbor holds its own user table (measured, M3): the
+    // directory account is imported where the directory allows it and the grant retried once;
+    // everywhere else the refusal is qualified, so "unknown user" says whether the account is
+    // missing from the directory or simply has not signed in to an OIDC Harbor yet.
+    const recovery = await recoverUnknownUser(member, desired.harborUsername)
+    if (recovery === "imported") {
+      try {
+        await grant()
+        return
+      } catch (retryErr) {
+        if (!(retryErr instanceof HarborUnknownUserError)) throw retryErr
+      }
+    }
     // Rethrown with the member's name attached: "no user clement" is only actionable once you
     // know which Harbor is missing the account.
-    if (err instanceof HarborUnknownUserError) {
-      throw new HarborUnknownUserError(desired.harborUsername, member.registryName)
-    }
-    throw err
+    throw new HarborUnknownUserError(
+      desired.harborUsername,
+      member.registryName,
+      recovery && recovery !== "imported" ? recovery : undefined
+    )
   }
 }
 
@@ -119,10 +135,18 @@ export interface MemberSyncSummary {
   failures: Array<{ registry: string; error: string }>
   /** True when no Harbor of the cluster knows the account — the grant is Gateway-only. */
   unknownUserEverywhere: boolean
+  /** Why, when every member that refused gave the same reason. */
+  unknownUserReason?: HarborUnknownUserReason | null
 }
 
 function summarize(outcomes: MemberOutcome<void>[]): MemberSyncSummary {
   const failed = outcomes.filter((o) => !o.ok)
+  const unknownUserEverywhere =
+    outcomes.length > 0 && failed.length === outcomes.length &&
+    failed.every((o) => o.reason instanceof HarborUnknownUserError)
+  const reasons = new Set(
+    failed.map((o) => (o.reason instanceof HarborUnknownUserError ? o.reason.reason ?? null : null))
+  )
   return {
     succeeded: outcomes.length - failed.length,
     failed: failed.length,
@@ -130,9 +154,8 @@ function summarize(outcomes: MemberOutcome<void>[]): MemberSyncSummary {
       registry: o.member.registryName,
       error: o.error ?? "Unknown error",
     })),
-    unknownUserEverywhere:
-      outcomes.length > 0 && failed.length === outcomes.length &&
-      failed.every((o) => o.reason instanceof HarborUnknownUserError),
+    unknownUserEverywhere,
+    unknownUserReason: unknownUserEverywhere && reasons.size === 1 ? [...reasons][0] : null,
   }
 }
 

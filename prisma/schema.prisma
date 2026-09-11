@@ -223,6 +223,41 @@ model Cluster {
   registries      Registry[]
   projects        Project[]
   identities      UserClusterIdentity[]
+  directoryConfig ClusterDirectoryConfig?
+}
+
+// The LDAP directory the Gateway may write onto this cluster's Harbors (docs/plan-ldap-sso-local.md,
+// lot 7). By default the Gateway only *reads* what each Harbor carries and compares the members
+// (clusters/directory-view.ts): many operators manage Harbor through their own tooling, and a
+// Gateway writing by default would start a drift war with the first one that does (D10).
+//
+// Writing is therefore opt-in per cluster (`enabled`), SUPERADMIN only, and an explicit gesture:
+// never queued, never replayed by the reconciler. A replay would overwrite a correction an operator
+// made by hand in the meantime and lock their users out again without anybody asking for it (D11).
+model ClusterDirectoryConfig {
+  id                       String   @id @default(cuid())
+  cluster                  Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  clusterId                String   @unique
+  // Off, nothing is ever written to this cluster's Harbors, whatever is stored below.
+  enabled                  Boolean  @default(false)
+  url                      String
+  searchDn                 String   @default("")
+  // The directory service account's password, encrypted by src/lib/crypto.ts like registry
+  // credentials. A class of secret of its own: an enterprise directory account whose compromise
+  // reaches well beyond this application. Never logged, never returned by the API.
+  encryptedSearchPassword  String?
+  baseDn                   String
+  filter                   String   @default("")
+  uid                      String   @default("uid")
+  scope                    Int      @default(2)
+  verifyCert               Boolean  @default(true)
+  groupBaseDn              String   @default("")
+  groupSearchFilter        String   @default("")
+  groupAttributeName       String   @default("cn")
+  groupMembershipAttribute String   @default("memberof")
+  groupSearchScope         Int      @default(2)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 }
 
 // What one Gateway user is called on one cluster's Harbors.
@@ -295,6 +330,12 @@ model Registry {
   // depends on the version reads it live (src/lib/registries/version-cache.ts).
   harborVersion       String?
   harborVersionSeenAt DateTime?
+  // SHA-256 of the LDAP settings the Gateway last wrote to this Harbor — bind password included —
+  // and when (clusters/directory-config.ts). Harbor never returns the password, so this is the
+  // only way to tell a rotation from "nothing changed": identical means no network call at all.
+  // Same pattern as ReplicationLink.appliedFingerprint.
+  ldapAppliedFingerprint String?
+  ldapAppliedAt          DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   cluster             Cluster?           @relation(fields: [clusterId], references: [id], onDelete: SetNull)

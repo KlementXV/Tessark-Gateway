@@ -204,8 +204,8 @@ enum ClusterIdentityMode {
 //   "scheduled"   — the same mesh, driven by `replicationCron` instead of push events.
 //   "none"        — fan out Gateway actions only, leave image content alone.
 model Cluster {
-  id              String                @id @default(cuid())
-  name            String                @unique
+  id              String                  @id @default(cuid())
+  name            String                  @unique
   description     String?
   // The single hostname users pull from, in front of the members — registry.local sitting
   // over registry-fr.local and registry-en.local. Purely the published address: the Gateway
@@ -213,16 +213,51 @@ model Cluster {
   // a mirrored image both have to name one specific Harbor. Stored bare (host[:port], no
   // scheme) because that is the form an image reference takes.
   registryUrl     String?
-  replicationMode String                @default("event_based")
+  replicationMode String                  @default("event_based")
   replicationCron String?
   // Whose directory names this cluster's users. Defaults to GATEWAY, so a single-directory
   // instance behaves exactly as it did before per-cluster identities existed.
-  identityMode    ClusterIdentityMode   @default(GATEWAY)
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
+  identityMode    ClusterIdentityMode     @default(GATEWAY)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
   registries      Registry[]
   projects        Project[]
   identities      UserClusterIdentity[]
+  directoryConfig ClusterDirectoryConfig?
+}
+
+// The LDAP directory the Gateway may write onto this cluster's Harbors (docs/plan-ldap-sso-local.md,
+// lot 7). By default the Gateway only *reads* what each Harbor carries and compares the members
+// (clusters/directory-view.ts): many operators manage Harbor through their own tooling, and a
+// Gateway writing by default would start a drift war with the first one that does (D10).
+//
+// Writing is therefore opt-in per cluster (`enabled`), SUPERADMIN only, and an explicit gesture:
+// never queued, never replayed by the reconciler. A replay would overwrite a correction an operator
+// made by hand in the meantime and lock their users out again without anybody asking for it (D11).
+model ClusterDirectoryConfig {
+  id                       String   @id @default(cuid())
+  cluster                  Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  clusterId                String   @unique
+  // Off, nothing is ever written to this cluster's Harbors, whatever is stored below.
+  enabled                  Boolean  @default(false)
+  url                      String
+  searchDn                 String   @default("")
+  // The directory service account's password, encrypted by src/lib/crypto.ts like registry
+  // credentials. A class of secret of its own: an enterprise directory account whose compromise
+  // reaches well beyond this application. Never logged, never returned by the API.
+  encryptedSearchPassword  String?
+  baseDn                   String
+  filter                   String   @default("")
+  uid                      String   @default("uid")
+  scope                    Int      @default(2)
+  verifyCert               Boolean  @default(true)
+  groupBaseDn              String   @default("")
+  groupSearchFilter        String   @default("")
+  groupAttributeName       String   @default("cn")
+  groupMembershipAttribute String   @default("memberof")
+  groupSearchScope         Int      @default(2)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 }
 
 // What one Gateway user is called on one cluster's Harbors.
@@ -272,45 +307,51 @@ enum RegistryRole {
 // A registry belongs to at most one cluster: membership is what makes it a fan-out target,
 // and letting the same Harbor sit in two meshes would give it conflicting peer sets.
 model Registry {
-  id                  String             @id @default(cuid())
-  name                String
-  baseUrl             String
-  role                RegistryRole       @default(MANAGED)
-  authType            String             @default("none")
-  username            String?
-  encryptedSecret     String?
-  insecureTLS         Boolean            @default(false)
-  description         String?
+  id                     String             @id @default(cuid())
+  name                   String
+  baseUrl                String
+  role                   RegistryRole       @default(MANAGED)
+  authType               String             @default("none")
+  username               String?
+  encryptedSecret        String?
+  insecureTLS            Boolean            @default(false)
+  description            String?
   // Harbor system-level robot provisioned by Gateway on this Harbor (see
   // src/lib/clusters/system-robot.ts). It carries push/pull on every project, and is what
   // the skopeo Job authenticates with when the destination project has no robot of its own.
   // `systemRobotName` is the full name Harbor generated ("robot$tessark-gateway"), never the
   // short one we asked for: the prefix is a Harbor setting.
-  systemRobotName     String?
-  systemRobotId       Int?
-  systemRobotSecret   String?
-  systemRobotSyncedAt DateTime?
+  systemRobotName        String?
+  systemRobotId          Int?
+  systemRobotSecret      String?
+  systemRobotSyncedAt    DateTime?
   // Last Harbor version *observed* on this registry, and when. A cache for display and for the
   // fleet-wide compatibility view — never the source of truth for a decision: an operation that
   // depends on the version reads it live (src/lib/registries/version-cache.ts).
-  harborVersion       String?
-  harborVersionSeenAt DateTime?
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  cluster             Cluster?           @relation(fields: [clusterId], references: [id], onDelete: SetNull)
-  clusterId           String?
-  placements          ProjectPlacement[]
-  robotPlacements     RobotPlacement[]
-  pendingOps          PendingOperation[]
-  outgoingLinks       ReplicationLink[]  @relation("ReplicationSource")
-  incomingLinks       ReplicationLink[]  @relation("ReplicationDest")
-  transferTargets     TransferTarget[]   @relation("TransferDestination")
-  transferSources     TransferRequest[]  @relation("TransferSource")
-  rulesAsSource       TransferRule[]     @relation("RuleSource")
-  rulesAsDestination  TransferRule[]     @relation("RuleDestination")
-  mirrorSources       ScheduledMirror[]  @relation("MirrorSource")
-  mirrorDestinations  ScheduledMirror[]  @relation("MirrorDestination")
-  mirrorPolicies      ScheduledMirror[]  @relation("MirrorPolicyHost")
+  harborVersion          String?
+  harborVersionSeenAt    DateTime?
+  // SHA-256 of the LDAP settings the Gateway last wrote to this Harbor — bind password included —
+  // and when (clusters/directory-config.ts). Harbor never returns the password, so this is the
+  // only way to tell a rotation from "nothing changed": identical means no network call at all.
+  // Same pattern as ReplicationLink.appliedFingerprint.
+  ldapAppliedFingerprint String?
+  ldapAppliedAt          DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  cluster                Cluster?           @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  clusterId              String?
+  placements             ProjectPlacement[]
+  robotPlacements        RobotPlacement[]
+  pendingOps             PendingOperation[]
+  outgoingLinks          ReplicationLink[]  @relation("ReplicationSource")
+  incomingLinks          ReplicationLink[]  @relation("ReplicationDest")
+  transferTargets        TransferTarget[]   @relation("TransferDestination")
+  transferSources        TransferRequest[]  @relation("TransferSource")
+  rulesAsSource          TransferRule[]     @relation("RuleSource")
+  rulesAsDestination     TransferRule[]     @relation("RuleDestination")
+  mirrorSources          ScheduledMirror[]  @relation("MirrorSource")
+  mirrorDestinations     ScheduledMirror[]  @relation("MirrorDestination")
+  mirrorPolicies         ScheduledMirror[]  @relation("MirrorPolicyHost")
 
   @@unique([baseUrl])
 }

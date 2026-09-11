@@ -120,6 +120,8 @@ export type HarborCapabilityId =
   | "project-lifecycle"
   | "project-members"
   | "directory-identity"
+  | "ldap-directory"
+  | "ldap-config-write"
   | "catalog-browse"
   | "artifact-delete"
   | "vulnerability-scan"
@@ -227,6 +229,54 @@ export const HARBOR_CAPABILITIES: readonly HarborCapability[] = Object.freeze([
     fallback: "deny-operation",
   },
   {
+    // The second configuration gate of the code after the SBOM one: whether a directory search
+    // reaches the directory or only the accounts Harbor already holds (clusters/directory.ts).
+    // Decided by the Harbor's configuration rather than its version, and read live.
+    id: "ldap-directory",
+    nameKey: "ldap-directory",
+    since: "2.0",
+    sinceConfidence: "declared",
+    availabilityEvidence: [
+      "spec: /configurations, /ldap/users/search, /ldap/users/import and /ldap/groups/search present in 2.10.0 through 2.15.0",
+      "measured on 2.15.0 (2026-09-10): the LDAP searches answer from the stored ldap_* settings whatever auth_mode is, match exactly, and an empty query returns the whole directory",
+      "measured on 2.15.0 (2026-09-10): import is idempotent on ldap_auth, refuses the whole batch when one uid is unknown, and fails on db_auth and oidc_auth",
+      "measured on 2.15.0 (2026-09-10): an ldap_auth Harbor creates a directory account when it is granted a project, and registers a group from a DN",
+    ],
+    exceptions: [],
+    operations: [
+      "GET /configurations",
+      "GET /ldap/users/search",
+      "GET /ldap/groups/search",
+      "POST /ldap/users/import",
+      "POST /usergroups",
+    ],
+    requiredTests: [
+      "directory/ldap-config-read",
+      "directory/ldap-user-search-exact",
+      "directory/ldap-group-search",
+      "directory/ldap-import-idempotent",
+    ],
+    degradationKey: "ldap-directory",
+    // Without it the search still runs, against Harbor's own accounts, and says so.
+    fallback: "allow-with-warning",
+  },
+  {
+    id: "ldap-config-write",
+    nameKey: "ldap-config-write",
+    since: "2.0",
+    sinceConfidence: "declared",
+    availabilityEvidence: [
+      "spec: PUT /configurations and POST /ldap/ping present in 2.10.0 through 2.15.0; ldap_search_password is write-only (absent from ConfigurationsResponse)",
+      "measured on 2.15.0 (2026-09-10): /ldap/ping tests only the body it is sent and never reuses the stored password",
+      "measured on 2.15.0 (2026-09-10): auth_mode is refused as soon as a non-admin account exists, and the whole PUT with it",
+    ],
+    exceptions: [],
+    operations: ["POST /ldap/ping", "PUT /configurations", "GET /users"],
+    requiredTests: ["directory/ldap-ping-candidate", "directory/ldap-config-write"],
+    degradationKey: "ldap-config-write",
+    fallback: "deny-operation",
+  },
+  {
     id: "catalog-browse",
     nameKey: "catalog-browse",
     since: "2.0",
@@ -237,6 +287,7 @@ export const HARBOR_CAPABILITIES: readonly HarborCapability[] = Object.freeze([
       "GET /projects/{}/repositories",
       "GET /projects/{}/repositories/{}/artifacts",
       "GET /projects/{}/repositories/{}/artifacts/{}",
+      "GET /projects/{}/repositories/{}/artifacts/{}/tags",
       "GET /search",
     ],
     requiredTests: ["catalog/list-repositories", "catalog/list-artifacts"],

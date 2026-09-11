@@ -8,6 +8,39 @@ const cronSchema = z
   .string()
   .regex(/^\s*(\S+\s+){5}\S+\s*$/, "Expected a 6-field cron (seconds first), e.g. 0 0 * * * *")
 
+// The LDAP settings the Gateway may write onto a cluster's Harbors (clusters/directory-config.ts).
+// Harbor's scope encoding: 0 = base, 1 = one level, 2 = subtree.
+const ldapScopeSchema = z.coerce.number().int().min(0).max(2)
+
+export const clusterDirectoryConfigInputSchema = z.object({
+  enabled: z.boolean().default(false),
+  url: z
+    .string()
+    .trim()
+    .max(512)
+    .regex(/^ldaps?:\/\/[^\s/]+\/?$/i, "Expected ldap://host[:port] or ldaps://host[:port]"),
+  searchDn: z.string().trim().max(1024).default(""),
+  // Omitted keeps the stored password; an empty string clears it.
+  searchPassword: z.string().max(1024).optional(),
+  baseDn: z.string().trim().min(1).max(1024),
+  filter: z.string().trim().max(1024).default(""),
+  uid: z.string().trim().min(1).max(128).default("uid"),
+  scope: ldapScopeSchema.default(2),
+  verifyCert: z.boolean().default(true),
+  groupBaseDn: z.string().trim().max(1024).default(""),
+  groupSearchFilter: z.string().trim().max(1024).default(""),
+  groupAttributeName: z.string().trim().max(128).default("cn"),
+  groupMembershipAttribute: z.string().trim().max(128).default("memberof"),
+  groupSearchScope: ldapScopeSchema.default(2),
+})
+
+export const clusterDirectoryApplyInputSchema = z.object({
+  force: z.boolean().default(false),
+  setAuthMode: z.boolean().default(false),
+  // The dialog names the blast radius before sending this; an API caller has to say it too.
+  confirm: z.literal(true),
+})
+
 export const clusterInputSchema = z
   .object({
     name: z.string().min(2).max(100),

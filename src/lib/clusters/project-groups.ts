@@ -7,6 +7,7 @@ import {
   HarborUnknownGroupError,
   removeHarborProjectMember,
 } from "@/lib/registries/harbor"
+import { registerDirectoryGroup } from "./directory"
 import { enqueue, fanOut, parsePayload, type MemberOutcome } from "./fanout"
 import { loadClusterMembers, type ClusterMember } from "./members"
 import { harborRoleId, type MemberSyncSummary } from "./project-members"
@@ -55,21 +56,29 @@ export async function applyGroupToMember(
     throw new Error(`Project "${desired.projectName}" does not exist on ${member.registryName} yet`)
   }
 
+  const grant = () =>
+    applyHarborProjectGroupMember(member.conn, harborProjectId, desired.groupName, harborRoleId(desired.role))
+
   try {
-    await applyHarborProjectGroupMember(
-      member.conn,
-      harborProjectId,
-      desired.groupName,
-      harborRoleId(desired.role)
-    )
+    await grant()
   } catch (err) {
+    if (!(err instanceof HarborUnknownGroupError)) throw err
+
+    // A group this Harbor has not registered yet is registered from the DN its own directory
+    // returns for that exact name, then granted — never from a DN somebody typed. Only an
+    // LDAP-backed Harbor accepts that; elsewhere the refusal stands.
+    if (await registerDirectoryGroup(member, desired.groupName)) {
+      try {
+        await grant()
+        return
+      } catch (retryErr) {
+        if (!(retryErr instanceof HarborUnknownGroupError)) throw retryErr
+      }
+    }
     // Rethrown with the member's name: "no group devs" is only actionable once you know which
     // Harbor is missing it — a directory is per-cluster, but a group can be registered on one
     // member and not yet on another.
-    if (err instanceof HarborUnknownGroupError) {
-      throw new HarborUnknownGroupError(desired.groupName, member.registryName)
-    }
-    throw err
+    throw new HarborUnknownGroupError(desired.groupName, member.registryName)
   }
 }
 

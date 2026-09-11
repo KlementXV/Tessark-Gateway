@@ -173,7 +173,7 @@ const envSchema = z.object({
   OIDC_ENABLED: boolField(false),
   // Base URL of the provider; everything else (authorization, token, jwks, end_session
   // endpoints) is read from <issuer>/.well-known/openid-configuration at request time. For
-  // Keycloak: https://keycloak.example.com/realms/<realm>.
+  // Dex example: https://sso.example.com.
   OIDC_ISSUER: z.string().url("must be a valid URL").optional(),
   OIDC_CLIENT_ID: z.string().min(1).optional(),
   OIDC_CLIENT_SECRET: z.string().min(1).optional(),
@@ -194,7 +194,7 @@ const envSchema = z.object({
   // still required. Meant to be switched on for the duration of a migration, then off again.
   OIDC_LINK_BY_EMAIL: boolField(false),
   // Claim carrying the group/role memberships, as a dotted path into the token claims —
-  // "groups" for a Keycloak group mapper, "realm_access.roles" for realm roles.
+  // "groups" for Dex; upstream claim mapping belongs in the Dex connector.
   OIDC_ROLE_CLAIM: z.string().min(1).default("groups"),
   // { "<claim value>": "<Role>" }. Highest matching role wins. A value that is not a Role
   // fails startup rather than silently degrading to OIDC_DEFAULT_ROLE.
@@ -297,6 +297,25 @@ const runtimeSchema = envSchema.superRefine((v, ctx) => {
     }
     if (!v.OIDC_CLIENT_ID) {
       ctx.addIssue({ code: "custom", path: ["OIDC_CLIENT_ID"], message: "is required when OIDC_ENABLED is true" })
+    }
+    // Failure mode n°1 of a Dex integration (docs/plan-ldap-sso-local.md, lot 5). Dex only puts
+    // a `groups` claim in the token when the `groups` scope is requested. Without it nothing
+    // fails: every sign-in simply matches no mapping, and since the mapping is re-applied at
+    // each sign-in, every user — administrators included — is quietly moved to
+    // OIDC_DEFAULT_ROLE. A claim at another path is left alone: which scope carries it is the
+    // provider's business, and guessing would refuse valid configurations.
+    const scopes = v.OIDC_SCOPES.split(/\s+/).filter(Boolean)
+    if (
+      Object.keys(v.OIDC_ROLE_MAPPING).length > 0 &&
+      v.OIDC_ROLE_CLAIM === "groups" &&
+      !scopes.includes("groups")
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["OIDC_SCOPES"],
+        message:
+          'must include "groups" when OIDC_ROLE_MAPPING is set and OIDC_ROLE_CLAIM is "groups" — without that scope Dex emits no groups claim and every user silently falls back to OIDC_DEFAULT_ROLE',
+      })
     }
   } else if (!v.OIDC_ALLOW_LOCAL_LOGIN) {
     ctx.addIssue({
@@ -413,6 +432,15 @@ function formatIssues(error: z.ZodError): string {
   return error.issues
     .map((issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`)
     .join("\n")
+}
+
+/**
+ * The problems a set of raw variables would stop the pod on, one line per variable and never a
+ * value. For tests and tooling: the application itself only ever goes through getConfig().
+ */
+export function configIssues(values: Partial<Record<string, string | undefined>>): string[] {
+  const parsed = runtimeSchema.safeParse(values)
+  return parsed.success ? [] : formatIssues(parsed.error).split("\n")
 }
 
 let cached: Config | null = null

@@ -1,0 +1,43 @@
+{{/*
+An issuer on a host of its own (identity.dex.issuer set to another hostname) gets its own Ingress,
+with the Gateway Ingress's class and annotations. An issuer on a Gateway host is routed by
+templates/ingress.yaml instead — one hostname, one certificate.
+*/}}
+{{- $route := include "tessark-gateway.dexRoute" . | fromJson }}
+{{- if and .Values.ingress.enabled $route.host }}
+{{- $onGatewayHost := false }}
+{{- range .Values.ingress.hosts }}
+{{- if eq .host $route.host }}{{- $onGatewayHost = true }}{{- end }}
+{{- end }}
+{{- if not $onGatewayHost }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "tessark-gateway.dexName" . }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.identity.dex.ingressTls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - host: {{ $route.host | quote }}
+      http:
+        paths:
+          - path: {{ $route.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "tessark-gateway.dexName" . }}
+                port:
+                  number: {{ .Values.identity.dex.service.port }}
+{{- end }}
+{{- end }}

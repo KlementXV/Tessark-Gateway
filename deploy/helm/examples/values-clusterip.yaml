@@ -1,0 +1,12 @@
+# Overlay after values-onprem.yaml. Cluster-only access; adapt auth.url to your access path.
+ingress:
+  enabled: false
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  nodePort: 0
+  externalTrafficPolicy: ""
+auth:
+  url: http://localhost:8080
+# kubectl -n tessark port-forward svc/gateway-tessark-gateway 8080:80

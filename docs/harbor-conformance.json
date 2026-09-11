@@ -2017,6 +2017,1988 @@
         "target": "http://localhost:1998",
         "authMode": "basic"
       }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-directory",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/ldap-config-read",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-user-search-exact",
+          "result": "skipped",
+          "symptom": "the exact-match search needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        },
+        {
+          "id": "directory/ldap-group-search",
+          "result": "skipped",
+          "symptom": "the group search needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        },
+        {
+          "id": "directory/ldap-import-idempotent",
+          "result": "skipped",
+          "symptom": "the import needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-config-write",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/ldap-ping-candidate",
+          "result": "skipped",
+          "symptom": "the directory ping needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        },
+        {
+          "id": "directory/ldap-config-write",
+          "result": "skipped",
+          "symptom": "the configuration write needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "10e07a29765ac22f",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "skipped",
+          "symptom": "no peer configured — set HARBOR_CONFORMANCE_PEER_URL to a Harbor the *target* can reach"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "skipped",
+          "symptom": "no endpoint and policy pair"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "skipped",
+          "symptom": "replication/policy-apply did not run"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-39-317Z",
+      "finishedAt": "2026-09-10T23:08:39.318Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-directory",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/ldap-config-read",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-user-search-exact",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-group-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-import-idempotent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-config-write",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/ldap-ping-candidate",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-config-write",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "10e07a29765ac22f",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "fail",
+          "symptom": "Harbor quota update failed (404)"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "skipped",
+          "symptom": "no peer configured — set HARBOR_CONFORMANCE_PEER_URL to a Harbor the *target* can reach"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "skipped",
+          "symptom": "no endpoint and policy pair"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "skipped",
+          "symptom": "replication/policy-apply did not run"
+        }
+      ],
+      "runId": "run-2026-09-10T23-08-52-026Z",
+      "finishedAt": "2026-09-10T23:08:52.026Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-directory",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/ldap-config-read",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-user-search-exact",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-group-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-import-idempotent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-config-write",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "directory/ldap-ping-candidate",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-config-write",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "10e07a29765ac22f",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "fail",
+          "symptom": "Harbor quota update failed (404)"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "skipped",
+          "symptom": "no peer configured — set HARBOR_CONFORMANCE_PEER_URL to a Harbor the *target* can reach"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "skipped",
+          "symptom": "no endpoint and policy pair"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "c4fed1b0cc68",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "skipped",
+          "symptom": "replication/policy-apply did not run"
+        }
+      ],
+      "runId": "run-2026-09-10T23-10-29-962Z",
+      "finishedAt": "2026-09-10T23:10:29.962Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-directory",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "directory/ldap-config-read",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-user-search-exact",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-group-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-import-idempotent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-config-write",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "directory/ldap-ping-candidate",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-config-write",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "10e07a29765ac22f",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "skipped",
+          "symptom": "no peer configured — set HARBOR_CONFORMANCE_PEER_URL to a Harbor the *target* can reach"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "skipped",
+          "symptom": "no endpoint and policy pair"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "skipped",
+          "symptom": "replication/policy-apply did not run"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-39-512Z",
+      "finishedAt": "2026-09-10T23:13:39.512Z",
+      "context": {
+        "target": "http://192.168.1.162:1999",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "harbor-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "identity/ping",
+          "result": "pass"
+        },
+        {
+          "id": "identity/version-read",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-lifecycle",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "projects/create-delete",
+          "result": "pass"
+        },
+        {
+          "id": "projects/metadata-merge",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-members",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "members/grant-revoke",
+          "result": "pass"
+        },
+        {
+          "id": "members/unknown-user",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "directory-identity",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "directory/user-search",
+          "result": "pass"
+        },
+        {
+          "id": "directory/group-list",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-directory",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "directory/ldap-config-read",
+          "result": "pass"
+        },
+        {
+          "id": "directory/ldap-user-search-exact",
+          "result": "skipped",
+          "symptom": "the exact-match search needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        },
+        {
+          "id": "directory/ldap-group-search",
+          "result": "skipped",
+          "symptom": "the group search needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        },
+        {
+          "id": "directory/ldap-import-idempotent",
+          "result": "skipped",
+          "symptom": "the import needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "ldap-config-write",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "directory/ldap-ping-candidate",
+          "result": "skipped",
+          "symptom": "the directory ping needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        },
+        {
+          "id": "directory/ldap-config-write",
+          "result": "skipped",
+          "symptom": "the configuration write needs HARBOR_CONFORMANCE_LDAP_URL and _KNOWN_UID"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "catalog-browse",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "10e07a29765ac22f",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "catalog/list-repositories",
+          "result": "pass"
+        },
+        {
+          "id": "catalog/list-artifacts",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "artifact-delete",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "artifacts/delete-by-digest",
+          "result": "pass"
+        },
+        {
+          "id": "artifacts/delete-removes-all-tags",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "vulnerability-scan",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "scan/trigger",
+          "result": "pass"
+        },
+        {
+          "id": "scan/read-report",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "sbom-generation",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "sbom/enable",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/metadata-merge-preserves-siblings",
+          "result": "pass"
+        },
+        {
+          "id": "sbom/read-format",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "cosign-signature",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "signature/detect-present",
+          "result": "skipped",
+          "symptom": "no signed artifact available — cosign is not installed on this host"
+        },
+        {
+          "id": "signature/detect-absent",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "system-robot",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "robot/create",
+          "result": "pass"
+        },
+        {
+          "id": "robot/effective-permissions",
+          "result": "pass"
+        },
+        {
+          "id": "robot/delete",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "retention-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "retention/create",
+          "result": "pass"
+        },
+        {
+          "id": "retention/update",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "project-quota",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "2d0b65760f29b393",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "quota/read",
+          "result": "pass"
+        },
+        {
+          "id": "quota/set",
+          "result": "pass"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-endpoint",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "replication/endpoint-upsert",
+          "result": "skipped",
+          "symptom": "no peer configured — set HARBOR_CONFORMANCE_PEER_URL to a Harbor the *target* can reach"
+        },
+        {
+          "id": "replication/ping-from-source",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/endpoint-in-use-refuses-delete",
+          "result": "skipped",
+          "symptom": "no endpoint and policy pair"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
+    },
+    {
+      "capabilityId": "replication-policy",
+      "harborVersion": "v2.15.0-e2b5ce92",
+      "gatewayCommit": "unversioned",
+      "surfaceDigest": "358ccc9409ba63c8",
+      "suiteRevision": "50d4f4d5ecac",
+      "tests": [
+        {
+          "id": "replication/policy-apply",
+          "result": "skipped",
+          "symptom": "replication/endpoint-upsert did not run"
+        },
+        {
+          "id": "replication/disable-before-delete",
+          "result": "skipped",
+          "symptom": "replication/policy-apply did not run"
+        }
+      ],
+      "runId": "run-2026-09-10T23-13-51-840Z",
+      "finishedAt": "2026-09-10T23:13:51.840Z",
+      "context": {
+        "target": "http://192.168.1.162:1998",
+        "authMode": "basic"
+      }
     }
   ]
 }

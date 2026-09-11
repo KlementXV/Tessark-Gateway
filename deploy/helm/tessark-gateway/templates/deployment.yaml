@@ -18,15 +18,15 @@ spec:
         # this on its own, so without this annotation a `helm upgrade` that only touches
         # config.* would have no effect until the pods happen to restart some other way.
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if and (include "tessark-gateway.dexEnabled" .) (not .Values.identity.dex.existingSecret) }}
+        checksum/dex-secret: {{ include (print $.Template.BasePath "/dex/secret.yaml") . | sha256sum }}
+        {{- end }}
         {{- if not .Values.existingSecret }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- end }}
     spec:
       serviceAccountName: {{ include "tessark-gateway.serviceAccountName" . }}
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "tessark-gateway.pullSecrets" (dict "root" . "local" .Values.imagePullSecrets) | nindent 6 }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- if eq .Values.database.mode "embedded" }}
@@ -35,7 +35,7 @@ spec:
       # Pods spin through crash-loop backoff for the same wait.
       initContainers:
         - name: wait-for-postgres
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ include "tessark-gateway.appImage" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - sh
@@ -49,24 +49,32 @@ spec:
       {{- end }}
       containers:
         - name: gateway
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ include "tessark-gateway.appImage" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           ports:
             - name: http
-              containerPort: 3000
+              containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
           envFrom:
             - configMapRef:
                 name: {{ include "tessark-gateway.fullname" . }}
             - secretRef:
                 name: {{ include "tessark-gateway.secretName" . }}
-          {{- $extraEnv := include "tessark-gateway.databaseEnv" . }}
-          {{- if $extraEnv }}
           env:
-            {{- $extraEnv | nindent 12 }}
-          {{- end }}
+            - name: PORT
+              value: {{ .Values.service.targetPort | quote }}
+            {{- include "tessark-gateway.databaseEnv" . | nindent 12 }}
+            {{- if include "tessark-gateway.dexEnabled" . }}
+            # The client secret at the embedded Dex, read from Dex's own Secret so that it exists
+            # in exactly one place (templates/dex/secret.yaml). Overrides envFrom.
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tessark-gateway.dexSecretName" . }}
+                  key: GATEWAY_CLIENT_SECRET
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /api/health

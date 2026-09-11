@@ -68,6 +68,8 @@ type ValidatedSource = Pick<
 export async function validateTransferRequest(
   input: TransferRequestCreateInput,
   session: Session,
+  // Trusted, server-resolved artifact snapshot. Never populated from the public schema.
+  options: { pinnedDigest?: string } = {},
 ): Promise<ValidatedTransfer> {
   const source = input.sourceId
     ? await validateUpstreamSource(input.sourceId, input.repo, input.tag)
@@ -77,6 +79,7 @@ export async function validateTransferRequest(
         input.repo,
         input.tag,
         session,
+        !options.pinnedDigest,
       )
 
   // Naming the same destination twice means the same thing as naming it once. Deduped on the
@@ -112,7 +115,7 @@ export async function validateTransferRequest(
   await validateDeliveryDestinations(targets)
   const requiresApproval = await validateAgainstRules(source, targets)
 
-  return { ...source, tag: input.tag, targets, requiresApproval }
+  return { ...source, sourceDigest: options.pinnedDigest ?? source.sourceDigest, tag: input.tag, targets, requiresApproval }
 }
 
 // An upstream host an admin approved, narrowed by its own repository allowlist. The host is
@@ -170,6 +173,7 @@ async function validateRegistrySource(
   rawRepo: string,
   tag: string,
   session: Session,
+  resolveDigest = true,
 ): Promise<ValidatedSource> {
   const registry = await prisma.registry.findUnique({ where: { id: registryId } })
   if (!registry) throw new TransferValidationError("That registry no longer exists.", 404)
@@ -214,14 +218,14 @@ async function validateRegistrySource(
   // tag. Resolve the tag directly: listing the first 100 artifacts misses older images.
   let sourceDigest: string | null = null
   try {
-    sourceDigest = await getHarborArtifactDigest(conn, projectName, repo, tag)
+    if (resolveDigest) sourceDigest = await getHarborArtifactDigest(conn, projectName, repo, tag)
   } catch (err) {
     throw new TransferValidationError(
       `${registry.name} could not be asked for ${projectName}/${repo} (${err instanceof Error ? err.message : "unknown error"}).`,
       502,
     )
   }
-  if (!sourceDigest) {
+  if (resolveDigest && !sourceDigest) {
     throw new TransferValidationError(
       `${projectName}/${repo}:${tag} was not found on ${registry.name}.`,
       404,

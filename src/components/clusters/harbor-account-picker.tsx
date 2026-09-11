@@ -14,11 +14,28 @@ import { cn } from "@/lib/utils"
 // the whole point of a mapping is to name an account in a directory the Gateway does not
 // hold. Free text is deliberately impossible here — a typed name is how an unrelated account
 // with the same spelling ends up receiving somebody's access.
+//
+// Two sources can answer and they are not worth the same, so the list says which one did: the
+// LDAP directory itself (people who never signed in to Harbor included, exact identifier only)
+// or just the accounts Harbor already holds. See src/lib/clusters/directory.ts.
 
 export interface HarborAccount {
-  userId: number
+  /** Null for a directory account this Harbor has not created yet. */
+  userId: number | null
   username: string
+  realname?: string | null
+  source?: "directory" | "harbor"
+  knownToHarbor?: boolean
 }
+
+interface SearchState {
+  source: "directory" | "harbor" | null
+  reason: string | null
+  provisioning: string | null
+  directoryError: string | null
+}
+
+const NO_STATE: SearchState = { source: null, reason: null, provisioning: null, directoryError: null }
 
 const SEARCH_DEBOUNCE_MS = 250
 
@@ -43,6 +60,7 @@ export function HarborAccountPicker({
   const [query, setQuery] = React.useState("")
   const [results, setResults] = React.useState<HarborAccount[]>([])
   const [truncated, setTruncated] = React.useState(false)
+  const [state, setState] = React.useState<SearchState>(NO_STATE)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [activeIndex, setActiveIndex] = React.useState(0)
@@ -65,11 +83,18 @@ export function HarborAccountPicker({
         if (!active) return
         if (!res.ok) {
           setResults([])
+          setState(NO_STATE)
           setError(typeof body?.error === "string" ? body.error : t("searchFailed"))
           return
         }
         setResults(body.users ?? [])
         setTruncated(Boolean(body.truncated))
+        setState({
+          source: body.source ?? null,
+          reason: body.capability?.reason ?? null,
+          provisioning: body.capability?.provisioning ?? null,
+          directoryError: typeof body.directoryError === "string" ? body.directoryError : null,
+        })
         setActiveIndex(0)
       } catch {
         if (active) {
@@ -108,6 +133,18 @@ export function HarborAccountPicker({
       if (account) select(account)
     }
   }
+
+  // Which source answered, said in words: an empty list from Harbor's own table and an empty
+  // list from the directory mean very different things.
+  const sourceNote = state.directoryError
+    ? t("directoryFailed", { error: state.directoryError })
+    : state.source === "directory"
+      ? t("sourceDirectory")
+      : state.source === "harbor"
+        ? state.reason === "configuration-unreadable"
+          ? t("sourceUnreadable")
+          : t("sourceHarbor")
+        : null
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -163,29 +200,57 @@ export function HarborAccountPicker({
 
           {results.map((account, index) => (
             <button
-              key={account.userId}
+              key={account.username}
               type="button"
               role="option"
               aria-selected={account.username === value}
               onMouseEnter={() => setActiveIndex(index)}
               onClick={() => select(account)}
               className={cn(
-                "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden",
+                "flex w-full items-start gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden",
                 index === activeIndex && "bg-accent text-accent-foreground"
               )}
             >
               <Check
                 className={cn(
-                  "size-4 shrink-0",
+                  "mt-0.5 size-4 shrink-0",
                   account.username === value ? "opacity-100" : "opacity-0"
                 )}
               />
-              <span className="truncate">{account.username}</span>
+              <span className="flex min-w-0 flex-col">
+                <span className="truncate">
+                  {account.username}
+                  {account.realname && (
+                    <span className="text-muted-foreground"> · {account.realname}</span>
+                  )}
+                </span>
+                {account.knownToHarbor === false && (
+                  <span
+                    className={cn(
+                      "text-xs",
+                      state.provisioning === "first-sign-in" ? "text-warning" : "text-muted-foreground"
+                    )}
+                  >
+                    {state.provisioning === "first-sign-in" ? t("firstSignInRequired") : t("notInHarborYet")}
+                  </span>
+                )}
+              </span>
             </button>
           ))}
 
           {truncated && <p className="px-2 py-2 text-xs text-muted-foreground">{t("moreMatch")}</p>}
         </div>
+
+        {sourceNote && (
+          <p
+            className={cn(
+              "border-t px-3 py-2 text-xs",
+              state.directoryError ? "text-warning" : "text-muted-foreground"
+            )}
+          >
+            {sourceNote}
+          </p>
+        )}
       </PopoverContent>
     </Popover>
   )

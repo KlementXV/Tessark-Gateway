@@ -1,5 +1,9 @@
 # Kubernetes deployment · Déploiement Kubernetes
 
+On-premise / air-gap, private image registries and OCI Helm chart transfers: [deployment guide](../../../docs/on-premise-airgap.md).
+
+Release notes and application/chart versioning: [changelog](../../../CHANGELOG.md) · [guide des releases](../../../docs/releases.md).
+
 **[English](#english) · [Français](#français)** · [Tessark Gateway](../../../README.md)
 
 ## English

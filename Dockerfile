@@ -27,6 +27,8 @@ RUN npx prisma generate
 # `npm run build`'s own "prebuild" hook (scripts/copy-swagger-ui.mjs) vendors Swagger UI's
 # static assets into public/ before Next builds — see package.json.
 RUN npm run build
+# Assemble the final tree before COPY so removed build dependencies never enter a layer.
+RUN node scripts/prepare-runtime.mjs
 
 # ---------------------------------------------------------------------------------------------
 FROM node:${NODE_VERSION}-alpine AS runner
@@ -56,16 +58,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=gateway:gateway /app/.next/standalone ./
 COPY --from=builder --chown=gateway:gateway /app/.next/static ./.next/static
 
-# --- The migration/seed tooling: the Helm chart's job-migrate/job-seed hooks (lot 10) run
-# `prisma migrate deploy` / `prisma db seed` from this *same* image with an overridden command.
-# Neither `prisma` nor `tsx` is part of the Next.js dependency graph, so standalone tracing
-# never picks them up — copied in explicitly, full node_modules (including devDependencies),
-# alongside (not instead of) the standalone server above.
-COPY --from=builder /app/node_modules ./node_modules
+# Migration and seed tooling was added to standalone by prepare-runtime.mjs. Do not copy
+# the builder's full node_modules here: it contains compilers, linters and unused UI packages.
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/src/generated/prisma ./src/generated/prisma
 
 USER 1001
 EXPOSE 3000

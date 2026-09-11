@@ -5,10 +5,21 @@
 nameOverride: ""
 fullnameOverride: ""
 
+global:
+  # Replace the registry of every chart-controlled image; retain its repository path.
+  imageRegistry: ""
+  # Optional extra path under that registry (for example platform/mirror).
+  imageRepositoryPrefix: ""
+  # Existing Secret names, present in every namespace running these workloads.
+  imagePullSecrets: []
+
 image:
   # No registry exists yet (decision D4 in docs/plan-kubernetes-helm.md) — build locally with
   # scripts/build-and-import.sh and import into every node that will run a pod.
+  registry: ""
   repository: tessark-gateway
+  # Takes precedence over tag.
+  digest: ""
   # Defaults to .Chart.AppVersion when empty. Never "latest": with pullPolicy IfNotPresent a
   # reused tag never gets re-pulled/re-imported.
   tag: ""
@@ -58,7 +69,15 @@ podDisruptionBudget:
 service:
   type: ClusterIP
   port: 80
+  # Also sets the Gateway listener (PORT) and named container port.
   targetPort: 3000
+  # NodePort / LoadBalancer only; 0 lets Kubernetes allocate the port.
+  nodePort: 0
+  # Empty lets Kubernetes allocate a service IP. A fixed IP must belong to its service CIDR.
+  clusterIP: ""
+  annotations: {}
+  # NodePort / LoadBalancer only: Cluster or Local. Empty uses Kubernetes' default.
+  externalTrafficPolicy: ""
 
 # Generic on purpose (decision D6): no default ingress class or controller-specific
 # annotation. auth.url is derived from the first host below when left empty.
@@ -151,9 +170,8 @@ auth:
   # every request, at the cost of one query per request.
   sessionRefreshSeconds: 300
 
-# Single sign-on through any OpenID Connect provider — Keycloak is the reference target, and
-# can itself broker LDAP/AD/SAML/Google. Off by default: an install that sets nothing here
-# behaves exactly as it did before this existed.
+# All SSO goes through Dex, with LDAP and/or upstream OIDC connectors — see identity.* below
+# for where that Dex comes from. Off by default: local accounts only, and no Dex deployed.
 #
 # On the provider side, the redirect URI to declare is:
 #   <auth.url>/api/auth/callback/oidc
@@ -161,12 +179,13 @@ auth:
 oidc:
   enabled: false
   # Everything but the issuer is discovered from <issuer>/.well-known/openid-configuration.
-  # Keycloak: https://keycloak.example.com/realms/<realm>
+  # Dex example: https://sso.example.com
   issuer: ""
   clientId: ""
   # Rendered into the chart's Secret, never the ConfigMap. With existingSecret set, supply
   # OIDC_CLIENT_SECRET there instead and leave this empty.
   clientSecret: ""
+  # With Dex group-based roles, use "openid profile email groups".
   scopes: "openid profile email"
   # Names the provider on the sign-in button and wherever the UI says who owns an account.
   displayName: "Single sign-on"
@@ -182,8 +201,7 @@ oidc:
   # turns a compromised mailbox into account takeover. A verified email is required even when
   # this is on. Meant to be switched on for a migration, then off again.
   linkByEmail: false
-  # Dotted path to the claim carrying group membership — "groups" for a Keycloak group
-  # mapper, "realm_access.roles" for realm roles.
+  # Dotted path to the claim carrying group membership — "groups" for Dex.
   roleClaim: groups
   # Claim value -> Role (SUPERADMIN | ADMIN | USER). Highest match wins; anything unmapped
   # falls back to defaultRole. Re-applied at every sign-in, so the provider owns the role and
@@ -197,6 +215,79 @@ oidc:
   # again needs no prompt. "idp" also ends the provider session, signing the user out of
   # every application in the realm.
   logoutMode: local
+
+# The Dex that oidc.* signs in through, when oidc.enabled=true (docs/plan-ldap-sso-local.md, lot 6).
+# Ignored while oidc.enabled=false: local accounts need no identity component at all.
+#
+#   embedded (default) — this chart deploys Dex. oidc.issuer, oidc.clientId and
+#                        oidc.clientSecret are then derived and must be left empty: the Gateway
+#                        is registered in Dex by the chart, redirect URI included.
+#   external           — oidc.issuer points at a Dex you run yourself. Nothing is deployed.
+#
+# Never an upstream identity provider directly: LDAP/AD and upstream OIDC providers are Dex
+# *connectors*, so the Gateway always sees the same issuer and the same claims.
+identity:
+  mode: embedded
+  dex:
+    # Rewritten by global.imageRegistry / global.imageRepositoryPrefix like every other image.
+    image: ghcr.io/dexidp/dex:v2.44.0
+    imagePullPolicy: IfNotPresent
+    # Secret names, merged with global.imagePullSecrets.
+    imagePullSecrets: []
+    replicaCount: 1
+    # Public issuer URL. It must resolve to the same Dex from browsers AND from the Gateway pods:
+    # Dex has no separate internal URL. Empty = <auth.url>/dex, served through the Gateway's own
+    # Ingress host (one hostname, one certificate). Another host gets an Ingress of its own.
+    issuer: ""
+    # TLS entries for that separate Ingress, same shape as ingress.tls.
+    ingressTls: []
+    clientId: tessark-gateway
+    # Empty = generated at install and preserved at every upgrade (lookup). Rotating it only
+    # takes a new value here: the Gateway reads it from Dex's Secret.
+    clientSecret: ""
+    # Dex connectors — `ldap` and `oidc` only, alone or combined; `saml` is refused (Dex documents
+    # it as unmaintained and likely vulnerable to authentication bypass). Reference secrets as
+    # $VARIABLE and provide the variables through `env` or `existingSecret`. For LDAP, set
+    # preferredUsernameAttr to the attribute Harbor's ldap_uid uses, or Gateway usernames will not
+    # match Harbor accounts. See deploy/helm/examples/values-ldap.yaml.
+    connectors: []
+    # Environment variables for Dex, rendered into its Secret (LDAP_BIND_PW, upstream client
+    # secrets…). Never read by the Gateway.
+    env: {}
+    # Or an existing Secret, used instead of the chart's: its keys become Dex's environment, and it
+    # must carry GATEWAY_CLIENT_SECRET, which the Gateway reads too.
+    existingSecret: ""
+    # ConfigMap holding the CA of the directory or upstream provider, mounted at /etc/dex/ca.
+    caConfigMap: ""
+    # Merged into Dex's configuration (expiry, logger, frontend, oauth2…). issuer, storage, web,
+    # telemetry, staticClients and connectors belong to the chart; staticPasswords and
+    # enablePasswordDB are refused — the recovery account is a local Gateway SUPERADMIN.
+    extraConfig: {}
+    # Dex keeps its state in Kubernetes CRDs and creates them at startup, which needs a
+    # cluster-scoped grant. Set false when the CRDs are installed out of band.
+    createCrdRbac: true
+    service:
+      port: 5556
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1001
+      runAsGroup: 1001
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: ["ALL"]
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
 
 # Upstream sources (mirror targets) created once by the same post-install seed Job as
 # auth.seedUsers — list of { name, host, authType?, username?, secret?, allowedRepos,
@@ -260,6 +351,8 @@ database:
 
   embedded:
     image: postgres:17-alpine
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
     storageSize: 8Gi
     storageClassName: ""
     resources:
@@ -276,6 +369,7 @@ database:
     # Empty preserves the operator/existing cluster image choice. Set a CNPG-compatible
     # image explicitly to control PostgreSQL releases; do not use the vanilla postgres image.
     imageName: ""
+    imagePullSecrets: []
     storageSize: 10Gi
     storageClassName: ""
     # Retain the Cluster (and its operator-owned resources) on Helm uninstall.

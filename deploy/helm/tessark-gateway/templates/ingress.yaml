@@ -4,6 +4,7 @@ annotations pre-filled. Everything comes from values.yaml — a Traefik or nginx
 default here would silently do the wrong thing on any other controller.
 */}}
 {{- if .Values.ingress.enabled }}
+{{- $dexRoute := include "tessark-gateway.dexRoute" . | fromJson }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -27,6 +28,17 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
+          {{- if and $dexRoute.host (eq $dexRoute.host .host) }}
+          # The embedded Dex, on the Gateway's own host: browsers and Gateway pods reach the
+          # issuer at the same URL, which Dex requires (it has no separate internal address).
+          - path: {{ $dexRoute.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "tessark-gateway.dexName" $ }}
+                port:
+                  number: {{ $.Values.identity.dex.service.port }}
+          {{- end }}
           {{- range .paths }}
           - path: {{ .path }}
             pathType: {{ .pathType }}

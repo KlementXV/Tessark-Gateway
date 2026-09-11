@@ -32,7 +32,7 @@ data:
   K8S_NAMESPACE: {{ .Values.config.k8sNamespace | quote }}
   {{- end }}
   K8S_HTTP_TIMEOUT_MS: {{ .Values.config.k8sHttpTimeoutMs | quote }}
-  SKOPEO_IMAGE: {{ .Values.skopeo.image | quote }}
+  SKOPEO_IMAGE: {{ include "tessark-gateway.imageRef" (dict "root" . "image" .Values.skopeo.image) | quote }}
   SKOPEO_JOB_TTL_SECONDS: {{ .Values.skopeo.jobTtlSeconds | quote }}
   SKOPEO_JOB_BACKOFF_LIMIT: {{ .Values.skopeo.jobBackoffLimit | quote }}
   SKOPEO_JOB_ACTIVE_DEADLINE_SECONDS: {{ .Values.skopeo.jobActiveDeadlineSeconds | quote }}
@@ -42,7 +42,7 @@ data:
   SKOPEO_MEMORY_LIMIT: {{ .Values.skopeo.resources.limits.memory | quote }}
   SKOPEO_NODE_SELECTOR: {{ .Values.skopeo.nodeSelector | toJson | quote }}
   SKOPEO_TOLERATIONS: {{ .Values.skopeo.tolerations | toJson | quote }}
-  SKOPEO_IMAGE_PULL_SECRETS: {{ .Values.skopeo.imagePullSecrets | join "," | quote }}
+  SKOPEO_IMAGE_PULL_SECRETS: {{ include "tessark-gateway.pullSecretNames" (dict "root" . "local" .Values.skopeo.imagePullSecrets) | fromJsonArray | join "," | quote }}
   {{- if .Values.skopeo.serviceAccount }}
   SKOPEO_SERVICE_ACCOUNT: {{ .Values.skopeo.serviceAccount | quote }}
   {{- end }}
@@ -59,10 +59,17 @@ data:
   LOGO_MAX_BYTES: {{ .Values.config.logoMaxBytes | quote }}
   AVATAR_MAX_BYTES: {{ .Values.config.avatarMaxBytes | quote }}
   LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  {{- include "tessark-gateway.validateIdentity" . }}
   OIDC_ENABLED: {{ .Values.oidc.enabled | quote }}
   {{- if .Values.oidc.enabled }}
+  {{- if include "tessark-gateway.dexEnabled" . }}
+  {{/* identity.mode=embedded: the issuer and client are the Dex this chart deploys. */}}
+  OIDC_ISSUER: {{ include "tessark-gateway.dexIssuer" . | quote }}
+  OIDC_CLIENT_ID: {{ .Values.identity.dex.clientId | quote }}
+  {{- else }}
   OIDC_ISSUER: {{ .Values.oidc.issuer | quote }}
   OIDC_CLIENT_ID: {{ .Values.oidc.clientId | quote }}
+  {{- end }}
   OIDC_SCOPES: {{ .Values.oidc.scopes | quote }}
   OIDC_DISPLAY_NAME: {{ .Values.oidc.displayName | quote }}
   OIDC_ALLOW_SIGNUP: {{ .Values.oidc.allowSignup | quote }}
@@ -89,7 +96,7 @@ data:
   NOTIFICATIONS_WEBHOOK_TIMEOUT_MS: {{ .Values.notifications.webhookTimeoutMs | quote }}
   NOTIFICATION_RETENTION_DAYS: {{ .Values.notifications.retentionDays | quote }}
   BUILDS_BETA_ENABLED: {{ .Values.builds.enabled | quote }}
-  BUILDS_RUNNER_IMAGE: {{ .Values.builds.runnerImage | quote }}
+  BUILDS_RUNNER_IMAGE: {{ include "tessark-gateway.imageRef" (dict "root" . "image" .Values.builds.runnerImage) | quote }}
   BUILDS_NAMESPACE: {{ default .Release.Namespace .Values.builds.namespace | quote }}
   BUILDS_SERVICE_ACCOUNT: {{ default (printf "%s-build-runner" (include "tessark-gateway.fullname" .)) .Values.builds.serviceAccount | quote }}
   BUILDS_POLL_SECONDS: {{ .Values.builds.pollSeconds | quote }}
@@ -103,4 +110,4 @@ data:
   BUILDS_STORAGE_LIMIT: {{ .Values.builds.storageLimit | quote }}
   BUILDS_NODE_SELECTOR: {{ .Values.builds.nodeSelector | toJson | quote }}
   BUILDS_TOLERATIONS: {{ .Values.builds.tolerations | toJson | quote }}
-  BUILDS_IMAGE_PULL_SECRETS: {{ .Values.builds.imagePullSecrets | toJson | quote }}
+  BUILDS_IMAGE_PULL_SECRETS: {{ include "tessark-gateway.pullSecretRefs" (dict "root" . "local" .Values.builds.imagePullSecrets) | quote }}

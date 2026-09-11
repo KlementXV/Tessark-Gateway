@@ -1,0 +1,99 @@
+{{- if include "tessark-gateway.dexEnabled" . }}
+{{/*
+identity.mode=embedded (docs/plan-ldap-sso-local.md, lot 6). Templated in this chart rather than
+pulled in as the upstream Dex chart, like the embedded PostgreSQL: that is what makes
+global.imageRegistry, global.imageRepositoryPrefix and global.imagePullSecrets apply to Dex as to
+every other component — an air-gapped install must not break on this one image.
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tessark-gateway.dexName" . }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.identity.dex.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tessark-gateway.dexSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tessark-gateway.dexLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/dex/configmap.yaml") . | sha256sum }}
+        {{- if not .Values.identity.dex.existingSecret }}
+        checksum/secret: {{ include (print $.Template.BasePath "/dex/secret.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "tessark-gateway.dexName" . }}
+      {{- include "tessark-gateway.pullSecrets" (dict "root" . "local" .Values.identity.dex.imagePullSecrets) | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.identity.dex.podSecurityContext | nindent 8 }}
+      containers:
+        - name: dex
+          image: {{ include "tessark-gateway.imageRef" (dict "root" . "image" .Values.identity.dex.image) | quote }}
+          imagePullPolicy: {{ .Values.identity.dex.imagePullPolicy }}
+          args: ["dex", "serve", "/etc/dex/cfg/config.yaml"]
+          ports:
+            - name: http
+              containerPort: 5556
+              protocol: TCP
+            - name: telemetry
+              containerPort: 5558
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ include "tessark-gateway.dexSecretName" . }}
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: telemetry
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: telemetry
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          securityContext:
+            {{- toYaml .Values.identity.dex.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.identity.dex.resources | nindent 12 }}
+          volumeMounts:
+            # Not /etc/dex itself: the CA below mounts next to it, never inside a read-only
+            # ConfigMap volume.
+            - name: config
+              mountPath: /etc/dex/cfg
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.identity.dex.caConfigMap }}
+            - name: ca
+              mountPath: /etc/dex/ca
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "tessark-gateway.dexName" . }}
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.identity.dex.caConfigMap }}
+        - name: ca
+          configMap:
+            name: {{ .Values.identity.dex.caConfigMap }}
+        {{- end }}
+      {{- with .Values.identity.dex.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.identity.dex.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.identity.dex.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

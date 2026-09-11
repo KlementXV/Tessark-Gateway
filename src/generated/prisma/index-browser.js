@@ -192,6 +192,27 @@ exports.Prisma.ClusterScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ClusterDirectoryConfigScalarFieldEnum = {
+  id: 'id',
+  clusterId: 'clusterId',
+  enabled: 'enabled',
+  url: 'url',
+  searchDn: 'searchDn',
+  encryptedSearchPassword: 'encryptedSearchPassword',
+  baseDn: 'baseDn',
+  filter: 'filter',
+  uid: 'uid',
+  scope: 'scope',
+  verifyCert: 'verifyCert',
+  groupBaseDn: 'groupBaseDn',
+  groupSearchFilter: 'groupSearchFilter',
+  groupAttributeName: 'groupAttributeName',
+  groupMembershipAttribute: 'groupMembershipAttribute',
+  groupSearchScope: 'groupSearchScope',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.UserClusterIdentityScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -217,6 +238,8 @@ exports.Prisma.RegistryScalarFieldEnum = {
   systemRobotSyncedAt: 'systemRobotSyncedAt',
   harborVersion: 'harborVersion',
   harborVersionSeenAt: 'harborVersionSeenAt',
+  ldapAppliedFingerprint: 'ldapAppliedFingerprint',
+  ldapAppliedAt: 'ldapAppliedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   clusterId: 'clusterId'
@@ -610,6 +633,7 @@ exports.Prisma.ModelName = {
   Notification: 'Notification',
   InstanceSettings: 'InstanceSettings',
   Cluster: 'Cluster',
+  ClusterDirectoryConfig: 'ClusterDirectoryConfig',
   UserClusterIdentity: 'UserClusterIdentity',
   Registry: 'Registry',
   Project: 'Project',

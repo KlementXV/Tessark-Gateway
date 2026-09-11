@@ -9,15 +9,29 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
-// The directory groups the project's cluster knows, fetched once when the list opens and
-// filtered in the browser afterwards: Harbor returns the whole set (there are rarely more than
-// a handful), unlike its user directory, which has to be searched server-side.
+// The directory groups the project's cluster knows. The groups Harbor has registered are
+// fetched once when the list opens and filtered in the browser afterwards (there are rarely more
+// than a handful). When that Harbor has an LDAP directory configured, what is typed is also
+// looked up there by exact name, so a group Harbor has never seen can be picked — its DN comes
+// from the directory, never from this form.
 
 export interface DirectoryGroup {
-  id: number
+  /** Null for a directory group Harbor has not registered yet. */
+  id: number | null
   name: string
-  type: number
+  type: number | null
+  dn?: string | null
+  source?: "directory" | "harbor"
+  /** False when this Harbor cannot take a directory group it has not registered. */
+  grantable?: boolean
 }
+
+interface Listing {
+  source: "directory" | "harbor" | null
+  directoryError: string | null
+}
+
+const SEARCH_DEBOUNCE_MS = 300
 
 export function ProjectGroupPicker({
   id,
@@ -41,6 +55,8 @@ export function ProjectGroupPicker({
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const [groups, setGroups] = React.useState<DirectoryGroup[] | null>(null)
+  const [directoryHits, setDirectoryHits] = React.useState<DirectoryGroup[]>([])
+  const [listing, setListing] = React.useState<Listing>({ source: null, directoryError: null })
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [activeIndex, setActiveIndex] = React.useState(0)
@@ -58,6 +74,7 @@ export function ProjectGroupPicker({
         return
       }
       setGroups(body.groups ?? [])
+      setListing({ source: body.source ?? null, directoryError: body.directoryError ?? null })
     } catch {
       setGroups([])
       setError(t("searchFailed"))
@@ -66,17 +83,52 @@ export function ProjectGroupPicker({
     }
   }, [projectId, t])
 
+  // The directory is only asked once something is typed, and only when this cluster has one:
+  // its lookup is by exact name, so there is nothing to ask it about an empty field.
+  const directoryQuery = open && listing.source === "directory" ? query.trim() : ""
+  React.useEffect(() => {
+    const q = directoryQuery
+    if (!q) return
+    let active = true
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/projects/${projectId}/groups/search?q=${encodeURIComponent(q)}`)
+        const body = await res.json().catch(() => null)
+        if (!active || !res.ok) return
+        setDirectoryHits(
+          ((body.groups ?? []) as DirectoryGroup[]).filter((group) => group.source === "directory")
+        )
+        setListing((current) => ({ ...current, directoryError: body.directoryError ?? null }))
+      } catch {
+        if (active) setDirectoryHits([])
+      }
+    }, SEARCH_DEBOUNCE_MS)
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [directoryQuery, projectId])
+
   const excluded = React.useMemo(
     () => new Set(excludeNames.map((name) => name.toLowerCase())),
     [excludeNames]
   )
-  const candidates = (groups ?? []).filter(
+  const registered = (groups ?? []).filter(
     (group) =>
       !excluded.has(group.name.toLowerCase()) &&
       group.name.toLowerCase().includes(query.trim().toLowerCase())
   )
+  const registeredNames = new Set(registered.map((group) => group.name.toLowerCase()))
+  // Hits from an earlier query are kept in state but only shown while a directory query is live.
+  const candidates = [
+    ...(directoryQuery ? directoryHits : []).filter(
+      (group) => !excluded.has(group.name.toLowerCase()) && !registeredNames.has(group.name.toLowerCase())
+    ),
+    ...registered,
+  ]
 
   function select(group: DirectoryGroup) {
+    if (group.grantable === false) return
     onChange(group.name)
     setOpen(false)
     setQuery("")
@@ -96,6 +148,14 @@ export function ProjectGroupPicker({
       if (group) select(group)
     }
   }
+
+  const sourceNote = listing.directoryError
+    ? t("directoryFailed", { error: listing.directoryError })
+    : listing.source === "directory"
+      ? t("sourceDirectory")
+      : listing.source === "harbor"
+        ? t("sourceHarbor")
+        : null
 
   return (
     <Popover
@@ -159,24 +219,44 @@ export function ProjectGroupPicker({
 
           {candidates.map((group, index) => (
             <button
-              key={group.id}
+              key={`${group.source ?? "harbor"}:${group.name}`}
               type="button"
               role="option"
               aria-selected={group.name === value}
+              aria-disabled={group.grantable === false}
               onMouseEnter={() => setActiveIndex(index)}
               onClick={() => select(group)}
               className={cn(
-                "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden",
-                index === activeIndex && "bg-accent text-accent-foreground"
+                "flex w-full items-start gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden",
+                index === activeIndex && "bg-accent text-accent-foreground",
+                group.grantable === false && "cursor-not-allowed opacity-60"
               )}
             >
               <Check
-                className={cn("size-4 shrink-0", group.name === value ? "opacity-100" : "opacity-0")}
+                className={cn("mt-0.5 size-4 shrink-0", group.name === value ? "opacity-100" : "opacity-0")}
               />
-              <span className="truncate">{group.name}</span>
+              <span className="flex min-w-0 flex-col">
+                <span className="truncate">{group.name}</span>
+                {group.source === "directory" && (
+                  <span className="text-xs text-muted-foreground">
+                    {group.grantable === false ? t("groupNotGrantable") : t("fromDirectory")}
+                  </span>
+                )}
+              </span>
             </button>
           ))}
         </div>
+
+        {sourceNote && (
+          <p
+            className={cn(
+              "border-t px-3 py-2 text-xs",
+              listing.directoryError ? "text-warning" : "text-muted-foreground"
+            )}
+          >
+            {sourceNote}
+          </p>
+        )}
       </PopoverContent>
     </Popover>
   )

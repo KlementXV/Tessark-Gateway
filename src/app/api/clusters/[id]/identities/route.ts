@@ -8,8 +8,8 @@ import {
   listClusterIdentities,
 } from "@/lib/clusters/identity"
 import { applyClusterIdentityChange } from "@/lib/clusters/identity-sync"
-import { pickHealthyMember } from "@/lib/clusters/members"
-import { searchHarborUsers } from "@/lib/registries/harbor"
+import { openClusterDirectory } from "@/lib/clusters/directory"
+import { searchHarborUsers, searchLdapUsers } from "@/lib/registries/harbor"
 import { clusterIdentityInputSchema } from "@/lib/clusters/schema"
 import { prisma } from "@/lib/prisma"
 
@@ -43,12 +43,18 @@ export async function GET(request: Request, { params }: Params) {
   // grants nothing can name any more, which nothing else here would surface. A cluster that
   // cannot be reached simply answers without the flag rather than failing the listing.
   if (new URL(request.url).searchParams.get("verify") === "1" && identities.length <= VERIFY_MAX) {
-    const member = await pickHealthyMember(id)
-    if (member) {
+    const opened = await openClusterDirectory(id)
+    if (opened) {
+      const { member, capability } = opened
+      // With a directory to ask, "still exists" is the directory's answer: someone who never
+      // signed in to Harbor is not missing, and Harbor's own table would say they are.
+      const live = capability.capability === "ldap-live"
       const verified = await Promise.all(
         identities.map(async (identity) => {
           try {
-            const matches = await searchHarborUsers(member.conn, identity.harborUsername)
+            const matches = live
+              ? await searchLdapUsers(member.conn, identity.harborUsername)
+              : await searchHarborUsers(member.conn, identity.harborUsername)
             return {
               ...identity,
               known: matches.some(

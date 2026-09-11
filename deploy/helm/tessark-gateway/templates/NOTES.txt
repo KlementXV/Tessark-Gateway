@@ -6,6 +6,20 @@ Once the pods are Ready, reach it at:
 {{- range .Values.ingress.hosts }}
   {{ if $.Values.ingress.tls }}https{{ else }}http{{ end }}://{{ .host }}
 {{- end }}
+{{- else if eq .Values.service.type "NodePort" }}
+
+Reach it at http://<reachable-node-address>:<node-port>.
+{{- if .Values.service.nodePort }}
+  Node port: {{ .Values.service.nodePort }}
+{{- else }}
+  kubectl -n {{ .Release.Namespace }} get svc {{ include "tessark-gateway.fullname" . }} -o jsonpath='{.spec.ports[0].nodePort}'
+{{- end }}
+Set auth.url to the public URL users actually open.
+{{- else if eq .Values.service.type "LoadBalancer" }}
+
+Read the external address once your load balancer provisions it:
+  kubectl -n {{ .Release.Namespace }} get svc {{ include "tessark-gateway.fullname" . }}
+Set auth.url to the public URL users actually open.
 {{- else }}
 
 No Ingress is enabled (ingress.enabled: false). Reach it from inside the cluster at:
@@ -30,6 +44,22 @@ First login (bootstrap SUPERADMIN, consumed once by the seed Job):
 
 {{- if .Values.oidc.enabled }}
 
+{{- if include "tessark-gateway.dexEnabled" . }}
+Single sign-on goes through the Dex deployed by this chart (identity.mode=embedded); the button on
+/login reads "{{ .Values.oidc.displayName }}".
+  issuer:      {{ include "tessark-gateway.dexIssuer" . }}
+  connectors:  {{ range .Values.identity.dex.connectors }}{{ .type }}/{{ .id }} {{ end }}
+The Gateway is registered in Dex by the chart, redirect URI included. Two things it cannot check:
+  - the issuer above must answer, at that exact URL, from browsers AND from the Gateway pods;
+  - for LDAP, preferredUsernameAttr must be the attribute Harbor's ldap_uid uses, or Gateway
+    usernames will not match Harbor accounts (switch the cluster to its own directory otherwise).
+
+Keep a local SUPERADMIN and oidc.allowLocalLogin=true: it is the only way in when Dex or the
+directory is down — no static password is configured in Dex, on purpose.
+
+Harbor's own LDAP settings are separate from Dex: configure them on each Harbor, or from a
+cluster's page (Directory → Configure directory, SUPERADMIN, opt-in per cluster).
+{{- else }}
 Single sign-on is enabled; the button on /login reads "{{ .Values.oidc.displayName }}". Declare
 this exact redirect URI on the provider side — a mismatch is the most common reason the first
 sign-in fails:
@@ -40,6 +70,7 @@ sign-in fails:
   <the URL users reach the Gateway on>/api/auth/callback/oidc
   ⚠ Neither auth.url nor an Ingress host is set, so AUTH_URL is unset and NextAuth will build
     redirects from the internal request host — which the browser cannot reach. Set auth.url.
+{{- end }}
 {{- end }}
 {{- if not .Values.oidc.roleMapping }}
 

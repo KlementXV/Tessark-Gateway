@@ -1,0 +1,11 @@
+# Overlay after values-onprem.yaml. Replace this hostname with a reachable node or proxy.
+ingress:
+  enabled: false
+service:
+  type: NodePort
+  port: 80
+  targetPort: 3000
+  nodePort: 30080
+  externalTrafficPolicy: Cluster
+auth:
+  url: http://gateway-node.internal:30080

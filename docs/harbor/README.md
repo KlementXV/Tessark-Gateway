@@ -14,12 +14,17 @@ This guide distinguishes **availability** (what Harbor provides), **declared sup
 - **Declared supported versions**: none — no commitment recorded
 - **Latest upstream minor recorded in the catalogue**: 2.15
 - **Recorded campaigns**:
-  - v2.15.0-e2b5ce92 · 2026-09-08T21:36:43.063Z · 6/14 capabilities verified
-  - v2.15.0-e2b5ce92 · 2026-09-08T21:37:50.823Z · 8/14 capabilities verified
-  - v2.15.0-e2b5ce92 · 2026-09-08T21:59:33.989Z · 11/14 capabilities verified
-  - v2.15.0-e2b5ce92 · 2026-09-08T22:06:32.357Z · 11/14 capabilities verified
-  - v2.15.0-e2b5ce92 · 2026-09-08T22:13:44.497Z · 12/14 capabilities verified
-  - v2.15.0-e2b5ce92 · 2026-09-08T22:14:30.863Z · 13/14 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-08T21:36:43.063Z · 6/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-08T21:37:50.823Z · 8/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-08T21:59:33.989Z · 11/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-08T22:06:32.357Z · 11/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-08T22:13:44.497Z · 12/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-08T22:14:30.863Z · 13/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:08:39.318Z · 11/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:08:52.026Z · 12/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:10:29.962Z · 12/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:13:39.512Z · 13/16 capabilities verified
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:13:51.840Z · 11/16 capabilities verified
 
 An out-of-range Harbor can still be added. Gateway displays the warning and explains unavailable capabilities; it does not reject a registry solely because of its version.
 
@@ -31,6 +36,8 @@ An out-of-range Harbor can still be added. Gateway displays the warning and expl
 | project-lifecycle | ? | ? | ? | ? | ? | ✓ |
 | project-members | ? | ? | ? | ? | ? | ✓ |
 | directory-identity | ? | ? | ? | ? | ? | ✓ |
+| ldap-directory | ? | ? | ? | ? | ? | ✓ |
+| ldap-config-write | ? | ? | ? | ? | ? | ✓ |
 | catalog-browse | ? | ? | ? | ? | ? | ✓ |
 | artifact-delete | ? | ? | ? | ? | ? | ✓ |
 | vulnerability-scan | ? | ? | ? | ? | ? | ✓ |
@@ -39,8 +46,8 @@ An out-of-range Harbor can still be added. Gateway displays the warning and expl
 | system-robot | ? | ? | ? | ? | ? | ✓ |
 | retention-policy | ? | ? | ? | ? | ? | ✓ |
 | project-quota | ? | ? | ? | ? | ? | ✓ |
-| replication-endpoint | ? | ? | ? | ? | ? | ✓ |
-| replication-policy | ? | ? | ? | ? | ? | ✓ |
+| replication-endpoint | ? | ? | ? | ? | ? | ! |
+| replication-policy | ? | ? | ? | ? | ? | ! |
 
 `✓` verified by a run on that exact version · `~` expected from an unchanged upstream contract since a verified version, without a run · `✗` failed, with a named test · `!` inconclusive because a required scenario/environment was missing · `?` unmeasured · `—` unavailable in that version.
 
@@ -64,6 +71,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### project-lifecycle
 
@@ -80,6 +92,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### project-members
 
@@ -96,6 +113,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### directory-identity
 
@@ -113,12 +135,52 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
+
+#### ldap-directory
+
+- **Available since**: 2.0 (*declared*)
+- **Fallback**: `allow-with-warning`
+- **Operations**: `GET /configurations`, `GET /ldap/users/search`, `GET /ldap/groups/search`, `POST /ldap/users/import`, `POST /usergroups`
+- **Required tests**: `directory/ldap-config-read`, `directory/ldap-user-search-exact`, `directory/ldap-group-search`, `directory/ldap-import-idempotent`
+- **Sources**:
+  - spec: /configurations, /ldap/users/search, /ldap/users/import and /ldap/groups/search present in 2.10.0 through 2.15.0
+  - measured on 2.15.0 (2026-09-10): the LDAP searches answer from the stored ldap_* settings whatever auth_mode is, match exactly, and an empty query returns the whole directory
+  - measured on 2.15.0 (2026-09-10): import is idempotent on ldap_auth, refuses the whole batch when one uid is unknown, and fails on db_auth and oidc_auth
+  - measured on 2.15.0 (2026-09-10): an ldap_auth Harbor creates a directory account when it is granted a project, and registers a group from a DN
+- **Runs**:
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 1/4 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 4/4 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 4/4 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 4/4 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 1/4 required tests
+
+#### ldap-config-write
+
+- **Available since**: 2.0 (*declared*)
+- **Fallback**: `deny-operation`
+- **Operations**: `POST /ldap/ping`, `PUT /configurations`, `GET /users`
+- **Required tests**: `directory/ldap-ping-candidate`, `directory/ldap-config-write`
+- **Sources**:
+  - spec: PUT /configurations and POST /ldap/ping present in 2.10.0 through 2.15.0; ldap_search_password is write-only (absent from ConfigurationsResponse)
+  - measured on 2.15.0 (2026-09-10): /ldap/ping tests only the body it is sent and never reuses the stored password
+  - measured on 2.15.0 (2026-09-10): auth_mode is refused as soon as a non-admin account exists, and the whole PUT with it
+- **Runs**:
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 0/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 0/2 required tests
 
 #### catalog-browse
 
 - **Available since**: 2.0 (*declared*)
 - **Fallback**: `deny-operation`
-- **Operations**: `GET /projects/{}/repositories`, `GET /projects/{}/repositories/{}/artifacts`, `GET /projects/{}/repositories/{}/artifacts/{}`, `GET /search`
+- **Operations**: `GET /projects/{}/repositories`, `GET /projects/{}/repositories/{}/artifacts`, `GET /projects/{}/repositories/{}/artifacts/{}`, `GET /projects/{}/repositories/{}/artifacts/{}/tags`, `GET /search`
 - **Required tests**: `catalog/list-repositories`, `catalog/list-artifacts`
 - **Sources**:
   - spec: repositories and artifacts listings present in 2.10.0 through 2.15.0
@@ -129,6 +191,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### artifact-delete
 
@@ -145,6 +212,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### vulnerability-scan
 
@@ -162,6 +234,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### sbom-generation
 
@@ -181,6 +258,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/3 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 3/3 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 3/3 required tests
 
 #### cosign-signature
 
@@ -198,6 +280,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 0/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 1/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 1/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 1/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 1/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 1/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 1/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 1/2 required tests
 
 #### system-robot
 
@@ -215,6 +302,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 3/3 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 3/3 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 3/3 required tests
 
 #### retention-policy
 
@@ -231,6 +323,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### project-quota
 
@@ -247,6 +344,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 1/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 1/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 required tests
 
 #### replication-endpoint
 
@@ -264,6 +366,11 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 3/3 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 3/3 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 3/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 0/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 0/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 0/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 0/3 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 0/3 required tests
 
 #### replication-policy
 
@@ -281,10 +388,15 @@ Columns show minor versions, but evidence applies to an **exact Harbor version a
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 1/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 1/2 required tests
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 0/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 0/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 0/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 0/2 required tests
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 0/2 required tests
 
 ### Coverage and maintenance
 
-The source scanner maps **43 Harbor operations** to capabilities. An operation added without a capability causes `npm run check:harbor-surface` to fail.
+The source scanner maps **52 Harbor operations** to capabilities. An operation added without a capability causes `npm run check:harbor-surface` to fail.
 
 This README is generated from the [capability catalogue](../../src/lib/registries/harbor-capabilities.ts), [conformance runs](../harbor-conformance.json) and [contract comparisons](../harbor-spec-evidence.json). Update those sources or the [generator](../../scripts/gen-harbor-matrix.ts), then run from the repository root:
 
@@ -305,12 +417,17 @@ Ce guide distingue la **disponibilité** (ce que Harbor fournit), le **support d
 - **Versions déclarées prises en charge**: aucune — aucun engagement enregistré
 - **Dernière mineure amont enregistrée dans le catalogue**: 2.15
 - **Campagnes enregistrées**:
-  - v2.15.0-e2b5ce92 · 2026-09-08T21:36:43.063Z · 6/14 capacités vérifiées
-  - v2.15.0-e2b5ce92 · 2026-09-08T21:37:50.823Z · 8/14 capacités vérifiées
-  - v2.15.0-e2b5ce92 · 2026-09-08T21:59:33.989Z · 11/14 capacités vérifiées
-  - v2.15.0-e2b5ce92 · 2026-09-08T22:06:32.357Z · 11/14 capacités vérifiées
-  - v2.15.0-e2b5ce92 · 2026-09-08T22:13:44.497Z · 12/14 capacités vérifiées
-  - v2.15.0-e2b5ce92 · 2026-09-08T22:14:30.863Z · 13/14 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-08T21:36:43.063Z · 6/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-08T21:37:50.823Z · 8/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-08T21:59:33.989Z · 11/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-08T22:06:32.357Z · 11/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-08T22:13:44.497Z · 12/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-08T22:14:30.863Z · 13/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:08:39.318Z · 11/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:08:52.026Z · 12/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:10:29.962Z · 12/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:13:39.512Z · 13/16 capacités vérifiées
+  - v2.15.0-e2b5ce92 · 2026-09-10T23:13:51.840Z · 11/16 capacités vérifiées
 
 Un Harbor hors plage peut toujours être ajouté. Gateway affiche l’avertissement et explique les capacités indisponibles ; il ne refuse pas un registre uniquement à cause de sa version.
 
@@ -322,6 +439,8 @@ Un Harbor hors plage peut toujours être ajouté. Gateway affiche l’avertissem
 | project-lifecycle | ? | ? | ? | ? | ? | ✓ |
 | project-members | ? | ? | ? | ? | ? | ✓ |
 | directory-identity | ? | ? | ? | ? | ? | ✓ |
+| ldap-directory | ? | ? | ? | ? | ? | ✓ |
+| ldap-config-write | ? | ? | ? | ? | ? | ✓ |
 | catalog-browse | ? | ? | ? | ? | ? | ✓ |
 | artifact-delete | ? | ? | ? | ? | ? | ✓ |
 | vulnerability-scan | ? | ? | ? | ? | ? | ✓ |
@@ -330,8 +449,8 @@ Un Harbor hors plage peut toujours être ajouté. Gateway affiche l’avertissem
 | system-robot | ? | ? | ? | ? | ? | ✓ |
 | retention-policy | ? | ? | ? | ? | ? | ✓ |
 | project-quota | ? | ? | ? | ? | ? | ✓ |
-| replication-endpoint | ? | ? | ? | ? | ? | ✓ |
-| replication-policy | ? | ? | ? | ? | ? | ✓ |
+| replication-endpoint | ? | ? | ? | ? | ? | ! |
+| replication-policy | ? | ? | ? | ? | ? | ! |
 
 `✓` vérifié par une exécution sur cette version exacte · `~` attendu selon un contrat amont inchangé depuis une version vérifiée, sans exécution · `✗` en échec, avec un test nommé · `!` non concluant faute de scénario/environnement requis · `?` non mesuré · `—` indisponible dans cette version.
 
@@ -355,6 +474,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### project-lifecycle
 
@@ -371,6 +495,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### project-members
 
@@ -387,6 +516,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### directory-identity
 
@@ -404,12 +538,52 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
+
+#### ldap-directory
+
+- **Disponible depuis**: 2.0 (*declared*)
+- **Repli**: `allow-with-warning`
+- **Opérations**: `GET /configurations`, `GET /ldap/users/search`, `GET /ldap/groups/search`, `POST /ldap/users/import`, `POST /usergroups`
+- **Tests requis**: `directory/ldap-config-read`, `directory/ldap-user-search-exact`, `directory/ldap-group-search`, `directory/ldap-import-idempotent`
+- **Sources**:
+  - spec: /configurations, /ldap/users/search, /ldap/users/import and /ldap/groups/search present in 2.10.0 through 2.15.0
+  - measured on 2.15.0 (2026-09-10): the LDAP searches answer from the stored ldap_* settings whatever auth_mode is, match exactly, and an empty query returns the whole directory
+  - measured on 2.15.0 (2026-09-10): import is idempotent on ldap_auth, refuses the whole batch when one uid is unknown, and fails on db_auth and oidc_auth
+  - measured on 2.15.0 (2026-09-10): an ldap_auth Harbor creates a directory account when it is granted a project, and registers a group from a DN
+- **Exécutions**:
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 1/4 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 4/4 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 4/4 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 4/4 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 1/4 tests requis
+
+#### ldap-config-write
+
+- **Disponible depuis**: 2.0 (*declared*)
+- **Repli**: `deny-operation`
+- **Opérations**: `POST /ldap/ping`, `PUT /configurations`, `GET /users`
+- **Tests requis**: `directory/ldap-ping-candidate`, `directory/ldap-config-write`
+- **Sources**:
+  - spec: PUT /configurations and POST /ldap/ping present in 2.10.0 through 2.15.0; ldap_search_password is write-only (absent from ConfigurationsResponse)
+  - measured on 2.15.0 (2026-09-10): /ldap/ping tests only the body it is sent and never reuses the stored password
+  - measured on 2.15.0 (2026-09-10): auth_mode is refused as soon as a non-admin account exists, and the whole PUT with it
+- **Exécutions**:
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 0/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 0/2 tests requis
 
 #### catalog-browse
 
 - **Disponible depuis**: 2.0 (*declared*)
 - **Repli**: `deny-operation`
-- **Opérations**: `GET /projects/{}/repositories`, `GET /projects/{}/repositories/{}/artifacts`, `GET /projects/{}/repositories/{}/artifacts/{}`, `GET /search`
+- **Opérations**: `GET /projects/{}/repositories`, `GET /projects/{}/repositories/{}/artifacts`, `GET /projects/{}/repositories/{}/artifacts/{}`, `GET /projects/{}/repositories/{}/artifacts/{}/tags`, `GET /search`
 - **Tests requis**: `catalog/list-repositories`, `catalog/list-artifacts`
 - **Sources**:
   - spec: repositories and artifacts listings present in 2.10.0 through 2.15.0
@@ -420,6 +594,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### artifact-delete
 
@@ -436,6 +615,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### vulnerability-scan
 
@@ -453,6 +637,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### sbom-generation
 
@@ -472,6 +661,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/3 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 3/3 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 3/3 tests requis
 
 #### cosign-signature
 
@@ -489,6 +683,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 0/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 1/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 1/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 1/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 1/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 1/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 1/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 1/2 tests requis
 
 #### system-robot
 
@@ -506,6 +705,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 3/3 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 3/3 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 3/3 tests requis
 
 #### retention-policy
 
@@ -522,6 +726,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### project-quota
 
@@ -538,6 +747,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 2/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 1/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 1/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 2/2 tests requis
 
 #### replication-endpoint
 
@@ -555,6 +769,11 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 3/3 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 3/3 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 3/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 0/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 0/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 0/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 0/3 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 0/3 tests requis
 
 #### replication-policy
 
@@ -572,10 +791,15 @@ Les colonnes montrent les versions mineures, mais une preuve concerne une **vers
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:06:32.357Z · 1/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:13:44.497Z · 1/2 tests requis
   - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-08T22:14:30.863Z · 2/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:39.318Z · 0/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:08:52.026Z · 0/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:10:29.962Z · 0/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:39.512Z · 0/2 tests requis
+  - v2.15.0-e2b5ce92 · Gateway `unversioned` · 2026-09-10T23:13:51.840Z · 0/2 tests requis
 
 ### Couverture et maintenance
 
-L’analyse du code rattache **43 opérations Harbor** à des capacités. Une opération ajoutée sans capacité fait échouer `npm run check:harbor-surface`.
+L’analyse du code rattache **52 opérations Harbor** à des capacités. Une opération ajoutée sans capacité fait échouer `npm run check:harbor-surface`.
 
 Ce README est généré depuis le [catalogue des capacités](../../src/lib/registries/harbor-capabilities.ts), les [exécutions de conformance](../harbor-conformance.json) et les [comparaisons de contrats](../harbor-spec-evidence.json). Modifier ces sources ou le [générateur](../../scripts/gen-harbor-matrix.ts), puis lancer depuis la racine du dépôt :
 

@@ -974,12 +974,26 @@ export interface HarborProjectMember {
 // Typed apart for the same reason as HarborQuotaRejectedError — the member is healthy and has
 // made up its mind, so replaying would only block its queue behind a call that cannot succeed
 // until somebody provisions the user.
+//
+// Why it doesn't know them depends on what backs that Harbor, and the three answers call for
+// three different fixes — measured on 2.15.0 (docs/plan-ldap-sso-local.md, lot 0b): an
+// LDAP-backed Harbor creates a directory account on the spot when it is granted, so a refusal
+// there means the directory has no such account; an OIDC-backed one cannot create anybody
+// ahead of their first sign-in; a database-backed one only knows the accounts created in it.
+export type HarborUnknownUserReason = "absent-from-directory" | "not-yet-signed-in" | "no-local-account"
+
+const UNKNOWN_USER_EXPLANATION: Record<HarborUnknownUserReason, string> = {
+  "absent-from-directory": "its LDAP directory has no such account",
+  "not-yet-signed-in":
+    "it signs people in through OIDC and only learns an account at that person's first sign-in to Harbor",
+  "no-local-account": "it uses its own database accounts, and nobody has created this one there",
+}
+
 export class HarborUnknownUserError extends Error {
-  constructor(username: string, registryName?: string) {
+  constructor(username: string, registryName?: string, readonly reason?: HarborUnknownUserReason) {
     super(
-      registryName
-        ? `${registryName} has no user "${username}"`
-        : `Harbor has no user "${username}"`
+      `${registryName ? `${registryName} has no user` : "Harbor has no user"} "${username}"` +
+        (reason ? ` — ${UNKNOWN_USER_EXPLANATION[reason]}` : "")
     )
     this.name = "HarborUnknownUserError"
   }
@@ -1223,6 +1237,418 @@ export async function applyHarborProjectGroupMember(
   if (res.status === 404 || res.status === 400) throw new HarborUnknownGroupError(groupName)
 
   throw new Error(`Harbor project group member creation failed (${res.status})`)
+}
+
+// ---------------------------------------------------------------------------------------------
+// The LDAP directory, read through Harbor
+// ---------------------------------------------------------------------------------------------
+//
+// The Gateway holds no LDAP client (docs/plan-ldap-sso-local.md, D3). Every lookup below asks a
+// Harbor to query the directory *it* is configured with — base DN, filter, bind account, CA — so
+// the Gateway can never offer an account that this Harbor would then refuse. None of the
+// behaviours noted here is in the spec; they were measured on Harbor 2.15.0 on 2026-09-10
+// (same plan, lot 0b).
+
+/** Harbor's `auth_mode`. Other values exist (http_auth, uaa_auth) and are passed through as-is. */
+export type HarborAuthMode = "db_auth" | "ldap_auth" | "oidc_auth" | (string & {})
+
+/** The LDAP settings a Harbor carries — minus its bind password, which the API never returns. */
+export interface HarborLdapSettings {
+  url: string
+  searchDn: string
+  baseDn: string
+  filter: string
+  uid: string
+  scope: number | null
+  verifyCert: boolean | null
+  groupBaseDn: string
+  groupSearchFilter: string
+  groupAttributeName: string
+  groupMembershipAttribute: string
+  groupSearchScope: number | null
+}
+
+export interface HarborAuthConfig {
+  authMode: HarborAuthMode
+  /** Harbor freezes auth_mode once it holds a non-admin account; null when it did not say. */
+  authModeEditable: boolean | null
+  ldap: HarborLdapSettings
+}
+
+/**
+ * How a configuration or directory call was refused. Typed rather than folded into one message:
+ * "not an administrator" is fixed by an operator in the registry form, "the directory did not
+ * answer" by whoever runs the LDAP server, and the two must not read the same.
+ */
+export type HarborDirectoryFailure = "forbidden" | "bad-request" | "directory-error" | "unexpected"
+
+export class HarborDirectoryError extends Error {
+  constructor(
+    readonly failure: HarborDirectoryFailure,
+    readonly status: number,
+    message: string
+  ) {
+    super(message)
+    this.name = "HarborDirectoryError"
+  }
+}
+
+function directoryError(status: number, what: string): HarborDirectoryError {
+  if (status === 401 || status === 403) {
+    return new HarborDirectoryError(
+      "forbidden",
+      status,
+      `${what} was refused (${status}): the credentials stored for this Harbor are not a Harbor administrator`
+    )
+  }
+  if (status === 400) {
+    return new HarborDirectoryError("bad-request", status, `${what} was rejected (400) by Harbor`)
+  }
+  // Measured: a wrong bind password, an unreachable LDAP server and a base DN that does not
+  // exist all come back as the same bodiless 500. Harbor says nothing more, so neither can we.
+  if (status >= 500) {
+    return new HarborDirectoryError(
+      "directory-error",
+      status,
+      `${what} failed (${status}): Harbor could not query its LDAP directory — a wrong bind password, an unreachable server or a missing base DN`
+    )
+  }
+  return new HarborDirectoryError("unexpected", status, `${what} failed (${status})`)
+}
+
+/** The first `errors[].message` of a Harbor error body, when there is one. */
+async function harborErrorMessage(res: Response): Promise<string | null> {
+  const body = (await res.json().catch(() => null)) as { errors?: Array<{ message?: unknown }> } | null
+  const message = body?.errors?.[0]?.message
+  return typeof message === "string" ? message : null
+}
+
+/**
+ * Reads how this Harbor authenticates people and which directory it is configured with.
+ *
+ * Built field by field on purpose: /configurations also carries OIDC and UAA settings, and
+ * nothing this function was not written to return reaches its caller.
+ */
+export async function getHarborAuthConfig(conn: RegistryConnection): Promise<HarborAuthConfig> {
+  const res = await registryFetch(conn, "/api/v2.0/configurations")
+  if (!res.ok) throw directoryError(res.status, "Reading the Harbor configuration")
+
+  const body = (await res.json()) as Record<string, { value?: unknown; editable?: unknown } | undefined>
+  const text = (key: string) => {
+    const value = body[key]?.value
+    return typeof value === "string" ? value : ""
+  }
+  const number = (key: string) => {
+    const value = body[key]?.value
+    return typeof value === "number" ? value : null
+  }
+  const flag = (key: string) => {
+    const value = body[key]?.value
+    return typeof value === "boolean" ? value : null
+  }
+  const editable = body.auth_mode?.editable
+
+  return {
+    authMode: text("auth_mode"),
+    authModeEditable: typeof editable === "boolean" ? editable : null,
+    ldap: {
+      url: text("ldap_url"),
+      searchDn: text("ldap_search_dn"),
+      baseDn: text("ldap_base_dn"),
+      filter: text("ldap_filter"),
+      uid: text("ldap_uid"),
+      scope: number("ldap_scope"),
+      verifyCert: flag("ldap_verify_cert"),
+      groupBaseDn: text("ldap_group_base_dn"),
+      groupSearchFilter: text("ldap_group_search_filter"),
+      groupAttributeName: text("ldap_group_attribute_name"),
+      groupMembershipAttribute: text("ldap_group_membership_attribute"),
+      groupSearchScope: number("ldap_group_search_scope"),
+    },
+  }
+}
+
+export interface HarborLdapUser {
+  username: string
+  realname: string | null
+  email: string | null
+}
+
+/**
+ * Looks an account up in this Harbor's LDAP directory — including accounts that never signed in
+ * to Harbor, which is the whole difference with searchHarborUsers().
+ *
+ * Two measured properties shape the callers: the match is **exact** on the uid attribute (`al`
+ * and `al*` find nothing when the account is `alice`), and an **empty** query returns the entire
+ * directory. The second is why an empty query never leaves this function.
+ *
+ * Answers from the stored `ldap_*` settings whatever the Harbor's auth_mode — db_auth and
+ * oidc_auth included (measured, M1).
+ */
+export async function searchLdapUsers(
+  conn: RegistryConnection,
+  username: string
+): Promise<HarborLdapUser[]> {
+  const query = username.trim()
+  if (!query) return []
+
+  const res = await registryFetch(
+    conn,
+    `/api/v2.0/ldap/users/search?username=${encodeURIComponent(query)}`
+  )
+  if (!res.ok) throw directoryError(res.status, "The directory search")
+
+  const body = (await res.json()) as Array<{ username?: unknown; realname?: unknown; email?: unknown }>
+  return body
+    .filter((u): u is { username: string; realname?: unknown; email?: unknown } =>
+      typeof u.username === "string" && u.username !== ""
+    )
+    .map((u) => ({
+      username: u.username,
+      realname: typeof u.realname === "string" && u.realname ? u.realname : null,
+      email: typeof u.email === "string" && u.email ? u.email : null,
+    }))
+}
+
+export interface HarborLdapGroup {
+  name: string
+  /** Read from the directory, so verified — unlike a DN typed into a form. */
+  dn: string
+}
+
+/** Exact lookup of a directory group, by name or by DN. Same empty-query rule as users. */
+export async function searchLdapGroups(
+  conn: RegistryConnection,
+  by: { name: string } | { dn: string }
+): Promise<HarborLdapGroup[]> {
+  const [param, raw] = "dn" in by ? ["groupdn", by.dn] : ["groupname", by.name]
+  const value = raw.trim()
+  if (!value) return []
+
+  const res = await registryFetch(
+    conn,
+    `/api/v2.0/ldap/groups/search?${param}=${encodeURIComponent(value)}`
+  )
+  // Unlike the user search, "no such group" is a 404 here rather than an empty list (measured).
+  if (res.status === 404) return []
+  if (!res.ok) throw directoryError(res.status, "The directory group search")
+
+  const body = (await res.json()) as Array<{ group_name?: unknown; ldap_group_dn?: unknown }>
+  return body
+    .filter((g): g is { group_name: string; ldap_group_dn: string } =>
+      typeof g.group_name === "string" && typeof g.ldap_group_dn === "string" && g.ldap_group_dn !== ""
+    )
+    .map((g) => ({ name: g.group_name, dn: g.ldap_group_dn }))
+}
+
+export interface LdapImportOutcome {
+  imported: string[]
+  /** One entry per refused uid, with Harbor's own reason ("unknown_user", …). */
+  failed: Array<{ uid: string; error: string }>
+}
+
+/**
+ * Creates Harbor accounts for directory uids, ahead of any sign-in.
+ *
+ * Idempotent on an uid already imported (measured, M2). But Harbor refuses the **whole** batch
+ * when one uid is refused — the others are not imported either — so the batch is sent again
+ * without the uids it named. A failure is thereby attributed to the uid that caused it, never to
+ * its neighbours, the same rule replication.ts applies to the edge that failed.
+ *
+ * Only an LDAP-backed Harbor imports anybody: db_auth and oidc_auth refuse every uid with
+ * "failed to import user" (measured).
+ */
+export async function importLdapUsers(
+  conn: RegistryConnection,
+  uids: string[]
+): Promise<LdapImportOutcome> {
+  let pending = [...new Set(uids.map((uid) => uid.trim()).filter(Boolean))]
+  const failed: LdapImportOutcome["failed"] = []
+
+  // Two passes at most: the first names the uids Harbor refuses, the second imports the rest.
+  // A refusal on the second pass would mean Harbor changed its mind about uids it had not
+  // complained about; that is reported, never looped on.
+  for (let pass = 0; pass < 2 && pending.length > 0; pass++) {
+    const res = await registryFetch(conn, "/api/v2.0/ldap/users/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ldap_uid_list: pending }),
+    })
+    if (res.ok) return { imported: pending, failed }
+    if (res.status !== 404) throw directoryError(res.status, "The directory import")
+
+    const body = (await res.json().catch(() => null)) as Array<{ uid?: unknown; error?: unknown }> | null
+    const refused = new Map<string, string>()
+    for (const entry of Array.isArray(body) ? body : []) {
+      if (typeof entry.uid === "string") {
+        refused.set(entry.uid.toLowerCase(), typeof entry.error === "string" ? entry.error : "refused")
+      }
+    }
+
+    const named = pending.filter((uid) => refused.has(uid.toLowerCase()))
+    // A 404 that names none of ours cannot be attributed to anybody in particular.
+    if (named.length === 0) {
+      return {
+        imported: [],
+        failed: [...failed, ...pending.map((uid) => ({ uid, error: "refused by Harbor without a reason" }))],
+      }
+    }
+    for (const uid of named) failed.push({ uid, error: refused.get(uid.toLowerCase())! })
+    pending = pending.filter((uid) => !refused.has(uid.toLowerCase()))
+
+    if (pass === 1) {
+      return {
+        imported: [],
+        failed: [...failed, ...pending.map((uid) => ({ uid, error: "not imported: Harbor refused the batch again" }))],
+      }
+    }
+  }
+
+  return { imported: [], failed }
+}
+
+/**
+ * Registers an LDAP group on this Harbor from a DN read out of its directory, and returns its ID.
+ * An already registered group (409) is the desired state and is read back.
+ */
+export async function registerHarborLdapGroup(
+  conn: RegistryConnection,
+  groupName: string,
+  dn: string
+): Promise<number> {
+  const res = await registryFetch(conn, "/api/v2.0/usergroups", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ group_name: groupName, group_type: 1, ldap_group_dn: dn }),
+  })
+
+  if (res.ok || res.status === 409) {
+    const id = res.ok ? parseIdFromLocation(res) : null
+    if (id) return id
+    const groups = await listHarborUserGroups(conn, groupName)
+    const match = groups.find((g) => g.name.toLowerCase() === groupName.toLowerCase())
+    if (match) return match.id
+    throw new Error(`Could not resolve the group "${groupName}" just registered`)
+  }
+  throw directoryError(res.status, "Registering the LDAP group")
+}
+
+/** The LDAP settings to test or write — the bind password included, since Harbor never reuses the stored one. */
+export interface HarborLdapCandidate {
+  url: string
+  searchDn: string
+  searchPassword: string
+  baseDn: string
+  filter: string
+  uid: string
+  scope: number
+  verifyCert: boolean
+  groupBaseDn: string
+  groupSearchFilter: string
+  groupAttributeName: string
+  groupMembershipAttribute: string
+  groupSearchScope: number
+}
+
+/**
+ * Asks this Harbor whether it can reach and bind to a *candidate* directory.
+ *
+ * It tests only the body it is sent: without a password it answers "error: empty password"
+ * rather than reusing the stored one (measured). It is therefore a check of settings about to be
+ * written, never a health check of the ones in place — for that, see clusters/directory-view.ts.
+ * Always 200: the verdict is in the body.
+ */
+export async function pingHarborLdap(
+  conn: RegistryConnection,
+  candidate: HarborLdapCandidate
+): Promise<{ success: boolean; message: string | null }> {
+  const res = await registryFetch(conn, "/api/v2.0/ldap/ping", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ldap_url: candidate.url,
+      ldap_search_dn: candidate.searchDn,
+      ldap_search_password: candidate.searchPassword,
+      ldap_base_dn: candidate.baseDn,
+      ldap_filter: candidate.filter,
+      ldap_uid: candidate.uid,
+      ldap_scope: candidate.scope,
+      ldap_verify_cert: candidate.verifyCert,
+    }),
+  })
+  if (!res.ok) throw directoryError(res.status, "The directory ping")
+
+  const body = (await res.json().catch(() => null)) as { success?: unknown; message?: unknown } | null
+  return {
+    success: body?.success === true,
+    message: typeof body?.message === "string" ? body.message : null,
+  }
+}
+
+/**
+ * Writes the LDAP settings of this Harbor. auth_mode is deliberately not part of it: Harbor
+ * rejects the *entire* PUT when auth_mode is frozen (measured), which would silently drop the
+ * directory settings along with it. See setHarborAuthMode().
+ */
+export async function putHarborLdapConfig(
+  conn: RegistryConnection,
+  candidate: HarborLdapCandidate
+): Promise<void> {
+  const res = await registryFetch(conn, "/api/v2.0/configurations", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ldap_url: candidate.url,
+      ldap_search_dn: candidate.searchDn,
+      ldap_search_password: candidate.searchPassword,
+      ldap_base_dn: candidate.baseDn,
+      ldap_filter: candidate.filter,
+      ldap_uid: candidate.uid,
+      ldap_scope: candidate.scope,
+      ldap_verify_cert: candidate.verifyCert,
+      ldap_group_base_dn: candidate.groupBaseDn,
+      ldap_group_search_filter: candidate.groupSearchFilter,
+      ldap_group_attribute_name: candidate.groupAttributeName,
+      ldap_group_membership_attribute: candidate.groupMembershipAttribute,
+      ldap_group_search_scope: candidate.groupSearchScope,
+    }),
+  })
+  if (res.ok) return
+  const message = await harborErrorMessage(res)
+  const error = directoryError(res.status, "Writing the LDAP configuration")
+  if (message) error.message = `${error.message}: ${message}`
+  throw error
+}
+
+/**
+ * Switches this Harbor's auth_mode. Harbor refuses it as soon as one non-admin account exists
+ * ("the auth mode cannot be modified as new users have been inserted into database", measured,
+ * M4) — which is what confines this to adopting a blank Harbor.
+ */
+export async function setHarborAuthMode(conn: RegistryConnection, authMode: HarborAuthMode): Promise<void> {
+  const res = await registryFetch(conn, "/api/v2.0/configurations", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ auth_mode: authMode }),
+  })
+  if (res.ok) return
+  const message = await harborErrorMessage(res)
+  const error = directoryError(res.status, "Changing the Harbor auth mode")
+  if (message) error.message = `${error.message}: ${message}`
+  throw error
+}
+
+/**
+ * How many accounts other than `admin` this Harbor holds — the number that freezes auth_mode.
+ * /users never lists `admin` itself (measured), so its total is exactly that count.
+ */
+export async function countHarborUsers(conn: RegistryConnection): Promise<number> {
+  const res = await registryFetch(conn, "/api/v2.0/users?page_size=1")
+  if (!res.ok) throw directoryError(res.status, "Counting the Harbor accounts")
+  const total = Number(res.headers.get("x-total-count"))
+  if (Number.isFinite(total)) return total
+  const body = (await res.json().catch(() => [])) as unknown[]
+  return Array.isArray(body) ? body.length : 0
 }
 
 export interface HarborRobotPermission {

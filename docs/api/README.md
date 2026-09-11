@@ -1,5 +1,7 @@
 # REST API and MCP · API REST et MCP
 
+OCI Helm charts use the existing transfer API and `create_transfer` MCP tool. Supply `repo` and an explicit OCI version in `tag` (for example `1.2.3_Build.7`); see [chart transfers and air-gap deployment](../on-premise-airgap.md#transférer-des-charts-helm-oci).
+
 **[English](#english) · [Français](#français)** · [Tessark Gateway](../../README.md)
 
 ## English
@@ -181,3 +183,50 @@ Les appels sont journalisés avec l’identifiant du token, le nom de l’outil 
 | Outil d’écriture absent | `MCP_WRITE_TOOLS_ENABLED` et rafraîchissement de la liste d’outils du client |
 | Réponse 429 | `Retry-After` et configuration de la limite par instance |
 | Transfert accepté mais inachevé | Jobs de destination et synchronisation du statut, décrits dans le guide Helm |
+
+## Transférer tous les tags de l’artefact demandé
+
+L’option **Inclure les autres tags de l’artefact** correspond à `allTags: true` dans REST et
+MCP. Le champ `tag` sélectionne l’artefact ; il n’est jamais ignoré (`latest` par défaut).
+
+```json
+{
+  "sourceId": "source-id",
+  "repo": "library/nginx",
+  "tag": "latest",
+  "allTags": true,
+  "targets": [{ "projectId": "destination-id" }]
+}
+```
+
+Si `latest`, `1.28` et `1.28.0` pointent vers le digest A, ces trois tags sont transférés.
+Si `1.27` et `alpine` pointent vers d’autres digests, ils sont exclus. La comparaison porte sur
+le manifeste ou l’index multi-architecture complet, pas sur une couche ou une architecture.
+Le digest identifie le contenu ; aucun tag artificiel nommé d’après le digest n’est créé.
+
+Le digest sélectionné est figé dans **chaque** demande, y compris pour une source amont.
+Si un tag est déplacé avant approbation ou pendant la création des demandes, les copies restent
+attachées à l’artefact initial. Chaque tag garde ses destinations, son approbation, son statut et
+son retry. Les demandes partagent un `batchId` pour permettre l’approbation groupée. Aucun
+transfert des autres artefacts du dépôt n’est lancé. Aucun changement de schéma de base requis.
+
+Harbor fournit directement les tags de l’artefact par digest, avec pagination. Sur un registre
+OCI générique (Docker Hub, etc.), Gateway résout le digest demandé puis compare les manifestes
+des tags du dépôt pour trouver ses alias. Cette inspection ne télécharge pas leurs couches et
+ne les copie pas. Les credentials, la CA et les contrôles d’autorisation habituels s’appliquent.
+Un artefact demandé inexistant ou une lecture incomplète renvoie une erreur, sans élargir la
+sélection aux autres artefacts.
+
+REST répond `{ "started": [...], "failed": [...] }`, même pour une seule image avec l’option.
+`started` désigne les demandes créées/lancées, pas la fin des copies ; `pending: true` indique
+une approbation requise. MCP répond `{ batchId, transfers, failed }`. Sans l’option, le contrat
+habituel est conservé. Avec `images`, l’option s’applique à l’artefact sélectionné sur chaque
+ligne ; deux tags d’un même dépôt peuvent sélectionner deux artefacts différents.
+
+Limites : 500 tags transférés par lot et, pour la recherche d’alias sur un registre générique,
+10 000 tags inspectés par dépôt. En cas de dépassement, la sélection concernée échoue sans
+troncature silencieuse ; un cumul dépassant 500 tags refuse le lot avant toute création.
+
+Pour les charts OCI, la version reste obligatoire dans le formulaire, même avec l’option.
+Seuls les tags de ce même artefact sont inclus, pas les autres versions du chart. Les images
+de workloads et les dépendances externes ne sont pas automatiquement transférées.

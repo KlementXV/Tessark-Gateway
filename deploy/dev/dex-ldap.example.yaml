@@ -1,0 +1,41 @@
+# Configuration example for an independently deployed Dex in Kubernetes.
+# Install Dex CRDs/RBAC, expose this listener behind TLS, and mount the LDAP CA.
+# Supply both referenced environment variables through a Secret.
+issuer: https://sso.example.com
+storage:
+  type: kubernetes
+  config:
+    inCluster: true
+web:
+  http: 0.0.0.0:5556
+staticClients:
+  - id: tessark-gateway
+    name: Tessark Gateway
+    secretEnv: GATEWAY_CLIENT_SECRET
+    redirectURIs:
+      - https://gateway.example.com/api/auth/callback/oidc
+connectors:
+  - type: ldap
+    id: ad
+    name: Company directory
+    config:
+      host: dc01.client.example:636
+      rootCA: /etc/dex/ca/ca.crt
+      bindDN: CN=svc-tessark,OU=Services,DC=client,DC=example
+      bindPW: $LDAP_BIND_PW
+      userSearch:
+        baseDN: OU=Users,DC=client,DC=example
+        filter: "(objectClass=person)"
+        username: sAMAccountName
+        idAttr: objectGUID
+        emailAttr: mail
+        nameAttr: displayName
+        # Match Harbor's ldap_uid; check the resulting Gateway username too.
+        preferredUsernameAttr: sAMAccountName
+      groupSearch:
+        baseDN: OU=Groups,DC=client,DC=example
+        filter: "(objectClass=group)"
+        userMatchers:
+          - userAttr: DN
+            groupAttr: member
+        nameAttr: cn

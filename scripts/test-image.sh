@@ -24,6 +24,19 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# The production image keeps CLI hooks but must never ship the builder's full dependency tree.
+docker run --rm -i --network none --entrypoint node "$image" <<'JS'
+const assert = require('node:assert/strict');
+const { existsSync } = require('node:fs');
+for (const name of ['eslint', 'typescript', 'shadcn', '@tailwindcss/postcss']) {
+  assert.equal(existsSync(`/app/node_modules/${name}`), false, `build-only package shipped: ${name}`);
+}
+for (const file of ['node_modules/.bin/prisma', 'node_modules/.bin/tsx', 'prisma/seed.ts', 'tsconfig.json', 'src/lib/config.ts']) {
+  assert.ok(existsSync(`/app/${file}`), `runtime tooling missing: ${file}`);
+}
+console.log('Runtime packaging passed: CLI hooks present, build toolchain absent.');
+JS
+
 docker network create "$network" >/dev/null
 network_created=true
 docker run -d --name "$database" --network "$network" --network-alias postgres \

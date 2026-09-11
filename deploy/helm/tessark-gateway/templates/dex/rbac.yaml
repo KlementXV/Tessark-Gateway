@@ -1,0 +1,71 @@
+{{- if include "tessark-gateway.dexEnabled" . }}
+{{/*
+Dex stores its state (auth requests, refresh tokens, signing keys) as dex.coreos.com resources in
+this namespace — no database of its own — and registers those CRDs itself at startup, which is
+the one cluster-scoped grant it needs (identity.dex.createCrdRbac). Same grants as the upstream
+Dex chart.
+*/}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "tessark-gateway.dexName" . }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+{{- if .Values.rbac.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "tessark-gateway.dexName" . }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+rules:
+  - apiGroups: ["dex.coreos.com"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "tessark-gateway.dexName" . }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "tessark-gateway.dexName" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "tessark-gateway.dexName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- if .Values.identity.dex.createCrdRbac }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # Cluster-scoped: prefixed with the namespace so two releases never share it.
+  name: {{ printf "%s-%s" .Release.Namespace (include "tessark-gateway.dexName" .) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["list", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ printf "%s-%s" .Release.Namespace (include "tessark-gateway.dexName" .) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "tessark-gateway.dexLabels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ printf "%s-%s" .Release.Namespace (include "tessark-gateway.dexName" .) | trunc 63 | trimSuffix "-" }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "tessark-gateway.dexName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}
+{{- end }}

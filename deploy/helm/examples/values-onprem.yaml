@@ -1,0 +1,34 @@
+# Replace registry, release tags and hostname with your installation's values.
+# Secrets are provisioned separately; never commit credentials here.
+global:
+  imageRegistry: registry.internal:5000
+  imageRepositoryPrefix: platform
+  imagePullSecrets:
+    - registry-pull
+
+image:
+  repository: tessark/gateway
+  tag: release-2026-09
+
+skopeo:
+  image: skopeo/stable:validated
+
+database:
+  mode: embedded
+  embedded:
+    image: library/postgres:17-alpine
+
+# Application Secret must contain the keys described in templates/secret.yaml.
+existingSecret: gateway-runtime
+
+ingress:
+  enabled: true
+  hosts:
+    - host: gateway.internal
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: gateway-tls
+      hosts:
+        - gateway.internal

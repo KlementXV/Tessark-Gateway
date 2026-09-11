@@ -7,8 +7,8 @@
 //     verified by the provider, so matching on one would let a compromised or re-issued
 //     mailbox take over an existing account. The stored key is `<issuer>|<sub>`, namespaced
 //     so two providers cannot collide on a short subject like "1".
-//  2. **The provider owns the role.** OIDC_ROLE_MAPPING is re-applied at every sign-in, so
-//     removing someone from a group in Keycloak demotes them here on their next visit. The
+//  2. **A configured mapping makes the provider own the role.** A nonempty OIDC_ROLE_MAPPING
+//     is re-applied at every sign-in; otherwise existing roles remain managed in Gateway. The
 //     one thing it may not do is leave the instance with no active SUPERADMIN — an operator
 //     who mis-maps a group must not be able to lock everyone out of user administration.
 import { Prisma, Role, type User } from "@/generated/prisma/client"
@@ -56,7 +56,7 @@ export interface OidcClaims {
  * Provider definition handed to NextAuth. Only the issuer is configured: the authorization,
  * token, userinfo, JWKS and end-session endpoints all come from
  * `<issuer>/.well-known/openid-configuration`, which is what makes this work against
- * Keycloak, Entra ID, Authentik or Okta without a provider-specific branch.
+ * Dex through standard OIDC discovery, regardless of its upstream connectors.
  */
 export function oidcProvider(config: Config): OIDCConfig<OidcClaims> {
   // getConfig() already refuses OIDC_ENABLED without an issuer and a client id, so these are
@@ -89,7 +89,7 @@ export function oidcProvider(config: Config): OIDCConfig<OidcClaims> {
   }
 }
 
-/** Reads a dotted path ("realm_access.roles") out of the claim object. */
+/** Reads a configured dotted path out of the claim object. */
 function claimAtPath(claims: OidcClaims, path: string): unknown {
   return path.split(".").reduce<unknown>((node, segment) => {
     if (node === null || typeof node !== "object") return undefined
@@ -108,10 +108,8 @@ export function resolveRole(claims: OidcClaims, config: Config): Role {
 
   const matched = values
     .filter((value): value is string => typeof value === "string")
-    // Keycloak group mappers emit paths ("/gateway-admins"); accept both forms so an
-    // operator does not have to guess which one their mapper produces.
-    .flatMap((value) => [value, value.replace(/^\//, "")])
-    .map((value) => config.oidcRoleMapping[value])
+    // Match the exact claim value; distinct directory group names stay distinct.
+    .map((value) => Object.hasOwn(config.oidcRoleMapping, value) ? config.oidcRoleMapping[value] : undefined)
     .filter((role): role is Role => role !== undefined)
 
   return highestRole(matched, config.oidcDefaultRole)
@@ -160,6 +158,7 @@ export async function upsertOidcUser(claims: OidcClaims, config: Config): Promis
   const email = typeof claims.email === "string" ? claims.email.trim() : null
   const name = typeof claims.name === "string" ? claims.name.trim() || null : null
   const role = resolveRole(claims, config)
+  const roleMapped = Object.keys(config.oidcRoleMapping).length > 0
 
   const existing = await prisma.user.findUnique({ where: { externalId } })
 
@@ -172,7 +171,7 @@ export async function upsertOidcUser(claims: OidcClaims, config: Config): Promis
     }
 
     const wouldDemoteLastSuperadmin =
-      existing.role === Role.SUPERADMIN && role !== Role.SUPERADMIN && (await isLastActiveSuperadmin(existing.id))
+      roleMapped && existing.role === Role.SUPERADMIN && role !== Role.SUPERADMIN && (await isLastActiveSuperadmin(existing.id))
 
     if (wouldDemoteLastSuperadmin) {
       logger.warn("Kept SUPERADMIN role against the OIDC role mapping: demoting would leave no active superadmin", {
@@ -188,7 +187,7 @@ export async function upsertOidcUser(claims: OidcClaims, config: Config): Promis
         // actually supplied: a token without an email claim must not blank a stored one.
         ...(email ? { email } : {}),
         ...(name ? { name } : {}),
-        role: wouldDemoteLastSuperadmin ? existing.role : role,
+        ...(roleMapped ? { role: wouldDemoteLastSuperadmin ? existing.role : role } : {}),
       },
     })
   }
@@ -198,7 +197,7 @@ export async function upsertOidcUser(claims: OidcClaims, config: Config): Promis
   const collision = email ? await prisma.user.findUnique({ where: { email } }) : null
 
   if (collision) {
-    if (!config.oidcLinkByEmail) {
+    if (!config.oidcLinkByEmail || collision.authProvider !== "local" || collision.externalId !== null) {
       logger.warn("OIDC sign-in refused", { sub, reason: "email already belongs to another account" })
       throw new OidcRefusal("OidcAccountExists")
     }
@@ -212,21 +211,30 @@ export async function upsertOidcUser(claims: OidcClaims, config: Config): Promis
     }
 
     const keepRole =
-      collision.role === Role.SUPERADMIN && role !== Role.SUPERADMIN && (await isLastActiveSuperadmin(collision.id))
+      roleMapped && collision.role === Role.SUPERADMIN && role !== Role.SUPERADMIN && (await isLastActiveSuperadmin(collision.id))
 
+    let linked: User
+    try {
+      linked = await prisma.user.update({
+        // Recheck at write time: another sign-in may have linked this account since the read.
+        where: { id: collision.id, authProvider: "local", disabled: false, AND: { externalId: null } },
+        data: {
+          externalId,
+          authProvider: OIDC_AUTH_PROVIDER,
+          // Linking removes the credentials path into the newly federated account.
+          passwordHash: null,
+          ...(name ? { name } : {}),
+          ...(roleMapped ? { role: keepRole ? collision.role : role } : {}),
+        },
+      })
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+        throw new OidcRefusal("OidcAccountExists")
+      }
+      throw err
+    }
     logger.info("Linked an existing local account to its OIDC identity", { userId: collision.id, sub })
-    return prisma.user.update({
-      where: { id: collision.id },
-      data: {
-        externalId,
-        authProvider: OIDC_AUTH_PROVIDER,
-        // The account is no longer local: leaving the old hash in place would keep the
-        // credentials form as a way around the identity provider.
-        passwordHash: null,
-        ...(name ? { name } : {}),
-        role: keepRole ? collision.role : role,
-      },
-    })
+    return linked
   }
 
   if (!config.oidcAllowSignup) {

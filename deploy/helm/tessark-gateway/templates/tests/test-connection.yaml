@@ -8,10 +8,11 @@ metadata:
     helm.sh/hook: test
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
+  {{- include "tessark-gateway.pullSecrets" (dict "root" . "local" .Values.imagePullSecrets) | nindent 2 }}
   restartPolicy: Never
   containers:
     - name: wget
-      image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+      image: {{ include "tessark-gateway.appImage" . | quote }}
       imagePullPolicy: {{ .Values.image.pullPolicy }}
       # Liveness only, deliberately — `helm test` runs whenever an operator wants to poke the
       # release, including right after a fresh install before the migrate/seed hooks have

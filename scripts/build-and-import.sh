@@ -13,7 +13,8 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 REV="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
-TAG="${1:-0.1.0-${REV}}"
+APP_VERSION="$(node -p 'require("./package.json").version')"
+TAG="${1:-${APP_VERSION}-${REV}}"
 IMAGE="tessark-gateway:${TAG}"
 
 # Never "latest": with imagePullPolicy: IfNotPresent, a reused tag doesn't get re-pulled/

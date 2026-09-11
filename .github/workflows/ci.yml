@@ -6,9 +6,18 @@ on:
     branches: [main]
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish a validated version tag (used by Publish release)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: gateway-${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +32,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
+      - name: Require a version tag for requested publication
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
+        run: |
+          if [[ "$GITHUB_REF" != refs/tags/v* ]]; then
+            echo 'Publication can only be requested on a version tag.' >&2
+            exit 1
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -31,6 +47,12 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - run: npm run version:check
+      - name: Check release tag against manifests and changelog
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: npm run version:check -- --tag "$RELEASE_TAG"
       - run: npm run prisma:generate
       - run: npm run lint
       - run: npx tsc --noEmit
@@ -110,6 +132,28 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: bash scripts/check-chart.sh
+      - name: Install OCI transfer test dependency
+        run: sudo apt-get update && sudo apt-get install -y skopeo
+      - name: Verify Helm chart transfer through Skopeo
+        run: node --env-file=tests/env.fixture --import tsx scripts/test-helm-transfer.ts
+      - name: Package release notes and the tested chart
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/release"
+          node scripts/versioning.mjs notes --tag "$RELEASE_TAG" > "$RUNNER_TEMP/release/release-notes.md"
+          helm package deploy/helm/tessark-gateway --destination "$RUNNER_TEMP/release"
+          cd "$RUNNER_TEMP/release"
+          sha256sum -- *.tgz > SHA256SUMS
+      - name: Upload release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-assets-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release/
+          retention-days: 7
+          if-no-files-found: error
 
   image:
     name: Build and test application image
@@ -141,15 +185,6 @@ jobs:
           labels: |
             org.opencontainers.image.title=Tessark Gateway
             org.opencontainers.image.description=Harbor fleet management portal
-      - name: Require a semantic version for release tags
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          IMAGE_VERSION: ${{ steps.meta.outputs.version }}
-        run: |
-          if [[ ! "$IMAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-            echo 'Use a semantic version tag such as v1.2.3 or v1.2.3-rc.1.' >&2
-            exit 1
-          fi
       - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
       - name: Build image without application secrets
         id: build
@@ -171,10 +206,10 @@ jobs:
       - name: Migrations, seed and HTTP smoke test
         run: bash scripts/test-image.sh tessark-gateway:ci
       - name: Export the tested image
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release && startsWith(github.ref, 'refs/tags/v'))
         run: docker save tessark-gateway:ci | gzip -1 > "$RUNNER_TEMP/gateway-image.tar.gz"
       - name: Upload the tested image
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release && startsWith(github.ref, 'refs/tags/v'))
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: gateway-image-${{ github.run_id }}-${{ github.run_attempt }}
@@ -186,12 +221,14 @@ jobs:
   publish:
     name: Publish tested image to GHCR
     needs: [checks, tests, postgres, chart, image]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))) || (github.event_name == 'workflow_dispatch' && inputs.publish_release && startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: read
       packages: write
+    outputs:
+      image-digests: ${{ steps.push.outputs.digests }}
     steps:
       # No repository checkout or application code execution in the publishing job.
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -211,6 +248,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push the tested image and report digests
+        id: push
         env:
           IMAGE_TAGS: ${{ needs.image.outputs.tags }}
         run: |
@@ -221,4 +259,36 @@ jobs:
             docker push "$tag"
             printf -- '- `%s`\n' "$tag" >> "$GITHUB_STEP_SUMMARY"
           done <<< "$IMAGE_TAGS"
-          docker image inspect tessark-gateway:ci --format '{{json .RepoDigests}}' >> "$GITHUB_STEP_SUMMARY"
+          digests="$(docker image inspect tessark-gateway:ci --format '{{json .RepoDigests}}')"
+          printf '%s\n' "$digests" >> "$GITHUB_STEP_SUMMARY"
+          printf 'digests=%s\n' "$digests" >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Publish GitHub release and chart assets
+    needs: [chart, image, publish]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # As with image publication, use only artifacts from this validated run.
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-assets-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          IMAGE_DIGESTS: ${{ needs.publish.outputs.image-digests }}
+        run: |
+          cd "$RUNNER_TEMP/release"
+          sha256sum -c SHA256SUMS
+          printf '%s\n' "$IMAGE_DIGESTS" | jq -e 'if type == "array" and length > 0 then . else error("Missing image digests") end' > application-images.json
+          sha256sum application-images.json >> SHA256SUMS
+          flags=(--latest)
+          if [[ "$RELEASE_TAG" == *-* ]]; then flags=(--prerelease --latest=false); fi
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "Tessark Gateway $RELEASE_TAG" --notes-file release-notes.md \
+            "${flags[@]}" ./*.tgz SHA256SUMS application-images.json

@@ -23,8 +23,9 @@ metadata:
 spec:
   instances: {{ .Values.database.cnpg.instances }}
   {{- with .Values.database.cnpg.imageName }}
-  imageName: {{ . | quote }}
+  imageName: {{ include "tessark-gateway.imageRef" (dict "root" $ "image" .) | quote }}
   {{- end }}
+  {{- include "tessark-gateway.pullSecrets" (dict "root" . "local" .Values.database.cnpg.imagePullSecrets) | nindent 2 }}
   enableSuperuserAccess: false
   {{- with .Values.database.cnpg.resources }}
   resources:

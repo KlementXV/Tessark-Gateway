@@ -1,0 +1,76 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_version:
+        description: Application version, without v (for example 0.2.0 or 0.2.0-rc.1)
+        required: true
+        type: string
+      chart_version:
+        description: Helm chart version (for example 0.3.0 or 0.3.0-rc.1)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare a release pull request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Require the main branch
+        run: test "$GITHUB_REF" = refs/heads/main
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare and validate version files
+        env:
+          APP_VERSION: ${{ inputs.app_version }}
+          CHART_VERSION: ${{ inputs.chart_version }}
+        run: |
+          npm run release:prepare -- "$APP_VERSION" --chart "$CHART_VERSION"
+          npm run version:check -- --tag "v$APP_VERSION"
+      - name: Open the release PR and request CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ inputs.app_version }}
+        run: |
+          branch="release/v$APP_VERSION"
+          existing="$(git ls-remote --heads origin "refs/heads/$branch")"
+          if [ -n "$existing" ]; then
+            echo "Branch $branch already exists. Resume its PR; this workflow never overwrites it." >&2
+            exit 1
+          fi
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- package.json package-lock.json deploy/helm/tessark-gateway/Chart.yaml CHANGELOG.md
+          git commit -m "chore(release): prepare v$APP_VERSION"
+          git push origin "HEAD:refs/heads/$branch"
+          node scripts/versioning.mjs notes --tag "v$APP_VERSION" > "$RUNNER_TEMP/release-pr.md"
+          printf '\nReview these release and upgrade notes, wait for CI, then merge. After main passes CI, run **Publish release** with this application version.\n' >> "$RUNNER_TEMP/release-pr.md"
+          pr_url="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --title "Release v$APP_VERSION" --body-file "$RUNNER_TEMP/release-pr.md")"
+          printf 'Release PR: %s\n' "$pr_url" >> "$GITHUB_STEP_SUMMARY"
+          # Explicit dispatch also works for GITHUB_TOKEN-created PRs whose automatic runs
+          # are absent or require approval. This validation cannot publish an image.
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"

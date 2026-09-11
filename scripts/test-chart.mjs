@@ -119,3 +119,110 @@ test('migration wait exits on deadline without printing connection details', () 
   assert.equal(exitCode, 1);
   assert.deepEqual(errors, ['Database readiness timed out before migrations.']);
 });
+
+test('private mirror rewrites every workload and propagates pull secrets to jobs', () => {
+  const hash = `sha256:${'a'.repeat(64)}`;
+  const docs = render([
+    'global.imageRegistry="registry.internal:5000"',
+    'global.imageRepositoryPrefix="platform"',
+    'global.imagePullSecrets=["mirror"]',
+    'image.repository="ghcr.io/tessark/gateway"',
+    `image.digest="${hash}"`,
+    'imagePullSecrets=[{"name":"app"},{"name":"mirror"}]',
+    'database.embedded.image="docker.io/library/postgres:17-alpine"',
+    'database.embedded.imagePullSecrets=["database"]',
+    'skopeo.imagePullSecrets=["transfer"]',
+    `builds.runnerImage="ghcr.io/tessark/runner@${hash}"`,
+    'builds.imagePullSecrets=[{"name":"builder"}]',
+  ]);
+  for (const workload of docs.filter(doc => ['Deployment', 'Job', 'Pod'].includes(doc.kind))) {
+    const pod = workload.kind === 'Pod' ? workload.spec : workload.spec.template.spec;
+    assert.deepEqual(pod.imagePullSecrets, [{ name: 'mirror' }, { name: 'app' }]);
+    for (const container of [...(pod.initContainers ?? []), ...pod.containers]) {
+      assert.equal(container.image, `registry.internal:5000/platform/tessark/gateway@${hash}`);
+    }
+  }
+  const postgres = find(docs, 'StatefulSet').spec.template.spec;
+  assert.equal(postgres.containers[0].image, 'registry.internal:5000/platform/library/postgres:17-alpine');
+  assert.deepEqual(postgres.imagePullSecrets, [{ name: 'mirror' }, { name: 'database' }]);
+  const env = find(docs, 'ConfigMap').data;
+  assert.equal(env.SKOPEO_IMAGE, 'registry.internal:5000/platform/skopeo/stable:latest');
+  assert.equal(env.SKOPEO_IMAGE_PULL_SECRETS, 'mirror,transfer');
+  assert.equal(env.BUILDS_RUNNER_IMAGE, `registry.internal:5000/platform/tessark/runner@${hash}`);
+  assert.deepEqual(JSON.parse(env.BUILDS_IMAGE_PULL_SECRETS), [{ name: 'mirror' }, { name: 'builder' }]);
+});
+
+test('CNPG private image and secrets are configurable while an omitted image stays operator-owned', () => {
+  const settings = [...cnpg, 'global.imageRegistry="mirror.internal"', 'global.imagePullSecrets=["mirror"]',
+    'database.cnpg.imagePullSecrets=["database"]'];
+  const cluster = find(render([...settings, 'database.cnpg.imageName="ghcr.io/cloudnative-pg/postgresql:17"']), 'Cluster');
+  assert.equal(cluster.spec.imageName, 'mirror.internal/cloudnative-pg/postgresql:17');
+  assert.deepEqual(cluster.spec.imagePullSecrets, [{ name: 'mirror' }, { name: 'database' }]);
+  assert.equal(find(render(settings), 'Cluster').spec.imageName, undefined);
+});
+
+test('component-only configuration and legacy app pull secrets remain supported', () => {
+  const docs = render(['image.registry="private.internal"', 'image.repository="custom/gateway"',
+    'image.tag="release"', 'imagePullSecrets=[{"name":"app"}]',
+    'database.embedded.image="private.internal/custom/postgres:17"']);
+  assert.equal(find(docs, 'Deployment').spec.template.spec.containers[0].image, 'private.internal/custom/gateway:release');
+  assert.deepEqual(find(docs, 'Pod').spec.imagePullSecrets, [{ name: 'app' }]);
+  assert.equal(find(docs, 'StatefulSet').spec.template.spec.containers[0].image, 'private.internal/custom/postgres:17');
+});
+
+test('invalid image registry, digest and secret shapes fail before deployment', () => {
+  for (const invalid of ['global.imageRegistry="https://registry.internal"',
+    'global.imageRepositoryPrefix="mirror"', 'image.digest="sha256:bad"',
+    'global.imagePullSecrets=[{"name":"wrong-shape"}]', 'database.cnpg.imagePullSecrets=[1]']) {
+    assert.throws(() => render([invalid]), error => error.stderr.toString().includes('schema'));
+  }
+});
+
+test('ClusterIP defaults and custom listener keep service, probes and PORT aligned', () => {
+  const docs = render(['service.port=8080', 'service.targetPort=4000', 'service.clusterIP="10.96.0.50"',
+    'service.annotations={"example.test/network":"internal"}']);
+  const service = docs.find(doc => doc.kind === 'Service' && !doc.metadata.name.endsWith('-postgres'));
+  assert.equal(service.spec.type, 'ClusterIP');
+  assert.equal(service.spec.clusterIP, '10.96.0.50');
+  assert.equal(service.spec.ports[0].port, 8080);
+  assert.equal(service.spec.ports[0].targetPort, 'http');
+  assert.equal(service.spec.ports[0].nodePort, undefined);
+  assert.equal(service.metadata.annotations['example.test/network'], 'internal');
+  const app = find(docs, 'Deployment').spec.template.spec.containers[0];
+  assert.equal(app.ports[0].containerPort, 4000);
+  assert.equal(app.env.find(item => item.name === 'PORT').value, '4000');
+  assert.equal(app.readinessProbe.httpGet.port, 'http');
+  assert.equal(find(docs, 'Ingress'), undefined);
+});
+
+test('NodePort and LoadBalancer support fixed or allocated node ports', () => {
+  for (const type of ['NodePort', 'LoadBalancer']) {
+    for (const port of [0, 30080]) {
+      const docs = render([`service.type="${type}"`, `service.nodePort=${port}`, 'service.externalTrafficPolicy="Local"']);
+      const service = docs.find(doc => doc.kind === 'Service' && !doc.metadata.name.endsWith('-postgres'));
+      assert.equal(service.spec.type, type);
+      assert.equal(service.spec.ports[0].nodePort, port || undefined);
+      assert.equal(service.spec.externalTrafficPolicy, 'Local');
+    }
+  }
+});
+
+test('Ingress routes through the configured ClusterIP port with class and TLS', () => {
+  const docs = render(['ingress.enabled=true', 'ingress.ingressClassName="traefik"',
+    'ingress.annotations={"example.test/ingress":"enabled"}', 'service.port=8080',
+    'ingress.hosts=[{"host":"gateway.internal","paths":[{"path":"/","pathType":"Prefix"}]}]',
+    'ingress.tls=[{"secretName":"gateway-tls","hosts":["gateway.internal"]}]']);
+  const ingress = find(docs, 'Ingress');
+  assert.equal(ingress.spec.ingressClassName, 'traefik');
+  assert.equal(ingress.spec.tls[0].secretName, 'gateway-tls');
+  assert.equal(ingress.spec.rules[0].http.paths[0].backend.service.port.number, 8080);
+  assert.equal(find(docs, 'ConfigMap').data.AUTH_URL, 'https://gateway.internal');
+});
+
+test('invalid service combinations and empty enabled Ingress fail validation', () => {
+  for (const invalid of [['service.nodePort=30080'], ['service.externalTrafficPolicy="Local"'],
+    ['service.targetPort=80'], ['service.type="NodePort"', 'service.nodePort=65536'],
+    ['ingress.enabled=true', 'ingress.hosts=[]']]) {
+    assert.throws(() => render(invalid), error => error.stderr.toString().includes('schema'));
+  }
+});

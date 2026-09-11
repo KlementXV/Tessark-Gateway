@@ -10,16 +10,33 @@
 
 | Job | Checks |
 | --- | --- |
-| Code and configuration | Prisma generation, ESLint, TypeScript, translations, environment example, Harbor surface/matrix, production dependency audit (high/critical) |
+| Code and configuration | Version/changelog/tag consistency, Prisma generation, ESLint, TypeScript, translations, environment example, Harbor surface/matrix, production dependency audit (high/critical) |
 | Tests, Node 22 and 24 | Application unit tests, real local TLS handshakes, Python build-runner tests |
 | PostgreSQL | PostgreSQL 17 service, all migrations in a temporary schema, cross-connection locks and durable cleanup |
 | Helm | Lint, embedded/CNPG/external rendering, CNPG configuration/credentials, migration wait/retry behavior, build configuration and rejection of invalid activation |
 | Image | Linux AMD64 Docker build, migrations, idempotent seed, password preservation, readiness, login page, API authentication boundary and Swagger |
 | Publish | Download the tested image, verify its image ID, then push it to GHCR |
+| Release | After a successful version-tag publication, create the GitHub Release with changelog notes, chart archive, application image digests and checksums |
 
 The image job waits for all checks. The publish job has no source checkout and does not rebuild or execute the application; it publishes the artifact that passed the image checks. Only this job receives `packages: write`. Actions are pinned to commit SHAs. Pull requests use `pull_request`, not `pull_request_target`, and never publish.
 
-The image is built without application secrets. Docker layer caching and npm caching speed up subsequent runs. The tested image archive is retained for one day; logs and the published image references are available in the Actions run. Manual workflow runs perform validation only.
+The image is built without application secrets. Docker layer caching and npm caching speed up subsequent runs. The tested image archive is retained for one day; release assets for seven days. Logs and published image references are available in the Actions run. Manual runs validate only unless `publish_release=true` is explicitly requested on a version tag.
+
+Use **Actions → Prepare release** to open a version/changelog PR, then **Publish release** on `main` after merging and passing CI. Publication verifies the exact main commit and dispatches this pipeline on its version tag. Both workflows use `GITHUB_TOKEN`; see [setup and operation](../releases.md). The local preparation command remains available.
+
+### Runtime image contents
+
+The runner ships Next.js standalone output plus the installed dependency closure of Prisma,
+tsx, dotenv and zod for the Helm migration/seed hooks. `scripts/prepare-runtime.mjs` resolves
+those packages from the lockfile-installed builder tree, preserving nested versions and native
+optional packages without a second dependency installation. The full builder `node_modules`
+is never copied into a final layer. Source files used by the TypeScript seed and its path
+aliases remain available. The same image still runs the web server, `prisma migrate deploy`
+and `prisma db seed`; no separate migration image is required.
+
+`test-image.sh` verifies the absence of build-only packages as well as migrations, seed and web
+endpoints. Run locally with `docker build -t tessark-gateway:local .` followed by
+`bash scripts/test-image.sh tessark-gateway:local`.
 
 ### Package and tags
 
@@ -30,14 +47,18 @@ The application package is **`ghcr.io/klementxv/tessark-gateway`**. The image na
 | Push to `main` | `main`, `sha-<full-commit>` |
 | Tag `v1.2.3` | `1.2.3`, `latest`, `sha-<full-commit>` |
 | Tag `v1.2.3-rc.1` | `1.2.3-rc.1`, `sha-<full-commit>`; does not change `latest` |
-| Pull request or manual run | None |
+| Manual run on a version tag with `publish_release=true` | Same tags as a push of that version tag |
+| Pull request or other manual run | None |
 
-Invalid version tags fail before publication. `latest` follows the most recently published stable release, not development pushes. For a deployment that must not change when a tag is updated, use an image digest. The Helm chart currently accepts an application repository/tag pair; the build runner setting separately requires a digest.
+Before publication, CI checks that the Git tag matches `package.json`, the lockfile, the chart's `appVersion` and a dated entry in [CHANGELOG.md](../../CHANGELOG.md). The chart has its own independent version. Prepare these files through **Prepare release**, or locally with `npm run release:prepare -- VERSION --chart CHART_VERSION`; see [the release guide](../releases.md).
+
+`latest` follows the most recently published stable release, not development pushes. For a deployment that must not change when a tag is updated, use `image.digest` in Helm; it takes precedence over `image.tag`. The build runner separately requires a digest.
 
 ```bash
 docker pull ghcr.io/klementxv/tessark-gateway:main
 
-# Publish a stable version after committing the intended code.
+# After preparing the release files, reviewing and committing them, and passing CI:
+npm run version:check -- --tag v1.2.3
 git tag v1.2.3
 git push origin v1.2.3
 ```
@@ -67,6 +88,7 @@ After the [local prerequisites](../../README.md#english):
 ```bash
 npm ci
 npm run prisma:generate
+npm run version:check
 npm run lint
 npx tsc --noEmit
 npm test
@@ -88,7 +110,7 @@ Real Harbor conformance and installation into a live Kubernetes cluster are sepa
 
 ### Troubleshooting
 
-- **No publish job:** expected on pull requests/manual runs, or when a prerequisite failed.
+- **No publish job:** expected on pull requests, validation-only manual runs, or when a prerequisite failed.
 - **Package push denied:** verify `packages: write`, repository policy and Actions access on any pre-existing package.
 - **Image download denied:** check package visibility or authenticate with package-read credentials.
 - **Dependency audit failure:** inspect the advisory and update the affected dependency before releasing.
@@ -97,22 +119,32 @@ Real Harbor conformance and installation into a live Kubernetes cluster are sepa
 
 ## Français
 
+L’image d’exécution contient la sortie standalone de Next.js et les dépendances nécessaires
+aux hooks Prisma/tsx, assemblées par `scripts/prepare-runtime.mjs` à partir des versions
+installées avec le lockfile. Les outils de build ne sont plus recopiés. Le serveur, les
+migrations et le seed restent dans la même image. `test-image.sh` vérifie cette composition
+et leur fonctionnement.
+
+
 ### Pipeline
 
 [Le workflow](../../.github/workflows/ci.yml) s’exécute sur les pull requests, les pushes vers `main`, les tags de version commençant par `v` et les lancements manuels **Run workflow**.
 
 | Job | Vérifications |
 | --- | --- |
-| Code et configuration | Génération Prisma, ESLint, TypeScript, traductions, exemple d’environnement, surface/matrice Harbor, audit des dépendances de production (sévérité haute/critique) |
+| Code et configuration | Cohérence versions/changelog/tag, génération Prisma, ESLint, TypeScript, traductions, exemple d’environnement, surface/matrice Harbor, audit des dépendances de production (sévérité haute/critique) |
 | Tests, Node 22 et 24 | Tests applicatifs, véritables connexions TLS locales, tests Python du runner |
 | PostgreSQL | Service PostgreSQL 17, toutes les migrations dans un schéma temporaire, verrous entre connexions et nettoyage durable |
 | Helm | Lint, rendu embedded/CNPG/external, configuration/identifiants CNPG, attente des migrations, configuration des builds et refus des activations invalides |
 | Image | Build Docker Linux AMD64, migrations, seed idempotent, conservation du mot de passe, readiness, page de connexion, protection API et Swagger |
 | Publication | Téléchargement de l’image testée, vérification de son identifiant, puis push vers GHCR |
+| Release | Après publication réussie d’un tag de version, création de la GitHub Release avec notes du changelog, archive du chart, digests de l’image applicative et sommes de contrôle |
 
 Le job image attend toutes les vérifications. Le job de publication ne récupère pas le code source, ne reconstruit pas l’image et n’exécute pas l’application ; il publie l’artefact qui a passé les tests. Lui seul reçoit `packages: write`. Les actions sont figées par SHA de commit. Les pull requests utilisent `pull_request`, jamais `pull_request_target`, et ne publient rien.
 
-L’image est construite sans secrets applicatifs. Les caches Docker et npm accélèrent les exécutions suivantes. L’archive de l’image testée est conservée un jour ; les logs et références publiées sont disponibles dans l’exécution Actions. Un lancement manuel effectue uniquement les validations.
+L’image est construite sans secrets applicatifs. Les caches Docker et npm accélèrent les exécutions suivantes. L’archive de l’image testée est conservée un jour ; les assets de release sept jours. Les logs et références publiées sont disponibles dans l’exécution Actions. Un lancement manuel valide uniquement, sauf si `publish_release=true` est explicitement demandé sur un tag de version.
+
+Utiliser **Actions → Prepare release** pour ouvrir une PR de versions/changelog, puis **Publish release** sur `main` après fusion et réussite de la CI. La publication vérifie le commit exact de `main` et lance ce pipeline sur son tag de version. Les deux workflows utilisent `GITHUB_TOKEN` ; voir leur [configuration et utilisation](../releases.md). La commande de préparation locale reste disponible.
 
 ### Package et tags
 
@@ -123,14 +155,18 @@ Le package applicatif est **`ghcr.io/klementxv/tessark-gateway`**. Son nom est d
 | Push vers `main` | `main`, `sha-<commit-complet>` |
 | Tag `v1.2.3` | `1.2.3`, `latest`, `sha-<commit-complet>` |
 | Tag `v1.2.3-rc.1` | `1.2.3-rc.1`, `sha-<commit-complet>` ; ne modifie pas `latest` |
-| Pull request ou lancement manuel | Aucun |
+| Lancement manuel sur un tag avec `publish_release=true` | Mêmes tags que pour le push de ce tag de version |
+| Pull request ou autre lancement manuel | Aucun |
 
-Un tag de version invalide échoue avant publication. `latest` suit la dernière version stable publiée, pas les pushes de développement. Pour un déploiement qui ne doit pas changer lorsqu’un tag est modifié, utiliser un digest. Le chart Helm accepte actuellement un couple dépôt/tag pour l’application ; le réglage du runner exige séparément un digest.
+Avant publication, la CI vérifie que le tag Git correspond à `package.json`, au lockfile, à l’`appVersion` du chart et à une entrée datée dans [CHANGELOG.md](../../CHANGELOG.md). Le chart possède sa propre version indépendante. Préparer ces fichiers via **Prepare release**, ou localement avec `npm run release:prepare -- VERSION --chart VERSION_CHART` ; voir le [guide des releases](../releases.md).
+
+`latest` suit la dernière version stable publiée, pas les pushes de développement. Pour un déploiement immuable, utiliser `image.digest` dans Helm : il prend priorité sur `image.tag`. Le runner exige séparément un digest.
 
 ```bash
 docker pull ghcr.io/klementxv/tessark-gateway:main
 
-# Publier une version stable après avoir commité le code souhaité.
+# Après préparation, revue et commit des fichiers de release, puis réussite de la CI :
+npm run version:check -- --tag v1.2.3
 git tag v1.2.3
 git push origin v1.2.3
 ```
@@ -160,6 +196,7 @@ Après les [prérequis locaux](../../README.md#français) :
 ```bash
 npm ci
 npm run prisma:generate
+npm run version:check
 npm run lint
 npx tsc --noEmit
 npm test
@@ -181,7 +218,7 @@ La conformance Harbor réelle et l’installation sur un cluster Kubernetes rée
 
 ### Dépannage
 
-- **Pas de job de publication :** normal sur une pull request/un lancement manuel, ou si un prérequis a échoué.
+- **Pas de job de publication :** normal sur une pull request, un lancement manuel de validation, ou si un prérequis a échoué.
 - **Push du package refusé :** vérifier `packages: write`, la politique du dépôt et l’accès Actions à un package préexistant.
 - **Téléchargement refusé :** vérifier la visibilité du package ou s’authentifier avec des droits de lecture.
 - **Échec de l’audit :** examiner l’avis de sécurité et mettre à jour la dépendance concernée avant publication.

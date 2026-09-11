@@ -1,0 +1,76 @@
+name: Publish release
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_version:
+        description: Merged and validated application version, without v
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Tag the validated main commit and dispatch publication
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Require the main branch
+        run: test "$GITHUB_REF" = refs/heads/main
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Verify the version, main CI and publication state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ inputs.app_version }}
+        run: |
+          npm run version:check -- --tag "v$APP_VERSION"
+          commit="$(git rev-parse HEAD)"
+          runs="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event push --commit "$commit" --status success --limit 1 --json databaseId --jq length)"
+          if [ "$runs" -eq 0 ]; then
+            echo "The exact main commit $commit must pass the complete CI before release." >&2
+            exit 1
+          fi
+          published="$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/releases?per_page=100" | jq --arg tag "v$APP_VERSION" '[.[][] | select(.tag_name == $tag)] | length')"
+          if [ "$published" -ne 0 ]; then
+            echo "Release v$APP_VERSION already exists. Published releases and drafts are not overwritten." >&2
+            exit 1
+          fi
+      - name: Create or verify the tag, then request the release pipeline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ inputs.app_version }}
+        run: |
+          tag="v$APP_VERSION"
+          commit="$(git rev-parse HEAD)"
+          existing="$(git ls-remote --tags origin "refs/tags/$tag")"
+          if [ -n "$existing" ]; then
+            git fetch --no-tags origin "refs/tags/$tag"
+            test "$(git rev-parse 'FETCH_HEAD^{commit}')" = "$commit"
+          else
+            git tag "$tag" "$commit"
+            git push origin "refs/tags/$tag"
+          fi
+          # A tag pushed with GITHUB_TOKEN does not trigger the push workflow. Dispatch it
+          # explicitly on that tag; never rebuild or publish directly in this workflow.
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$tag" -f publish_release=true
+          printf 'Release pipeline requested for `%s` at `%s`. Follow **Test, build and publish** for the publication result.\n' "$tag" "$commit" >> "$GITHUB_STEP_SUMMARY"

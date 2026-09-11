@@ -39,6 +39,11 @@ export type InstanceSettings = $Result.DefaultSelection<Prisma.$InstanceSettings
  */
 export type Cluster = $Result.DefaultSelection<Prisma.$ClusterPayload>
 /**
+ * Model ClusterDirectoryConfig
+ * 
+ */
+export type ClusterDirectoryConfig = $Result.DefaultSelection<Prisma.$ClusterDirectoryConfigPayload>
+/**
  * Model UserClusterIdentity
  * 
  */
@@ -462,6 +467,16 @@ export class PrismaClient<
     * ```
     */
   get cluster(): Prisma.ClusterDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.clusterDirectoryConfig`: Exposes CRUD operations for the **ClusterDirectoryConfig** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ClusterDirectoryConfigs
+    * const clusterDirectoryConfigs = await prisma.clusterDirectoryConfig.findMany()
+    * ```
+    */
+  get clusterDirectoryConfig(): Prisma.ClusterDirectoryConfigDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.userClusterIdentity`: Exposes CRUD operations for the **UserClusterIdentity** model.
@@ -1128,6 +1143,7 @@ export namespace Prisma {
     Notification: 'Notification',
     InstanceSettings: 'InstanceSettings',
     Cluster: 'Cluster',
+    ClusterDirectoryConfig: 'ClusterDirectoryConfig',
     UserClusterIdentity: 'UserClusterIdentity',
     Registry: 'Registry',
     Project: 'Project',
@@ -1168,7 +1184,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "apiToken" | "notification" | "instanceSettings" | "cluster" | "userClusterIdentity" | "registry" | "project" | "projectPlacement" | "projectMember" | "projectGroupMember" | "quotaRequest" | "projectDeleteRequest" | "robotAccount" | "robotPlacement" | "retentionPolicy" | "upstreamSource" | "transferRequest" | "transferTarget" | "pendingOperation" | "replicationLink" | "transferRule" | "scheduledMirror" | "replicationCleanup" | "scheduledBuild" | "buildRevision" | "buildRun"
+      modelProps: "user" | "apiToken" | "notification" | "instanceSettings" | "cluster" | "clusterDirectoryConfig" | "userClusterIdentity" | "registry" | "project" | "projectPlacement" | "projectMember" | "projectGroupMember" | "quotaRequest" | "projectDeleteRequest" | "robotAccount" | "robotPlacement" | "retentionPolicy" | "upstreamSource" | "transferRequest" | "transferTarget" | "pendingOperation" | "replicationLink" | "transferRule" | "scheduledMirror" | "replicationCleanup" | "scheduledBuild" | "buildRevision" | "buildRun"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1539,6 +1555,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ClusterCountArgs<ExtArgs>
             result: $Utils.Optional<ClusterCountAggregateOutputType> | number
+          }
+        }
+      }
+      ClusterDirectoryConfig: {
+        payload: Prisma.$ClusterDirectoryConfigPayload<ExtArgs>
+        fields: Prisma.ClusterDirectoryConfigFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ClusterDirectoryConfigFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ClusterDirectoryConfigFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>
+          }
+          findFirst: {
+            args: Prisma.ClusterDirectoryConfigFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ClusterDirectoryConfigFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>
+          }
+          findMany: {
+            args: Prisma.ClusterDirectoryConfigFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>[]
+          }
+          create: {
+            args: Prisma.ClusterDirectoryConfigCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>
+          }
+          createMany: {
+            args: Prisma.ClusterDirectoryConfigCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ClusterDirectoryConfigCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>[]
+          }
+          delete: {
+            args: Prisma.ClusterDirectoryConfigDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>
+          }
+          update: {
+            args: Prisma.ClusterDirectoryConfigUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>
+          }
+          deleteMany: {
+            args: Prisma.ClusterDirectoryConfigDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ClusterDirectoryConfigUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ClusterDirectoryConfigUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>[]
+          }
+          upsert: {
+            args: Prisma.ClusterDirectoryConfigUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClusterDirectoryConfigPayload>
+          }
+          aggregate: {
+            args: Prisma.ClusterDirectoryConfigAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateClusterDirectoryConfig>
+          }
+          groupBy: {
+            args: Prisma.ClusterDirectoryConfigGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ClusterDirectoryConfigGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ClusterDirectoryConfigCountArgs<ExtArgs>
+            result: $Utils.Optional<ClusterDirectoryConfigCountAggregateOutputType> | number
           }
         }
       }
@@ -3271,6 +3361,7 @@ export namespace Prisma {
     notification?: NotificationOmit
     instanceSettings?: InstanceSettingsOmit
     cluster?: ClusterOmit
+    clusterDirectoryConfig?: ClusterDirectoryConfigOmit
     userClusterIdentity?: UserClusterIdentityOmit
     registry?: RegistryOmit
     project?: ProjectOmit
@@ -8506,6 +8597,7 @@ export namespace Prisma {
     registries?: boolean | Cluster$registriesArgs<ExtArgs>
     projects?: boolean | Cluster$projectsArgs<ExtArgs>
     identities?: boolean | Cluster$identitiesArgs<ExtArgs>
+    directoryConfig?: boolean | Cluster$directoryConfigArgs<ExtArgs>
     _count?: boolean | ClusterCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cluster"]>
 
@@ -8550,6 +8642,7 @@ export namespace Prisma {
     registries?: boolean | Cluster$registriesArgs<ExtArgs>
     projects?: boolean | Cluster$projectsArgs<ExtArgs>
     identities?: boolean | Cluster$identitiesArgs<ExtArgs>
+    directoryConfig?: boolean | Cluster$directoryConfigArgs<ExtArgs>
     _count?: boolean | ClusterCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ClusterIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -8561,6 +8654,7 @@ export namespace Prisma {
       registries: Prisma.$RegistryPayload<ExtArgs>[]
       projects: Prisma.$ProjectPayload<ExtArgs>[]
       identities: Prisma.$UserClusterIdentityPayload<ExtArgs>[]
+      directoryConfig: Prisma.$ClusterDirectoryConfigPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -8969,6 +9063,7 @@ export namespace Prisma {
     registries<T extends Cluster$registriesArgs<ExtArgs> = {}>(args?: Subset<T, Cluster$registriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RegistryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     projects<T extends Cluster$projectsArgs<ExtArgs> = {}>(args?: Subset<T, Cluster$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     identities<T extends Cluster$identitiesArgs<ExtArgs> = {}>(args?: Subset<T, Cluster$identitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserClusterIdentityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    directoryConfig<T extends Cluster$directoryConfigArgs<ExtArgs> = {}>(args?: Subset<T, Cluster$directoryConfigArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9467,6 +9562,25 @@ export namespace Prisma {
   }
 
   /**
+   * Cluster.directoryConfig
+   */
+  export type Cluster$directoryConfigArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    where?: ClusterDirectoryConfigWhereInput
+  }
+
+  /**
    * Cluster without action
    */
   export type ClusterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9482,6 +9596,1271 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ClusterInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ClusterDirectoryConfig
+   */
+
+  export type AggregateClusterDirectoryConfig = {
+    _count: ClusterDirectoryConfigCountAggregateOutputType | null
+    _avg: ClusterDirectoryConfigAvgAggregateOutputType | null
+    _sum: ClusterDirectoryConfigSumAggregateOutputType | null
+    _min: ClusterDirectoryConfigMinAggregateOutputType | null
+    _max: ClusterDirectoryConfigMaxAggregateOutputType | null
+  }
+
+  export type ClusterDirectoryConfigAvgAggregateOutputType = {
+    scope: number | null
+    groupSearchScope: number | null
+  }
+
+  export type ClusterDirectoryConfigSumAggregateOutputType = {
+    scope: number | null
+    groupSearchScope: number | null
+  }
+
+  export type ClusterDirectoryConfigMinAggregateOutputType = {
+    id: string | null
+    clusterId: string | null
+    enabled: boolean | null
+    url: string | null
+    searchDn: string | null
+    encryptedSearchPassword: string | null
+    baseDn: string | null
+    filter: string | null
+    uid: string | null
+    scope: number | null
+    verifyCert: boolean | null
+    groupBaseDn: string | null
+    groupSearchFilter: string | null
+    groupAttributeName: string | null
+    groupMembershipAttribute: string | null
+    groupSearchScope: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ClusterDirectoryConfigMaxAggregateOutputType = {
+    id: string | null
+    clusterId: string | null
+    enabled: boolean | null
+    url: string | null
+    searchDn: string | null
+    encryptedSearchPassword: string | null
+    baseDn: string | null
+    filter: string | null
+    uid: string | null
+    scope: number | null
+    verifyCert: boolean | null
+    groupBaseDn: string | null
+    groupSearchFilter: string | null
+    groupAttributeName: string | null
+    groupMembershipAttribute: string | null
+    groupSearchScope: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ClusterDirectoryConfigCountAggregateOutputType = {
+    id: number
+    clusterId: number
+    enabled: number
+    url: number
+    searchDn: number
+    encryptedSearchPassword: number
+    baseDn: number
+    filter: number
+    uid: number
+    scope: number
+    verifyCert: number
+    groupBaseDn: number
+    groupSearchFilter: number
+    groupAttributeName: number
+    groupMembershipAttribute: number
+    groupSearchScope: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ClusterDirectoryConfigAvgAggregateInputType = {
+    scope?: true
+    groupSearchScope?: true
+  }
+
+  export type ClusterDirectoryConfigSumAggregateInputType = {
+    scope?: true
+    groupSearchScope?: true
+  }
+
+  export type ClusterDirectoryConfigMinAggregateInputType = {
+    id?: true
+    clusterId?: true
+    enabled?: true
+    url?: true
+    searchDn?: true
+    encryptedSearchPassword?: true
+    baseDn?: true
+    filter?: true
+    uid?: true
+    scope?: true
+    verifyCert?: true
+    groupBaseDn?: true
+    groupSearchFilter?: true
+    groupAttributeName?: true
+    groupMembershipAttribute?: true
+    groupSearchScope?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ClusterDirectoryConfigMaxAggregateInputType = {
+    id?: true
+    clusterId?: true
+    enabled?: true
+    url?: true
+    searchDn?: true
+    encryptedSearchPassword?: true
+    baseDn?: true
+    filter?: true
+    uid?: true
+    scope?: true
+    verifyCert?: true
+    groupBaseDn?: true
+    groupSearchFilter?: true
+    groupAttributeName?: true
+    groupMembershipAttribute?: true
+    groupSearchScope?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ClusterDirectoryConfigCountAggregateInputType = {
+    id?: true
+    clusterId?: true
+    enabled?: true
+    url?: true
+    searchDn?: true
+    encryptedSearchPassword?: true
+    baseDn?: true
+    filter?: true
+    uid?: true
+    scope?: true
+    verifyCert?: true
+    groupBaseDn?: true
+    groupSearchFilter?: true
+    groupAttributeName?: true
+    groupMembershipAttribute?: true
+    groupSearchScope?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ClusterDirectoryConfigAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ClusterDirectoryConfig to aggregate.
+     */
+    where?: ClusterDirectoryConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClusterDirectoryConfigs to fetch.
+     */
+    orderBy?: ClusterDirectoryConfigOrderByWithRelationInput | ClusterDirectoryConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ClusterDirectoryConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClusterDirectoryConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClusterDirectoryConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ClusterDirectoryConfigs
+    **/
+    _count?: true | ClusterDirectoryConfigCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ClusterDirectoryConfigAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ClusterDirectoryConfigSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ClusterDirectoryConfigMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ClusterDirectoryConfigMaxAggregateInputType
+  }
+
+  export type GetClusterDirectoryConfigAggregateType<T extends ClusterDirectoryConfigAggregateArgs> = {
+        [P in keyof T & keyof AggregateClusterDirectoryConfig]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateClusterDirectoryConfig[P]>
+      : GetScalarType<T[P], AggregateClusterDirectoryConfig[P]>
+  }
+
+
+
+
+  export type ClusterDirectoryConfigGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ClusterDirectoryConfigWhereInput
+    orderBy?: ClusterDirectoryConfigOrderByWithAggregationInput | ClusterDirectoryConfigOrderByWithAggregationInput[]
+    by: ClusterDirectoryConfigScalarFieldEnum[] | ClusterDirectoryConfigScalarFieldEnum
+    having?: ClusterDirectoryConfigScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ClusterDirectoryConfigCountAggregateInputType | true
+    _avg?: ClusterDirectoryConfigAvgAggregateInputType
+    _sum?: ClusterDirectoryConfigSumAggregateInputType
+    _min?: ClusterDirectoryConfigMinAggregateInputType
+    _max?: ClusterDirectoryConfigMaxAggregateInputType
+  }
+
+  export type ClusterDirectoryConfigGroupByOutputType = {
+    id: string
+    clusterId: string
+    enabled: boolean
+    url: string
+    searchDn: string
+    encryptedSearchPassword: string | null
+    baseDn: string
+    filter: string
+    uid: string
+    scope: number
+    verifyCert: boolean
+    groupBaseDn: string
+    groupSearchFilter: string
+    groupAttributeName: string
+    groupMembershipAttribute: string
+    groupSearchScope: number
+    createdAt: Date
+    updatedAt: Date
+    _count: ClusterDirectoryConfigCountAggregateOutputType | null
+    _avg: ClusterDirectoryConfigAvgAggregateOutputType | null
+    _sum: ClusterDirectoryConfigSumAggregateOutputType | null
+    _min: ClusterDirectoryConfigMinAggregateOutputType | null
+    _max: ClusterDirectoryConfigMaxAggregateOutputType | null
+  }
+
+  type GetClusterDirectoryConfigGroupByPayload<T extends ClusterDirectoryConfigGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ClusterDirectoryConfigGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ClusterDirectoryConfigGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ClusterDirectoryConfigGroupByOutputType[P]>
+            : GetScalarType<T[P], ClusterDirectoryConfigGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ClusterDirectoryConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clusterId?: boolean
+    enabled?: boolean
+    url?: boolean
+    searchDn?: boolean
+    encryptedSearchPassword?: boolean
+    baseDn?: boolean
+    filter?: boolean
+    uid?: boolean
+    scope?: boolean
+    verifyCert?: boolean
+    groupBaseDn?: boolean
+    groupSearchFilter?: boolean
+    groupAttributeName?: boolean
+    groupMembershipAttribute?: boolean
+    groupSearchScope?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    cluster?: boolean | ClusterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["clusterDirectoryConfig"]>
+
+  export type ClusterDirectoryConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clusterId?: boolean
+    enabled?: boolean
+    url?: boolean
+    searchDn?: boolean
+    encryptedSearchPassword?: boolean
+    baseDn?: boolean
+    filter?: boolean
+    uid?: boolean
+    scope?: boolean
+    verifyCert?: boolean
+    groupBaseDn?: boolean
+    groupSearchFilter?: boolean
+    groupAttributeName?: boolean
+    groupMembershipAttribute?: boolean
+    groupSearchScope?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    cluster?: boolean | ClusterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["clusterDirectoryConfig"]>
+
+  export type ClusterDirectoryConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clusterId?: boolean
+    enabled?: boolean
+    url?: boolean
+    searchDn?: boolean
+    encryptedSearchPassword?: boolean
+    baseDn?: boolean
+    filter?: boolean
+    uid?: boolean
+    scope?: boolean
+    verifyCert?: boolean
+    groupBaseDn?: boolean
+    groupSearchFilter?: boolean
+    groupAttributeName?: boolean
+    groupMembershipAttribute?: boolean
+    groupSearchScope?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    cluster?: boolean | ClusterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["clusterDirectoryConfig"]>
+
+  export type ClusterDirectoryConfigSelectScalar = {
+    id?: boolean
+    clusterId?: boolean
+    enabled?: boolean
+    url?: boolean
+    searchDn?: boolean
+    encryptedSearchPassword?: boolean
+    baseDn?: boolean
+    filter?: boolean
+    uid?: boolean
+    scope?: boolean
+    verifyCert?: boolean
+    groupBaseDn?: boolean
+    groupSearchFilter?: boolean
+    groupAttributeName?: boolean
+    groupMembershipAttribute?: boolean
+    groupSearchScope?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ClusterDirectoryConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clusterId" | "enabled" | "url" | "searchDn" | "encryptedSearchPassword" | "baseDn" | "filter" | "uid" | "scope" | "verifyCert" | "groupBaseDn" | "groupSearchFilter" | "groupAttributeName" | "groupMembershipAttribute" | "groupSearchScope" | "createdAt" | "updatedAt", ExtArgs["result"]["clusterDirectoryConfig"]>
+  export type ClusterDirectoryConfigInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cluster?: boolean | ClusterDefaultArgs<ExtArgs>
+  }
+  export type ClusterDirectoryConfigIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cluster?: boolean | ClusterDefaultArgs<ExtArgs>
+  }
+  export type ClusterDirectoryConfigIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cluster?: boolean | ClusterDefaultArgs<ExtArgs>
+  }
+
+  export type $ClusterDirectoryConfigPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ClusterDirectoryConfig"
+    objects: {
+      cluster: Prisma.$ClusterPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      clusterId: string
+      enabled: boolean
+      url: string
+      searchDn: string
+      encryptedSearchPassword: string | null
+      baseDn: string
+      filter: string
+      uid: string
+      scope: number
+      verifyCert: boolean
+      groupBaseDn: string
+      groupSearchFilter: string
+      groupAttributeName: string
+      groupMembershipAttribute: string
+      groupSearchScope: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["clusterDirectoryConfig"]>
+    composites: {}
+  }
+
+  type ClusterDirectoryConfigGetPayload<S extends boolean | null | undefined | ClusterDirectoryConfigDefaultArgs> = $Result.GetResult<Prisma.$ClusterDirectoryConfigPayload, S>
+
+  type ClusterDirectoryConfigCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ClusterDirectoryConfigFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ClusterDirectoryConfigCountAggregateInputType | true
+    }
+
+  export interface ClusterDirectoryConfigDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ClusterDirectoryConfig'], meta: { name: 'ClusterDirectoryConfig' } }
+    /**
+     * Find zero or one ClusterDirectoryConfig that matches the filter.
+     * @param {ClusterDirectoryConfigFindUniqueArgs} args - Arguments to find a ClusterDirectoryConfig
+     * @example
+     * // Get one ClusterDirectoryConfig
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ClusterDirectoryConfigFindUniqueArgs>(args: SelectSubset<T, ClusterDirectoryConfigFindUniqueArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ClusterDirectoryConfig that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ClusterDirectoryConfigFindUniqueOrThrowArgs} args - Arguments to find a ClusterDirectoryConfig
+     * @example
+     * // Get one ClusterDirectoryConfig
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ClusterDirectoryConfigFindUniqueOrThrowArgs>(args: SelectSubset<T, ClusterDirectoryConfigFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ClusterDirectoryConfig that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClusterDirectoryConfigFindFirstArgs} args - Arguments to find a ClusterDirectoryConfig
+     * @example
+     * // Get one ClusterDirectoryConfig
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ClusterDirectoryConfigFindFirstArgs>(args?: SelectSubset<T, ClusterDirectoryConfigFindFirstArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ClusterDirectoryConfig that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClusterDirectoryConfigFindFirstOrThrowArgs} args - Arguments to find a ClusterDirectoryConfig
+     * @example
+     * // Get one ClusterDirectoryConfig
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ClusterDirectoryConfigFindFirstOrThrowArgs>(args?: SelectSubset<T, ClusterDirectoryConfigFindFirstOrThrowArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ClusterDirectoryConfigs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClusterDirectoryConfigFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ClusterDirectoryConfigs
+     * const clusterDirectoryConfigs = await prisma.clusterDirectoryConfig.findMany()
+     * 
+     * // Get first 10 ClusterDirectoryConfigs
+     * const clusterDirectoryConfigs = await prisma.clusterDirectoryConfig.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const clusterDirectoryConfigWithIdOnly = await prisma.clusterDirectoryConfig.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ClusterDirectoryConfigFindManyArgs>(args?: SelectSubset<T, ClusterDirectoryConfigFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ClusterDirectoryConfig.
+     * @param {ClusterDirectoryConfigCreateArgs} args - Arguments to create a ClusterDirectoryConfig.
+     * @example
+     * // Create one ClusterDirectoryConfig
+     * const ClusterDirectoryConfig = await prisma.clusterDirectoryConfig.create({
+     *   data: {
+     *     // ... data to create a ClusterDirectoryConfig
+     *   }
+     * })
+     * 
+     */
+    create<T extends ClusterDirectoryConfigCreateArgs>(args: SelectSubset<T, ClusterDirectoryConfigCreateArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ClusterDirectoryConfigs.
+     * @param {ClusterDirectoryConfigCreateManyArgs} args - Arguments to create many ClusterDirectoryConfigs.
+     * @example
+     * // Create many ClusterDirectoryConfigs
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ClusterDirectoryConfigCreateManyArgs>(args?: SelectSubset<T, ClusterDirectoryConfigCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ClusterDirectoryConfigs and returns the data saved in the database.
+     * @param {ClusterDirectoryConfigCreateManyAndReturnArgs} args - Arguments to create many ClusterDirectoryConfigs.
+     * @example
+     * // Create many ClusterDirectoryConfigs
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ClusterDirectoryConfigs and only return the `id`
+     * const clusterDirectoryConfigWithIdOnly = await prisma.clusterDirectoryConfig.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ClusterDirectoryConfigCreateManyAndReturnArgs>(args?: SelectSubset<T, ClusterDirectoryConfigCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ClusterDirectoryConfig.
+     * @param {ClusterDirectoryConfigDeleteArgs} args - Arguments to delete one ClusterDirectoryConfig.
+     * @example
+     * // Delete one ClusterDirectoryConfig
+     * const ClusterDirectoryConfig = await prisma.clusterDirectoryConfig.delete({
+     *   where: {
+     *     // ... filter to delete one ClusterDirectoryConfig
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ClusterDirectoryConfigDeleteArgs>(args: SelectSubset<T, ClusterDirectoryConfigDeleteArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ClusterDirectoryConfig.
+     * @param {ClusterDirectoryConfigUpdateArgs} args - Arguments to update one ClusterDirectoryConfig.
+     * @example
+     * // Update one ClusterDirectoryConfig
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ClusterDirectoryConfigUpdateArgs>(args: SelectSubset<T, ClusterDirectoryConfigUpdateArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ClusterDirectoryConfigs.
+     * @param {ClusterDirectoryConfigDeleteManyArgs} args - Arguments to filter ClusterDirectoryConfigs to delete.
+     * @example
+     * // Delete a few ClusterDirectoryConfigs
+     * const { count } = await prisma.clusterDirectoryConfig.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ClusterDirectoryConfigDeleteManyArgs>(args?: SelectSubset<T, ClusterDirectoryConfigDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ClusterDirectoryConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClusterDirectoryConfigUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ClusterDirectoryConfigs
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ClusterDirectoryConfigUpdateManyArgs>(args: SelectSubset<T, ClusterDirectoryConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ClusterDirectoryConfigs and returns the data updated in the database.
+     * @param {ClusterDirectoryConfigUpdateManyAndReturnArgs} args - Arguments to update many ClusterDirectoryConfigs.
+     * @example
+     * // Update many ClusterDirectoryConfigs
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ClusterDirectoryConfigs and only return the `id`
+     * const clusterDirectoryConfigWithIdOnly = await prisma.clusterDirectoryConfig.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ClusterDirectoryConfigUpdateManyAndReturnArgs>(args: SelectSubset<T, ClusterDirectoryConfigUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ClusterDirectoryConfig.
+     * @param {ClusterDirectoryConfigUpsertArgs} args - Arguments to update or create a ClusterDirectoryConfig.
+     * @example
+     * // Update or create a ClusterDirectoryConfig
+     * const clusterDirectoryConfig = await prisma.clusterDirectoryConfig.upsert({
+     *   create: {
+     *     // ... data to create a ClusterDirectoryConfig
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ClusterDirectoryConfig we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ClusterDirectoryConfigUpsertArgs>(args: SelectSubset<T, ClusterDirectoryConfigUpsertArgs<ExtArgs>>): Prisma__ClusterDirectoryConfigClient<$Result.GetResult<Prisma.$ClusterDirectoryConfigPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ClusterDirectoryConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClusterDirectoryConfigCountArgs} args - Arguments to filter ClusterDirectoryConfigs to count.
+     * @example
+     * // Count the number of ClusterDirectoryConfigs
+     * const count = await prisma.clusterDirectoryConfig.count({
+     *   where: {
+     *     // ... the filter for the ClusterDirectoryConfigs we want to count
+     *   }
+     * })
+    **/
+    count<T extends ClusterDirectoryConfigCountArgs>(
+      args?: Subset<T, ClusterDirectoryConfigCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ClusterDirectoryConfigCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ClusterDirectoryConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClusterDirectoryConfigAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ClusterDirectoryConfigAggregateArgs>(args: Subset<T, ClusterDirectoryConfigAggregateArgs>): Prisma.PrismaPromise<GetClusterDirectoryConfigAggregateType<T>>
+
+    /**
+     * Group by ClusterDirectoryConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClusterDirectoryConfigGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ClusterDirectoryConfigGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ClusterDirectoryConfigGroupByArgs['orderBy'] }
+        : { orderBy?: ClusterDirectoryConfigGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ClusterDirectoryConfigGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetClusterDirectoryConfigGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ClusterDirectoryConfig model
+   */
+  readonly fields: ClusterDirectoryConfigFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ClusterDirectoryConfig.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ClusterDirectoryConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    cluster<T extends ClusterDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClusterDefaultArgs<ExtArgs>>): Prisma__ClusterClient<$Result.GetResult<Prisma.$ClusterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ClusterDirectoryConfig model
+   */
+  interface ClusterDirectoryConfigFieldRefs {
+    readonly id: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly clusterId: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly enabled: FieldRef<"ClusterDirectoryConfig", 'Boolean'>
+    readonly url: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly searchDn: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly encryptedSearchPassword: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly baseDn: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly filter: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly uid: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly scope: FieldRef<"ClusterDirectoryConfig", 'Int'>
+    readonly verifyCert: FieldRef<"ClusterDirectoryConfig", 'Boolean'>
+    readonly groupBaseDn: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly groupSearchFilter: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly groupAttributeName: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly groupMembershipAttribute: FieldRef<"ClusterDirectoryConfig", 'String'>
+    readonly groupSearchScope: FieldRef<"ClusterDirectoryConfig", 'Int'>
+    readonly createdAt: FieldRef<"ClusterDirectoryConfig", 'DateTime'>
+    readonly updatedAt: FieldRef<"ClusterDirectoryConfig", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ClusterDirectoryConfig findUnique
+   */
+  export type ClusterDirectoryConfigFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which ClusterDirectoryConfig to fetch.
+     */
+    where: ClusterDirectoryConfigWhereUniqueInput
+  }
+
+  /**
+   * ClusterDirectoryConfig findUniqueOrThrow
+   */
+  export type ClusterDirectoryConfigFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which ClusterDirectoryConfig to fetch.
+     */
+    where: ClusterDirectoryConfigWhereUniqueInput
+  }
+
+  /**
+   * ClusterDirectoryConfig findFirst
+   */
+  export type ClusterDirectoryConfigFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which ClusterDirectoryConfig to fetch.
+     */
+    where?: ClusterDirectoryConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClusterDirectoryConfigs to fetch.
+     */
+    orderBy?: ClusterDirectoryConfigOrderByWithRelationInput | ClusterDirectoryConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ClusterDirectoryConfigs.
+     */
+    cursor?: ClusterDirectoryConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClusterDirectoryConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClusterDirectoryConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ClusterDirectoryConfigs.
+     */
+    distinct?: ClusterDirectoryConfigScalarFieldEnum | ClusterDirectoryConfigScalarFieldEnum[]
+  }
+
+  /**
+   * ClusterDirectoryConfig findFirstOrThrow
+   */
+  export type ClusterDirectoryConfigFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which ClusterDirectoryConfig to fetch.
+     */
+    where?: ClusterDirectoryConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClusterDirectoryConfigs to fetch.
+     */
+    orderBy?: ClusterDirectoryConfigOrderByWithRelationInput | ClusterDirectoryConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ClusterDirectoryConfigs.
+     */
+    cursor?: ClusterDirectoryConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClusterDirectoryConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClusterDirectoryConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ClusterDirectoryConfigs.
+     */
+    distinct?: ClusterDirectoryConfigScalarFieldEnum | ClusterDirectoryConfigScalarFieldEnum[]
+  }
+
+  /**
+   * ClusterDirectoryConfig findMany
+   */
+  export type ClusterDirectoryConfigFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which ClusterDirectoryConfigs to fetch.
+     */
+    where?: ClusterDirectoryConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClusterDirectoryConfigs to fetch.
+     */
+    orderBy?: ClusterDirectoryConfigOrderByWithRelationInput | ClusterDirectoryConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ClusterDirectoryConfigs.
+     */
+    cursor?: ClusterDirectoryConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClusterDirectoryConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClusterDirectoryConfigs.
+     */
+    skip?: number
+    distinct?: ClusterDirectoryConfigScalarFieldEnum | ClusterDirectoryConfigScalarFieldEnum[]
+  }
+
+  /**
+   * ClusterDirectoryConfig create
+   */
+  export type ClusterDirectoryConfigCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ClusterDirectoryConfig.
+     */
+    data: XOR<ClusterDirectoryConfigCreateInput, ClusterDirectoryConfigUncheckedCreateInput>
+  }
+
+  /**
+   * ClusterDirectoryConfig createMany
+   */
+  export type ClusterDirectoryConfigCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ClusterDirectoryConfigs.
+     */
+    data: ClusterDirectoryConfigCreateManyInput | ClusterDirectoryConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ClusterDirectoryConfig createManyAndReturn
+   */
+  export type ClusterDirectoryConfigCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * The data used to create many ClusterDirectoryConfigs.
+     */
+    data: ClusterDirectoryConfigCreateManyInput | ClusterDirectoryConfigCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ClusterDirectoryConfig update
+   */
+  export type ClusterDirectoryConfigUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ClusterDirectoryConfig.
+     */
+    data: XOR<ClusterDirectoryConfigUpdateInput, ClusterDirectoryConfigUncheckedUpdateInput>
+    /**
+     * Choose, which ClusterDirectoryConfig to update.
+     */
+    where: ClusterDirectoryConfigWhereUniqueInput
+  }
+
+  /**
+   * ClusterDirectoryConfig updateMany
+   */
+  export type ClusterDirectoryConfigUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ClusterDirectoryConfigs.
+     */
+    data: XOR<ClusterDirectoryConfigUpdateManyMutationInput, ClusterDirectoryConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which ClusterDirectoryConfigs to update
+     */
+    where?: ClusterDirectoryConfigWhereInput
+    /**
+     * Limit how many ClusterDirectoryConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ClusterDirectoryConfig updateManyAndReturn
+   */
+  export type ClusterDirectoryConfigUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * The data used to update ClusterDirectoryConfigs.
+     */
+    data: XOR<ClusterDirectoryConfigUpdateManyMutationInput, ClusterDirectoryConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which ClusterDirectoryConfigs to update
+     */
+    where?: ClusterDirectoryConfigWhereInput
+    /**
+     * Limit how many ClusterDirectoryConfigs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ClusterDirectoryConfig upsert
+   */
+  export type ClusterDirectoryConfigUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ClusterDirectoryConfig to update in case it exists.
+     */
+    where: ClusterDirectoryConfigWhereUniqueInput
+    /**
+     * In case the ClusterDirectoryConfig found by the `where` argument doesn't exist, create a new ClusterDirectoryConfig with this data.
+     */
+    create: XOR<ClusterDirectoryConfigCreateInput, ClusterDirectoryConfigUncheckedCreateInput>
+    /**
+     * In case the ClusterDirectoryConfig was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ClusterDirectoryConfigUpdateInput, ClusterDirectoryConfigUncheckedUpdateInput>
+  }
+
+  /**
+   * ClusterDirectoryConfig delete
+   */
+  export type ClusterDirectoryConfigDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
+    /**
+     * Filter which ClusterDirectoryConfig to delete.
+     */
+    where: ClusterDirectoryConfigWhereUniqueInput
+  }
+
+  /**
+   * ClusterDirectoryConfig deleteMany
+   */
+  export type ClusterDirectoryConfigDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ClusterDirectoryConfigs to delete
+     */
+    where?: ClusterDirectoryConfigWhereInput
+    /**
+     * Limit how many ClusterDirectoryConfigs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ClusterDirectoryConfig without action
+   */
+  export type ClusterDirectoryConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClusterDirectoryConfig
+     */
+    select?: ClusterDirectoryConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClusterDirectoryConfig
+     */
+    omit?: ClusterDirectoryConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClusterDirectoryConfigInclude<ExtArgs> | null
   }
 
 
@@ -10600,6 +11979,8 @@ export namespace Prisma {
     systemRobotSyncedAt: Date | null
     harborVersion: string | null
     harborVersionSeenAt: Date | null
+    ldapAppliedFingerprint: string | null
+    ldapAppliedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     clusterId: string | null
@@ -10621,6 +12002,8 @@ export namespace Prisma {
     systemRobotSyncedAt: Date | null
     harborVersion: string | null
     harborVersionSeenAt: Date | null
+    ldapAppliedFingerprint: string | null
+    ldapAppliedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     clusterId: string | null
@@ -10642,6 +12025,8 @@ export namespace Prisma {
     systemRobotSyncedAt: number
     harborVersion: number
     harborVersionSeenAt: number
+    ldapAppliedFingerprint: number
+    ldapAppliedAt: number
     createdAt: number
     updatedAt: number
     clusterId: number
@@ -10673,6 +12058,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: true
     harborVersion?: true
     harborVersionSeenAt?: true
+    ldapAppliedFingerprint?: true
+    ldapAppliedAt?: true
     createdAt?: true
     updatedAt?: true
     clusterId?: true
@@ -10694,6 +12081,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: true
     harborVersion?: true
     harborVersionSeenAt?: true
+    ldapAppliedFingerprint?: true
+    ldapAppliedAt?: true
     createdAt?: true
     updatedAt?: true
     clusterId?: true
@@ -10715,6 +12104,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: true
     harborVersion?: true
     harborVersionSeenAt?: true
+    ldapAppliedFingerprint?: true
+    ldapAppliedAt?: true
     createdAt?: true
     updatedAt?: true
     clusterId?: true
@@ -10823,6 +12214,8 @@ export namespace Prisma {
     systemRobotSyncedAt: Date | null
     harborVersion: string | null
     harborVersionSeenAt: Date | null
+    ldapAppliedFingerprint: string | null
+    ldapAppliedAt: Date | null
     createdAt: Date
     updatedAt: Date
     clusterId: string | null
@@ -10863,6 +12256,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: boolean
     harborVersion?: boolean
     harborVersionSeenAt?: boolean
+    ldapAppliedFingerprint?: boolean
+    ldapAppliedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     clusterId?: boolean
@@ -10898,6 +12293,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: boolean
     harborVersion?: boolean
     harborVersionSeenAt?: boolean
+    ldapAppliedFingerprint?: boolean
+    ldapAppliedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     clusterId?: boolean
@@ -10920,6 +12317,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: boolean
     harborVersion?: boolean
     harborVersionSeenAt?: boolean
+    ldapAppliedFingerprint?: boolean
+    ldapAppliedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     clusterId?: boolean
@@ -10942,12 +12341,14 @@ export namespace Prisma {
     systemRobotSyncedAt?: boolean
     harborVersion?: boolean
     harborVersionSeenAt?: boolean
+    ldapAppliedFingerprint?: boolean
+    ldapAppliedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     clusterId?: boolean
   }
 
-  export type RegistryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "baseUrl" | "role" | "authType" | "username" | "encryptedSecret" | "insecureTLS" | "description" | "systemRobotName" | "systemRobotId" | "systemRobotSecret" | "systemRobotSyncedAt" | "harborVersion" | "harborVersionSeenAt" | "createdAt" | "updatedAt" | "clusterId", ExtArgs["result"]["registry"]>
+  export type RegistryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "baseUrl" | "role" | "authType" | "username" | "encryptedSecret" | "insecureTLS" | "description" | "systemRobotName" | "systemRobotId" | "systemRobotSecret" | "systemRobotSyncedAt" | "harborVersion" | "harborVersionSeenAt" | "ldapAppliedFingerprint" | "ldapAppliedAt" | "createdAt" | "updatedAt" | "clusterId", ExtArgs["result"]["registry"]>
   export type RegistryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cluster?: boolean | Registry$clusterArgs<ExtArgs>
     placements?: boolean | Registry$placementsArgs<ExtArgs>
@@ -11004,6 +12405,8 @@ export namespace Prisma {
       systemRobotSyncedAt: Date | null
       harborVersion: string | null
       harborVersionSeenAt: Date | null
+      ldapAppliedFingerprint: string | null
+      ldapAppliedAt: Date | null
       createdAt: Date
       updatedAt: Date
       clusterId: string | null
@@ -11458,6 +12861,8 @@ export namespace Prisma {
     readonly systemRobotSyncedAt: FieldRef<"Registry", 'DateTime'>
     readonly harborVersion: FieldRef<"Registry", 'String'>
     readonly harborVersionSeenAt: FieldRef<"Registry", 'DateTime'>
+    readonly ldapAppliedFingerprint: FieldRef<"Registry", 'String'>
+    readonly ldapAppliedAt: FieldRef<"Registry", 'DateTime'>
     readonly createdAt: FieldRef<"Registry", 'DateTime'>
     readonly updatedAt: FieldRef<"Registry", 'DateTime'>
     readonly clusterId: FieldRef<"Registry", 'String'>
@@ -36350,6 +37755,30 @@ export namespace Prisma {
   export type ClusterScalarFieldEnum = (typeof ClusterScalarFieldEnum)[keyof typeof ClusterScalarFieldEnum]
 
 
+  export const ClusterDirectoryConfigScalarFieldEnum: {
+    id: 'id',
+    clusterId: 'clusterId',
+    enabled: 'enabled',
+    url: 'url',
+    searchDn: 'searchDn',
+    encryptedSearchPassword: 'encryptedSearchPassword',
+    baseDn: 'baseDn',
+    filter: 'filter',
+    uid: 'uid',
+    scope: 'scope',
+    verifyCert: 'verifyCert',
+    groupBaseDn: 'groupBaseDn',
+    groupSearchFilter: 'groupSearchFilter',
+    groupAttributeName: 'groupAttributeName',
+    groupMembershipAttribute: 'groupMembershipAttribute',
+    groupSearchScope: 'groupSearchScope',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ClusterDirectoryConfigScalarFieldEnum = (typeof ClusterDirectoryConfigScalarFieldEnum)[keyof typeof ClusterDirectoryConfigScalarFieldEnum]
+
+
   export const UserClusterIdentityScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
@@ -36378,6 +37807,8 @@ export namespace Prisma {
     systemRobotSyncedAt: 'systemRobotSyncedAt',
     harborVersion: 'harborVersion',
     harborVersionSeenAt: 'harborVersionSeenAt',
+    ldapAppliedFingerprint: 'ldapAppliedFingerprint',
+    ldapAppliedAt: 'ldapAppliedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     clusterId: 'clusterId'
@@ -37356,6 +38787,7 @@ export namespace Prisma {
     registries?: RegistryListRelationFilter
     projects?: ProjectListRelationFilter
     identities?: UserClusterIdentityListRelationFilter
+    directoryConfig?: XOR<ClusterDirectoryConfigNullableScalarRelationFilter, ClusterDirectoryConfigWhereInput> | null
   }
 
   export type ClusterOrderByWithRelationInput = {
@@ -37371,6 +38803,7 @@ export namespace Prisma {
     registries?: RegistryOrderByRelationAggregateInput
     projects?: ProjectOrderByRelationAggregateInput
     identities?: UserClusterIdentityOrderByRelationAggregateInput
+    directoryConfig?: ClusterDirectoryConfigOrderByWithRelationInput
   }
 
   export type ClusterWhereUniqueInput = Prisma.AtLeast<{
@@ -37389,6 +38822,7 @@ export namespace Prisma {
     registries?: RegistryListRelationFilter
     projects?: ProjectListRelationFilter
     identities?: UserClusterIdentityListRelationFilter
+    directoryConfig?: XOR<ClusterDirectoryConfigNullableScalarRelationFilter, ClusterDirectoryConfigWhereInput> | null
   }, "id" | "name">
 
   export type ClusterOrderByWithAggregationInput = {
@@ -37419,6 +38853,128 @@ export namespace Prisma {
     identityMode?: EnumClusterIdentityModeWithAggregatesFilter<"Cluster"> | $Enums.ClusterIdentityMode
     createdAt?: DateTimeWithAggregatesFilter<"Cluster"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Cluster"> | Date | string
+  }
+
+  export type ClusterDirectoryConfigWhereInput = {
+    AND?: ClusterDirectoryConfigWhereInput | ClusterDirectoryConfigWhereInput[]
+    OR?: ClusterDirectoryConfigWhereInput[]
+    NOT?: ClusterDirectoryConfigWhereInput | ClusterDirectoryConfigWhereInput[]
+    id?: StringFilter<"ClusterDirectoryConfig"> | string
+    clusterId?: StringFilter<"ClusterDirectoryConfig"> | string
+    enabled?: BoolFilter<"ClusterDirectoryConfig"> | boolean
+    url?: StringFilter<"ClusterDirectoryConfig"> | string
+    searchDn?: StringFilter<"ClusterDirectoryConfig"> | string
+    encryptedSearchPassword?: StringNullableFilter<"ClusterDirectoryConfig"> | string | null
+    baseDn?: StringFilter<"ClusterDirectoryConfig"> | string
+    filter?: StringFilter<"ClusterDirectoryConfig"> | string
+    uid?: StringFilter<"ClusterDirectoryConfig"> | string
+    scope?: IntFilter<"ClusterDirectoryConfig"> | number
+    verifyCert?: BoolFilter<"ClusterDirectoryConfig"> | boolean
+    groupBaseDn?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupSearchFilter?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupAttributeName?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupMembershipAttribute?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupSearchScope?: IntFilter<"ClusterDirectoryConfig"> | number
+    createdAt?: DateTimeFilter<"ClusterDirectoryConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"ClusterDirectoryConfig"> | Date | string
+    cluster?: XOR<ClusterScalarRelationFilter, ClusterWhereInput>
+  }
+
+  export type ClusterDirectoryConfigOrderByWithRelationInput = {
+    id?: SortOrder
+    clusterId?: SortOrder
+    enabled?: SortOrder
+    url?: SortOrder
+    searchDn?: SortOrder
+    encryptedSearchPassword?: SortOrderInput | SortOrder
+    baseDn?: SortOrder
+    filter?: SortOrder
+    uid?: SortOrder
+    scope?: SortOrder
+    verifyCert?: SortOrder
+    groupBaseDn?: SortOrder
+    groupSearchFilter?: SortOrder
+    groupAttributeName?: SortOrder
+    groupMembershipAttribute?: SortOrder
+    groupSearchScope?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    cluster?: ClusterOrderByWithRelationInput
+  }
+
+  export type ClusterDirectoryConfigWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    clusterId?: string
+    AND?: ClusterDirectoryConfigWhereInput | ClusterDirectoryConfigWhereInput[]
+    OR?: ClusterDirectoryConfigWhereInput[]
+    NOT?: ClusterDirectoryConfigWhereInput | ClusterDirectoryConfigWhereInput[]
+    enabled?: BoolFilter<"ClusterDirectoryConfig"> | boolean
+    url?: StringFilter<"ClusterDirectoryConfig"> | string
+    searchDn?: StringFilter<"ClusterDirectoryConfig"> | string
+    encryptedSearchPassword?: StringNullableFilter<"ClusterDirectoryConfig"> | string | null
+    baseDn?: StringFilter<"ClusterDirectoryConfig"> | string
+    filter?: StringFilter<"ClusterDirectoryConfig"> | string
+    uid?: StringFilter<"ClusterDirectoryConfig"> | string
+    scope?: IntFilter<"ClusterDirectoryConfig"> | number
+    verifyCert?: BoolFilter<"ClusterDirectoryConfig"> | boolean
+    groupBaseDn?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupSearchFilter?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupAttributeName?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupMembershipAttribute?: StringFilter<"ClusterDirectoryConfig"> | string
+    groupSearchScope?: IntFilter<"ClusterDirectoryConfig"> | number
+    createdAt?: DateTimeFilter<"ClusterDirectoryConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"ClusterDirectoryConfig"> | Date | string
+    cluster?: XOR<ClusterScalarRelationFilter, ClusterWhereInput>
+  }, "id" | "clusterId">
+
+  export type ClusterDirectoryConfigOrderByWithAggregationInput = {
+    id?: SortOrder
+    clusterId?: SortOrder
+    enabled?: SortOrder
+    url?: SortOrder
+    searchDn?: SortOrder
+    encryptedSearchPassword?: SortOrderInput | SortOrder
+    baseDn?: SortOrder
+    filter?: SortOrder
+    uid?: SortOrder
+    scope?: SortOrder
+    verifyCert?: SortOrder
+    groupBaseDn?: SortOrder
+    groupSearchFilter?: SortOrder
+    groupAttributeName?: SortOrder
+    groupMembershipAttribute?: SortOrder
+    groupSearchScope?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ClusterDirectoryConfigCountOrderByAggregateInput
+    _avg?: ClusterDirectoryConfigAvgOrderByAggregateInput
+    _max?: ClusterDirectoryConfigMaxOrderByAggregateInput
+    _min?: ClusterDirectoryConfigMinOrderByAggregateInput
+    _sum?: ClusterDirectoryConfigSumOrderByAggregateInput
+  }
+
+  export type ClusterDirectoryConfigScalarWhereWithAggregatesInput = {
+    AND?: ClusterDirectoryConfigScalarWhereWithAggregatesInput | ClusterDirectoryConfigScalarWhereWithAggregatesInput[]
+    OR?: ClusterDirectoryConfigScalarWhereWithAggregatesInput[]
+    NOT?: ClusterDirectoryConfigScalarWhereWithAggregatesInput | ClusterDirectoryConfigScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    clusterId?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    enabled?: BoolWithAggregatesFilter<"ClusterDirectoryConfig"> | boolean
+    url?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    searchDn?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    encryptedSearchPassword?: StringNullableWithAggregatesFilter<"ClusterDirectoryConfig"> | string | null
+    baseDn?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    filter?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    uid?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    scope?: IntWithAggregatesFilter<"ClusterDirectoryConfig"> | number
+    verifyCert?: BoolWithAggregatesFilter<"ClusterDirectoryConfig"> | boolean
+    groupBaseDn?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    groupSearchFilter?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    groupAttributeName?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    groupMembershipAttribute?: StringWithAggregatesFilter<"ClusterDirectoryConfig"> | string
+    groupSearchScope?: IntWithAggregatesFilter<"ClusterDirectoryConfig"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"ClusterDirectoryConfig"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ClusterDirectoryConfig"> | Date | string
   }
 
   export type UserClusterIdentityWhereInput = {
@@ -37505,6 +39061,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
     harborVersion?: StringNullableFilter<"Registry"> | string | null
     harborVersionSeenAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
+    ldapAppliedFingerprint?: StringNullableFilter<"Registry"> | string | null
+    ldapAppliedAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
     createdAt?: DateTimeFilter<"Registry"> | Date | string
     updatedAt?: DateTimeFilter<"Registry"> | Date | string
     clusterId?: StringNullableFilter<"Registry"> | string | null
@@ -37539,6 +39097,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: SortOrderInput | SortOrder
     harborVersion?: SortOrderInput | SortOrder
     harborVersionSeenAt?: SortOrderInput | SortOrder
+    ldapAppliedFingerprint?: SortOrderInput | SortOrder
+    ldapAppliedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clusterId?: SortOrderInput | SortOrder
@@ -37576,6 +39136,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
     harborVersion?: StringNullableFilter<"Registry"> | string | null
     harborVersionSeenAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
+    ldapAppliedFingerprint?: StringNullableFilter<"Registry"> | string | null
+    ldapAppliedAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
     createdAt?: DateTimeFilter<"Registry"> | Date | string
     updatedAt?: DateTimeFilter<"Registry"> | Date | string
     clusterId?: StringNullableFilter<"Registry"> | string | null
@@ -37610,6 +39172,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: SortOrderInput | SortOrder
     harborVersion?: SortOrderInput | SortOrder
     harborVersionSeenAt?: SortOrderInput | SortOrder
+    ldapAppliedFingerprint?: SortOrderInput | SortOrder
+    ldapAppliedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clusterId?: SortOrderInput | SortOrder
@@ -37639,6 +39203,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: DateTimeNullableWithAggregatesFilter<"Registry"> | Date | string | null
     harborVersion?: StringNullableWithAggregatesFilter<"Registry"> | string | null
     harborVersionSeenAt?: DateTimeNullableWithAggregatesFilter<"Registry"> | Date | string | null
+    ldapAppliedFingerprint?: StringNullableWithAggregatesFilter<"Registry"> | string | null
+    ldapAppliedAt?: DateTimeNullableWithAggregatesFilter<"Registry"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Registry"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Registry"> | Date | string
     clusterId?: StringNullableWithAggregatesFilter<"Registry"> | string | null
@@ -39972,6 +41538,7 @@ export namespace Prisma {
     registries?: RegistryCreateNestedManyWithoutClusterInput
     projects?: ProjectCreateNestedManyWithoutClusterInput
     identities?: UserClusterIdentityCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterUncheckedCreateInput = {
@@ -39987,6 +41554,7 @@ export namespace Prisma {
     registries?: RegistryUncheckedCreateNestedManyWithoutClusterInput
     projects?: ProjectUncheckedCreateNestedManyWithoutClusterInput
     identities?: UserClusterIdentityUncheckedCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterUpdateInput = {
@@ -40002,6 +41570,7 @@ export namespace Prisma {
     registries?: RegistryUpdateManyWithoutClusterNestedInput
     projects?: ProjectUpdateManyWithoutClusterNestedInput
     identities?: UserClusterIdentityUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUpdateOneWithoutClusterNestedInput
   }
 
   export type ClusterUncheckedUpdateInput = {
@@ -40017,6 +41586,7 @@ export namespace Prisma {
     registries?: RegistryUncheckedUpdateManyWithoutClusterNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutClusterNestedInput
     identities?: UserClusterIdentityUncheckedUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedUpdateOneWithoutClusterNestedInput
   }
 
   export type ClusterCreateManyInput = {
@@ -40051,6 +41621,152 @@ export namespace Prisma {
     replicationMode?: StringFieldUpdateOperationsInput | string
     replicationCron?: NullableStringFieldUpdateOperationsInput | string | null
     identityMode?: EnumClusterIdentityModeFieldUpdateOperationsInput | $Enums.ClusterIdentityMode
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClusterDirectoryConfigCreateInput = {
+    id?: string
+    enabled?: boolean
+    url: string
+    searchDn?: string
+    encryptedSearchPassword?: string | null
+    baseDn: string
+    filter?: string
+    uid?: string
+    scope?: number
+    verifyCert?: boolean
+    groupBaseDn?: string
+    groupSearchFilter?: string
+    groupAttributeName?: string
+    groupMembershipAttribute?: string
+    groupSearchScope?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    cluster: ClusterCreateNestedOneWithoutDirectoryConfigInput
+  }
+
+  export type ClusterDirectoryConfigUncheckedCreateInput = {
+    id?: string
+    clusterId: string
+    enabled?: boolean
+    url: string
+    searchDn?: string
+    encryptedSearchPassword?: string | null
+    baseDn: string
+    filter?: string
+    uid?: string
+    scope?: number
+    verifyCert?: boolean
+    groupBaseDn?: string
+    groupSearchFilter?: string
+    groupAttributeName?: string
+    groupMembershipAttribute?: string
+    groupSearchScope?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClusterDirectoryConfigUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    url?: StringFieldUpdateOperationsInput | string
+    searchDn?: StringFieldUpdateOperationsInput | string
+    encryptedSearchPassword?: NullableStringFieldUpdateOperationsInput | string | null
+    baseDn?: StringFieldUpdateOperationsInput | string
+    filter?: StringFieldUpdateOperationsInput | string
+    uid?: StringFieldUpdateOperationsInput | string
+    scope?: IntFieldUpdateOperationsInput | number
+    verifyCert?: BoolFieldUpdateOperationsInput | boolean
+    groupBaseDn?: StringFieldUpdateOperationsInput | string
+    groupSearchFilter?: StringFieldUpdateOperationsInput | string
+    groupAttributeName?: StringFieldUpdateOperationsInput | string
+    groupMembershipAttribute?: StringFieldUpdateOperationsInput | string
+    groupSearchScope?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cluster?: ClusterUpdateOneRequiredWithoutDirectoryConfigNestedInput
+  }
+
+  export type ClusterDirectoryConfigUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clusterId?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    url?: StringFieldUpdateOperationsInput | string
+    searchDn?: StringFieldUpdateOperationsInput | string
+    encryptedSearchPassword?: NullableStringFieldUpdateOperationsInput | string | null
+    baseDn?: StringFieldUpdateOperationsInput | string
+    filter?: StringFieldUpdateOperationsInput | string
+    uid?: StringFieldUpdateOperationsInput | string
+    scope?: IntFieldUpdateOperationsInput | number
+    verifyCert?: BoolFieldUpdateOperationsInput | boolean
+    groupBaseDn?: StringFieldUpdateOperationsInput | string
+    groupSearchFilter?: StringFieldUpdateOperationsInput | string
+    groupAttributeName?: StringFieldUpdateOperationsInput | string
+    groupMembershipAttribute?: StringFieldUpdateOperationsInput | string
+    groupSearchScope?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClusterDirectoryConfigCreateManyInput = {
+    id?: string
+    clusterId: string
+    enabled?: boolean
+    url: string
+    searchDn?: string
+    encryptedSearchPassword?: string | null
+    baseDn: string
+    filter?: string
+    uid?: string
+    scope?: number
+    verifyCert?: boolean
+    groupBaseDn?: string
+    groupSearchFilter?: string
+    groupAttributeName?: string
+    groupMembershipAttribute?: string
+    groupSearchScope?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClusterDirectoryConfigUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    url?: StringFieldUpdateOperationsInput | string
+    searchDn?: StringFieldUpdateOperationsInput | string
+    encryptedSearchPassword?: NullableStringFieldUpdateOperationsInput | string | null
+    baseDn?: StringFieldUpdateOperationsInput | string
+    filter?: StringFieldUpdateOperationsInput | string
+    uid?: StringFieldUpdateOperationsInput | string
+    scope?: IntFieldUpdateOperationsInput | number
+    verifyCert?: BoolFieldUpdateOperationsInput | boolean
+    groupBaseDn?: StringFieldUpdateOperationsInput | string
+    groupSearchFilter?: StringFieldUpdateOperationsInput | string
+    groupAttributeName?: StringFieldUpdateOperationsInput | string
+    groupMembershipAttribute?: StringFieldUpdateOperationsInput | string
+    groupSearchScope?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClusterDirectoryConfigUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clusterId?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    url?: StringFieldUpdateOperationsInput | string
+    searchDn?: StringFieldUpdateOperationsInput | string
+    encryptedSearchPassword?: NullableStringFieldUpdateOperationsInput | string | null
+    baseDn?: StringFieldUpdateOperationsInput | string
+    filter?: StringFieldUpdateOperationsInput | string
+    uid?: StringFieldUpdateOperationsInput | string
+    scope?: IntFieldUpdateOperationsInput | number
+    verifyCert?: BoolFieldUpdateOperationsInput | boolean
+    groupBaseDn?: StringFieldUpdateOperationsInput | string
+    groupSearchFilter?: StringFieldUpdateOperationsInput | string
+    groupAttributeName?: StringFieldUpdateOperationsInput | string
+    groupMembershipAttribute?: StringFieldUpdateOperationsInput | string
+    groupSearchScope?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -40132,6 +41848,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -40165,6 +41883,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -40198,6 +41918,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -40231,6 +41953,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40264,6 +41988,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -40285,6 +42011,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -40305,6 +42033,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42856,6 +44586,11 @@ export namespace Prisma {
     none?: ProjectWhereInput
   }
 
+  export type ClusterDirectoryConfigNullableScalarRelationFilter = {
+    is?: ClusterDirectoryConfigWhereInput | null
+    isNot?: ClusterDirectoryConfigWhereInput | null
+  }
+
   export type RegistryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -42910,14 +44645,87 @@ export namespace Prisma {
     _max?: NestedEnumClusterIdentityModeFilter<$PrismaModel>
   }
 
-  export type UserScalarRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
-  }
-
   export type ClusterScalarRelationFilter = {
     is?: ClusterWhereInput
     isNot?: ClusterWhereInput
+  }
+
+  export type ClusterDirectoryConfigCountOrderByAggregateInput = {
+    id?: SortOrder
+    clusterId?: SortOrder
+    enabled?: SortOrder
+    url?: SortOrder
+    searchDn?: SortOrder
+    encryptedSearchPassword?: SortOrder
+    baseDn?: SortOrder
+    filter?: SortOrder
+    uid?: SortOrder
+    scope?: SortOrder
+    verifyCert?: SortOrder
+    groupBaseDn?: SortOrder
+    groupSearchFilter?: SortOrder
+    groupAttributeName?: SortOrder
+    groupMembershipAttribute?: SortOrder
+    groupSearchScope?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClusterDirectoryConfigAvgOrderByAggregateInput = {
+    scope?: SortOrder
+    groupSearchScope?: SortOrder
+  }
+
+  export type ClusterDirectoryConfigMaxOrderByAggregateInput = {
+    id?: SortOrder
+    clusterId?: SortOrder
+    enabled?: SortOrder
+    url?: SortOrder
+    searchDn?: SortOrder
+    encryptedSearchPassword?: SortOrder
+    baseDn?: SortOrder
+    filter?: SortOrder
+    uid?: SortOrder
+    scope?: SortOrder
+    verifyCert?: SortOrder
+    groupBaseDn?: SortOrder
+    groupSearchFilter?: SortOrder
+    groupAttributeName?: SortOrder
+    groupMembershipAttribute?: SortOrder
+    groupSearchScope?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClusterDirectoryConfigMinOrderByAggregateInput = {
+    id?: SortOrder
+    clusterId?: SortOrder
+    enabled?: SortOrder
+    url?: SortOrder
+    searchDn?: SortOrder
+    encryptedSearchPassword?: SortOrder
+    baseDn?: SortOrder
+    filter?: SortOrder
+    uid?: SortOrder
+    scope?: SortOrder
+    verifyCert?: SortOrder
+    groupBaseDn?: SortOrder
+    groupSearchFilter?: SortOrder
+    groupAttributeName?: SortOrder
+    groupMembershipAttribute?: SortOrder
+    groupSearchScope?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClusterDirectoryConfigSumOrderByAggregateInput = {
+    scope?: SortOrder
+    groupSearchScope?: SortOrder
+  }
+
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
   }
 
   export type UserClusterIdentityUserIdClusterIdCompoundUniqueInput = {
@@ -43076,6 +44884,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: SortOrder
     harborVersion?: SortOrder
     harborVersionSeenAt?: SortOrder
+    ldapAppliedFingerprint?: SortOrder
+    ldapAppliedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clusterId?: SortOrder
@@ -43101,6 +44911,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: SortOrder
     harborVersion?: SortOrder
     harborVersionSeenAt?: SortOrder
+    ldapAppliedFingerprint?: SortOrder
+    ldapAppliedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clusterId?: SortOrder
@@ -43122,6 +44934,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: SortOrder
     harborVersion?: SortOrder
     harborVersionSeenAt?: SortOrder
+    ldapAppliedFingerprint?: SortOrder
+    ldapAppliedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     clusterId?: SortOrder
@@ -44516,6 +46330,12 @@ export namespace Prisma {
     connect?: UserClusterIdentityWhereUniqueInput | UserClusterIdentityWhereUniqueInput[]
   }
 
+  export type ClusterDirectoryConfigCreateNestedOneWithoutClusterInput = {
+    create?: XOR<ClusterDirectoryConfigCreateWithoutClusterInput, ClusterDirectoryConfigUncheckedCreateWithoutClusterInput>
+    connectOrCreate?: ClusterDirectoryConfigCreateOrConnectWithoutClusterInput
+    connect?: ClusterDirectoryConfigWhereUniqueInput
+  }
+
   export type RegistryUncheckedCreateNestedManyWithoutClusterInput = {
     create?: XOR<RegistryCreateWithoutClusterInput, RegistryUncheckedCreateWithoutClusterInput> | RegistryCreateWithoutClusterInput[] | RegistryUncheckedCreateWithoutClusterInput[]
     connectOrCreate?: RegistryCreateOrConnectWithoutClusterInput | RegistryCreateOrConnectWithoutClusterInput[]
@@ -44535,6 +46355,12 @@ export namespace Prisma {
     connectOrCreate?: UserClusterIdentityCreateOrConnectWithoutClusterInput | UserClusterIdentityCreateOrConnectWithoutClusterInput[]
     createMany?: UserClusterIdentityCreateManyClusterInputEnvelope
     connect?: UserClusterIdentityWhereUniqueInput | UserClusterIdentityWhereUniqueInput[]
+  }
+
+  export type ClusterDirectoryConfigUncheckedCreateNestedOneWithoutClusterInput = {
+    create?: XOR<ClusterDirectoryConfigCreateWithoutClusterInput, ClusterDirectoryConfigUncheckedCreateWithoutClusterInput>
+    connectOrCreate?: ClusterDirectoryConfigCreateOrConnectWithoutClusterInput
+    connect?: ClusterDirectoryConfigWhereUniqueInput
   }
 
   export type EnumClusterIdentityModeFieldUpdateOperationsInput = {
@@ -44583,6 +46409,16 @@ export namespace Prisma {
     deleteMany?: UserClusterIdentityScalarWhereInput | UserClusterIdentityScalarWhereInput[]
   }
 
+  export type ClusterDirectoryConfigUpdateOneWithoutClusterNestedInput = {
+    create?: XOR<ClusterDirectoryConfigCreateWithoutClusterInput, ClusterDirectoryConfigUncheckedCreateWithoutClusterInput>
+    connectOrCreate?: ClusterDirectoryConfigCreateOrConnectWithoutClusterInput
+    upsert?: ClusterDirectoryConfigUpsertWithoutClusterInput
+    disconnect?: ClusterDirectoryConfigWhereInput | boolean
+    delete?: ClusterDirectoryConfigWhereInput | boolean
+    connect?: ClusterDirectoryConfigWhereUniqueInput
+    update?: XOR<XOR<ClusterDirectoryConfigUpdateToOneWithWhereWithoutClusterInput, ClusterDirectoryConfigUpdateWithoutClusterInput>, ClusterDirectoryConfigUncheckedUpdateWithoutClusterInput>
+  }
+
   export type RegistryUncheckedUpdateManyWithoutClusterNestedInput = {
     create?: XOR<RegistryCreateWithoutClusterInput, RegistryUncheckedCreateWithoutClusterInput> | RegistryCreateWithoutClusterInput[] | RegistryUncheckedCreateWithoutClusterInput[]
     connectOrCreate?: RegistryCreateOrConnectWithoutClusterInput | RegistryCreateOrConnectWithoutClusterInput[]
@@ -44623,6 +46459,30 @@ export namespace Prisma {
     update?: UserClusterIdentityUpdateWithWhereUniqueWithoutClusterInput | UserClusterIdentityUpdateWithWhereUniqueWithoutClusterInput[]
     updateMany?: UserClusterIdentityUpdateManyWithWhereWithoutClusterInput | UserClusterIdentityUpdateManyWithWhereWithoutClusterInput[]
     deleteMany?: UserClusterIdentityScalarWhereInput | UserClusterIdentityScalarWhereInput[]
+  }
+
+  export type ClusterDirectoryConfigUncheckedUpdateOneWithoutClusterNestedInput = {
+    create?: XOR<ClusterDirectoryConfigCreateWithoutClusterInput, ClusterDirectoryConfigUncheckedCreateWithoutClusterInput>
+    connectOrCreate?: ClusterDirectoryConfigCreateOrConnectWithoutClusterInput
+    upsert?: ClusterDirectoryConfigUpsertWithoutClusterInput
+    disconnect?: ClusterDirectoryConfigWhereInput | boolean
+    delete?: ClusterDirectoryConfigWhereInput | boolean
+    connect?: ClusterDirectoryConfigWhereUniqueInput
+    update?: XOR<XOR<ClusterDirectoryConfigUpdateToOneWithWhereWithoutClusterInput, ClusterDirectoryConfigUpdateWithoutClusterInput>, ClusterDirectoryConfigUncheckedUpdateWithoutClusterInput>
+  }
+
+  export type ClusterCreateNestedOneWithoutDirectoryConfigInput = {
+    create?: XOR<ClusterCreateWithoutDirectoryConfigInput, ClusterUncheckedCreateWithoutDirectoryConfigInput>
+    connectOrCreate?: ClusterCreateOrConnectWithoutDirectoryConfigInput
+    connect?: ClusterWhereUniqueInput
+  }
+
+  export type ClusterUpdateOneRequiredWithoutDirectoryConfigNestedInput = {
+    create?: XOR<ClusterCreateWithoutDirectoryConfigInput, ClusterUncheckedCreateWithoutDirectoryConfigInput>
+    connectOrCreate?: ClusterCreateOrConnectWithoutDirectoryConfigInput
+    upsert?: ClusterUpsertWithoutDirectoryConfigInput
+    connect?: ClusterWhereUniqueInput
+    update?: XOR<XOR<ClusterUpdateToOneWithWhereWithoutDirectoryConfigInput, ClusterUpdateWithoutDirectoryConfigInput>, ClusterUncheckedUpdateWithoutDirectoryConfigInput>
   }
 
   export type UserCreateNestedOneWithoutClusterIdentitiesInput = {
@@ -46873,6 +48733,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     placements?: ProjectPlacementCreateNestedManyWithoutRegistryInput
@@ -46905,6 +48767,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     placements?: ProjectPlacementUncheckedCreateNestedManyWithoutRegistryInput
@@ -47017,6 +48881,51 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ClusterDirectoryConfigCreateWithoutClusterInput = {
+    id?: string
+    enabled?: boolean
+    url: string
+    searchDn?: string
+    encryptedSearchPassword?: string | null
+    baseDn: string
+    filter?: string
+    uid?: string
+    scope?: number
+    verifyCert?: boolean
+    groupBaseDn?: string
+    groupSearchFilter?: string
+    groupAttributeName?: string
+    groupMembershipAttribute?: string
+    groupSearchScope?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClusterDirectoryConfigUncheckedCreateWithoutClusterInput = {
+    id?: string
+    enabled?: boolean
+    url: string
+    searchDn?: string
+    encryptedSearchPassword?: string | null
+    baseDn: string
+    filter?: string
+    uid?: string
+    scope?: number
+    verifyCert?: boolean
+    groupBaseDn?: string
+    groupSearchFilter?: string
+    groupAttributeName?: string
+    groupMembershipAttribute?: string
+    groupSearchScope?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClusterDirectoryConfigCreateOrConnectWithoutClusterInput = {
+    where: ClusterDirectoryConfigWhereUniqueInput
+    create: XOR<ClusterDirectoryConfigCreateWithoutClusterInput, ClusterDirectoryConfigUncheckedCreateWithoutClusterInput>
+  }
+
   export type RegistryUpsertWithWhereUniqueWithoutClusterInput = {
     where: RegistryWhereUniqueInput
     update: XOR<RegistryUpdateWithoutClusterInput, RegistryUncheckedUpdateWithoutClusterInput>
@@ -47052,6 +48961,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
     harborVersion?: StringNullableFilter<"Registry"> | string | null
     harborVersionSeenAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
+    ldapAppliedFingerprint?: StringNullableFilter<"Registry"> | string | null
+    ldapAppliedAt?: DateTimeNullableFilter<"Registry"> | Date | string | null
     createdAt?: DateTimeFilter<"Registry"> | Date | string
     updatedAt?: DateTimeFilter<"Registry"> | Date | string
     clusterId?: StringNullableFilter<"Registry"> | string | null
@@ -47108,6 +49019,133 @@ export namespace Prisma {
     data: XOR<UserClusterIdentityUpdateManyMutationInput, UserClusterIdentityUncheckedUpdateManyWithoutClusterInput>
   }
 
+  export type ClusterDirectoryConfigUpsertWithoutClusterInput = {
+    update: XOR<ClusterDirectoryConfigUpdateWithoutClusterInput, ClusterDirectoryConfigUncheckedUpdateWithoutClusterInput>
+    create: XOR<ClusterDirectoryConfigCreateWithoutClusterInput, ClusterDirectoryConfigUncheckedCreateWithoutClusterInput>
+    where?: ClusterDirectoryConfigWhereInput
+  }
+
+  export type ClusterDirectoryConfigUpdateToOneWithWhereWithoutClusterInput = {
+    where?: ClusterDirectoryConfigWhereInput
+    data: XOR<ClusterDirectoryConfigUpdateWithoutClusterInput, ClusterDirectoryConfigUncheckedUpdateWithoutClusterInput>
+  }
+
+  export type ClusterDirectoryConfigUpdateWithoutClusterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    url?: StringFieldUpdateOperationsInput | string
+    searchDn?: StringFieldUpdateOperationsInput | string
+    encryptedSearchPassword?: NullableStringFieldUpdateOperationsInput | string | null
+    baseDn?: StringFieldUpdateOperationsInput | string
+    filter?: StringFieldUpdateOperationsInput | string
+    uid?: StringFieldUpdateOperationsInput | string
+    scope?: IntFieldUpdateOperationsInput | number
+    verifyCert?: BoolFieldUpdateOperationsInput | boolean
+    groupBaseDn?: StringFieldUpdateOperationsInput | string
+    groupSearchFilter?: StringFieldUpdateOperationsInput | string
+    groupAttributeName?: StringFieldUpdateOperationsInput | string
+    groupMembershipAttribute?: StringFieldUpdateOperationsInput | string
+    groupSearchScope?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClusterDirectoryConfigUncheckedUpdateWithoutClusterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    url?: StringFieldUpdateOperationsInput | string
+    searchDn?: StringFieldUpdateOperationsInput | string
+    encryptedSearchPassword?: NullableStringFieldUpdateOperationsInput | string | null
+    baseDn?: StringFieldUpdateOperationsInput | string
+    filter?: StringFieldUpdateOperationsInput | string
+    uid?: StringFieldUpdateOperationsInput | string
+    scope?: IntFieldUpdateOperationsInput | number
+    verifyCert?: BoolFieldUpdateOperationsInput | boolean
+    groupBaseDn?: StringFieldUpdateOperationsInput | string
+    groupSearchFilter?: StringFieldUpdateOperationsInput | string
+    groupAttributeName?: StringFieldUpdateOperationsInput | string
+    groupMembershipAttribute?: StringFieldUpdateOperationsInput | string
+    groupSearchScope?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClusterCreateWithoutDirectoryConfigInput = {
+    id?: string
+    name: string
+    description?: string | null
+    registryUrl?: string | null
+    replicationMode?: string
+    replicationCron?: string | null
+    identityMode?: $Enums.ClusterIdentityMode
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    registries?: RegistryCreateNestedManyWithoutClusterInput
+    projects?: ProjectCreateNestedManyWithoutClusterInput
+    identities?: UserClusterIdentityCreateNestedManyWithoutClusterInput
+  }
+
+  export type ClusterUncheckedCreateWithoutDirectoryConfigInput = {
+    id?: string
+    name: string
+    description?: string | null
+    registryUrl?: string | null
+    replicationMode?: string
+    replicationCron?: string | null
+    identityMode?: $Enums.ClusterIdentityMode
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    registries?: RegistryUncheckedCreateNestedManyWithoutClusterInput
+    projects?: ProjectUncheckedCreateNestedManyWithoutClusterInput
+    identities?: UserClusterIdentityUncheckedCreateNestedManyWithoutClusterInput
+  }
+
+  export type ClusterCreateOrConnectWithoutDirectoryConfigInput = {
+    where: ClusterWhereUniqueInput
+    create: XOR<ClusterCreateWithoutDirectoryConfigInput, ClusterUncheckedCreateWithoutDirectoryConfigInput>
+  }
+
+  export type ClusterUpsertWithoutDirectoryConfigInput = {
+    update: XOR<ClusterUpdateWithoutDirectoryConfigInput, ClusterUncheckedUpdateWithoutDirectoryConfigInput>
+    create: XOR<ClusterCreateWithoutDirectoryConfigInput, ClusterUncheckedCreateWithoutDirectoryConfigInput>
+    where?: ClusterWhereInput
+  }
+
+  export type ClusterUpdateToOneWithWhereWithoutDirectoryConfigInput = {
+    where?: ClusterWhereInput
+    data: XOR<ClusterUpdateWithoutDirectoryConfigInput, ClusterUncheckedUpdateWithoutDirectoryConfigInput>
+  }
+
+  export type ClusterUpdateWithoutDirectoryConfigInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    registryUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    replicationMode?: StringFieldUpdateOperationsInput | string
+    replicationCron?: NullableStringFieldUpdateOperationsInput | string | null
+    identityMode?: EnumClusterIdentityModeFieldUpdateOperationsInput | $Enums.ClusterIdentityMode
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    registries?: RegistryUpdateManyWithoutClusterNestedInput
+    projects?: ProjectUpdateManyWithoutClusterNestedInput
+    identities?: UserClusterIdentityUpdateManyWithoutClusterNestedInput
+  }
+
+  export type ClusterUncheckedUpdateWithoutDirectoryConfigInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    registryUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    replicationMode?: StringFieldUpdateOperationsInput | string
+    replicationCron?: NullableStringFieldUpdateOperationsInput | string | null
+    identityMode?: EnumClusterIdentityModeFieldUpdateOperationsInput | $Enums.ClusterIdentityMode
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    registries?: RegistryUncheckedUpdateManyWithoutClusterNestedInput
+    projects?: ProjectUncheckedUpdateManyWithoutClusterNestedInput
+    identities?: UserClusterIdentityUncheckedUpdateManyWithoutClusterNestedInput
+  }
+
   export type UserCreateWithoutClusterIdentitiesInput = {
     id?: string
     email: string
@@ -47159,6 +49197,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     registries?: RegistryCreateNestedManyWithoutClusterInput
     projects?: ProjectCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterUncheckedCreateWithoutIdentitiesInput = {
@@ -47173,6 +49212,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     registries?: RegistryUncheckedCreateNestedManyWithoutClusterInput
     projects?: ProjectUncheckedCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterCreateOrConnectWithoutIdentitiesInput = {
@@ -47248,6 +49288,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     registries?: RegistryUpdateManyWithoutClusterNestedInput
     projects?: ProjectUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUpdateOneWithoutClusterNestedInput
   }
 
   export type ClusterUncheckedUpdateWithoutIdentitiesInput = {
@@ -47262,6 +49303,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     registries?: RegistryUncheckedUpdateManyWithoutClusterNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedUpdateOneWithoutClusterNestedInput
   }
 
   export type ClusterCreateWithoutRegistriesInput = {
@@ -47276,6 +49318,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutClusterInput
     identities?: UserClusterIdentityCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterUncheckedCreateWithoutRegistriesInput = {
@@ -47290,6 +49333,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutClusterInput
     identities?: UserClusterIdentityUncheckedCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterCreateOrConnectWithoutRegistriesInput = {
@@ -47896,6 +49940,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutClusterNestedInput
     identities?: UserClusterIdentityUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUpdateOneWithoutClusterNestedInput
   }
 
   export type ClusterUncheckedUpdateWithoutRegistriesInput = {
@@ -47910,6 +49955,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutClusterNestedInput
     identities?: UserClusterIdentityUncheckedUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedUpdateOneWithoutClusterNestedInput
   }
 
   export type ProjectPlacementUpsertWithWhereUniqueWithoutRegistryInput = {
@@ -48283,6 +50329,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     registries?: RegistryCreateNestedManyWithoutClusterInput
     identities?: UserClusterIdentityCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterUncheckedCreateWithoutProjectsInput = {
@@ -48297,6 +50344,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     registries?: RegistryUncheckedCreateNestedManyWithoutClusterInput
     identities?: UserClusterIdentityUncheckedCreateNestedManyWithoutClusterInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedCreateNestedOneWithoutClusterInput
   }
 
   export type ClusterCreateOrConnectWithoutProjectsInput = {
@@ -48690,6 +50738,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     registries?: RegistryUpdateManyWithoutClusterNestedInput
     identities?: UserClusterIdentityUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUpdateOneWithoutClusterNestedInput
   }
 
   export type ClusterUncheckedUpdateWithoutProjectsInput = {
@@ -48704,6 +50753,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     registries?: RegistryUncheckedUpdateManyWithoutClusterNestedInput
     identities?: UserClusterIdentityUncheckedUpdateManyWithoutClusterNestedInput
+    directoryConfig?: ClusterDirectoryConfigUncheckedUpdateOneWithoutClusterNestedInput
   }
 
   export type ProjectMemberUpsertWithWhereUniqueWithoutProjectInput = {
@@ -49039,6 +51089,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -49071,6 +51123,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -49180,6 +51234,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -49212,6 +51268,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -49899,6 +51957,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -49931,6 +51991,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -50012,6 +52074,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -50044,6 +52108,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50433,6 +52499,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -50465,6 +52533,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -50596,6 +52666,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -50628,6 +52700,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50776,6 +52850,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -50808,6 +52884,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -50968,6 +53046,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -51000,6 +53080,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51032,6 +53114,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -51064,6 +53148,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -51112,6 +53198,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -51144,6 +53232,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51176,6 +53266,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -51208,6 +53300,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -51245,6 +53339,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -51277,6 +53373,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -51325,6 +53423,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -51357,6 +53457,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51400,6 +53502,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -51432,6 +53536,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51501,6 +53607,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -51533,6 +53641,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -51570,6 +53680,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -51602,6 +53714,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -51693,6 +53807,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -51725,6 +53841,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51768,6 +53886,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -51800,6 +53920,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51869,6 +53991,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -51901,6 +54025,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -51993,6 +54119,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -52025,6 +54153,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -52062,6 +54192,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cluster?: ClusterCreateNestedOneWithoutRegistriesInput
@@ -52094,6 +54226,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     clusterId?: string | null
@@ -52185,6 +54319,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -52217,6 +54353,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52321,6 +54459,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -52353,6 +54493,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52396,6 +54538,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cluster?: ClusterUpdateOneWithoutRegistriesNestedInput
@@ -52428,6 +54572,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clusterId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53058,6 +55204,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: Date | string | null
     harborVersion?: string | null
     harborVersionSeenAt?: Date | string | null
+    ldapAppliedFingerprint?: string | null
+    ldapAppliedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -53101,6 +55249,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     placements?: ProjectPlacementUpdateManyWithoutRegistryNestedInput
@@ -53133,6 +55283,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     placements?: ProjectPlacementUncheckedUpdateManyWithoutRegistryNestedInput
@@ -53165,6 +55317,8 @@ export namespace Prisma {
     systemRobotSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     harborVersion?: NullableStringFieldUpdateOperationsInput | string | null
     harborVersionSeenAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ldapAppliedFingerprint?: NullableStringFieldUpdateOperationsInput | string | null
+    ldapAppliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
